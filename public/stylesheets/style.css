@@ -1,8 +1,18 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+* {
+  padding: 0;
+  margin: 0;
+  font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-a {
-  color: #00B7FF;
+body {
+  width: 100%;
+  background: url("/images/leaves.png");
+  background-position: right -5;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-color: #eaf7ff;
+}
+
+table {
+  border-collapse: collapse;
 }
