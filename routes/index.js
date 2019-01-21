@@ -10,4 +10,10 @@ router.get('/', function(req, res, next) {
   });
 });
 
+router.get('/person/:personId', function(req, res, next) {
+  res.render('person', {
+    title: 'Person!',
+  });
+});
+
 module.exports = router;
