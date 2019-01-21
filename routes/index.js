@@ -5,14 +5,16 @@ const database = require('../database.js');
 
 router.get('/', function(req, res, next) {
   res.render('index', {
-    title: 'Lundberg Ancestry',
-    people: database.people,
+    database: database,
   });
 });
 
 router.get('/person/:personId', function(req, res, next) {
+  let currentPerson = database.people[0];
   res.render('person', {
     title: 'Person!',
+    database: database,
+    person: currentPerson,
   });
 });
 

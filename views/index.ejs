@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %></title>
+    <title>Lundberg Ancestry</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-    <p><%= people[0].name %></p>
+    <h1>Lundberg Ancestry</h1>
+    <h2>All people:</h2>
+    <% database.people.forEach(person => { %>
+        <p>
+            <a href="/person/<%= person.customId %>"><%= person.name %></a>
+        </p>
+    <% }); %>
   </body>
 </html>
