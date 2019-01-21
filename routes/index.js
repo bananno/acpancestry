@@ -10,7 +10,10 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/person/:personId', function(req, res, next) {
-  let currentPerson = database.people[0];
+  let personId = req.params.personId;
+  let currentPerson = database.people.filter(nextPerson => {
+    return nextPerson.customId == personId;
+  })[0];
   res.render('person', {
     title: 'Person!',
     database: database,
