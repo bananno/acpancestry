@@ -1,9 +1,13 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
+const database = require('../database.js');
+
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('index', {
+    title: 'Lundberg Ancestry',
+    people: database.people,
+  });
 });
 
 module.exports = router;
