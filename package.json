@@ -1,9 +1,9 @@
 {
   "name": "test-app2",
   "version": "1.0.0",
-  "main": "app.js",
+  "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node ./bin/www"
   },
   "author": "Anna Peterson",
   "dependencies": {
