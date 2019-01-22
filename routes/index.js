@@ -27,16 +27,4 @@ router.get('/sources', function(req, res, next) {
   });
 });
 
-router.get('/person/:personId', function(req, res, next) {
-  let personId = req.params.personId;
-  let currentPerson = database.people.filter(nextPerson => {
-    return nextPerson.customId == personId;
-  })[0];
-  res.render('person', {
-    title: 'Person!',
-    database: database,
-    person: currentPerson,
-  });
-});
-
 module.exports = router;
