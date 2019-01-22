@@ -10,19 +10,19 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/people', function(req, res, next) {
-  res.render('index', {
+  res.render('people', {
     database: database,
   });
 });
 
 router.get('/events', function(req, res, next) {
-  res.render('index', {
+  res.render('events', {
     database: database,
   });
 });
 
 router.get('/sources', function(req, res, next) {
-  res.render('index', {
+  res.render('sources', {
     database: database,
   });
 });
