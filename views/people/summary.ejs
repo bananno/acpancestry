@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Lundberg Ancestry | <%= person.name %></title>
-    <%- include ./partials/header %>
+    <%- include ../partials/header %>
 </head>
 <body>
     <h1><%= person.name %></h1>
@@ -14,7 +14,7 @@
     <ul>
         <% person.parents.forEach(thisPerson => { %>
             <li>
-                <%- include('./partials/linkToPerson', { params: {
+                <%- include('../partials/linkToPerson', { params: {
                     person: thisPerson,
                 }}) %>
             </li>
@@ -24,7 +24,7 @@
     <ul>
         <% person.spouses.forEach(thisPerson => { %>
             <li>
-                <%- include('./partials/linkToPerson', { params: {
+                <%- include('../partials/linkToPerson', { params: {
                     person: thisPerson,
                 }}) %>
             </li>
@@ -34,7 +34,7 @@
     <ul>
         <% person.children.forEach(thisPerson => { %>
             <li>
-                <%- include('./partials/linkToPerson', { params: {
+                <%- include('../partials/linkToPerson', { params: {
                     person: thisPerson,
                 }}) %>
             </li>

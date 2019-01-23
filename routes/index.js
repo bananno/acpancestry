@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/people', function(req, res, next) {
-  res.render('people', {
+  res.render('people/index', {
     database: database,
   });
 });
