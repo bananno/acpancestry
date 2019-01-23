@@ -60,13 +60,23 @@ table {
 #page-content {
   width: 1000px;
   margin: auto;
+  padding-top: 30px;
+}
+
+/* PERSON HEADER */
+
+.person-header img {
+  max-height: 80px;
+  vertical-align: middle;
+  margin-right: 15px;
+  border-radius: 40px;
+}
+
+.person-header div {
+  display: inline-block;
 }
 
 /* OTHER */
-
-.profile-picture {
-  height: 100px;
-}
 
 .fancy-link {
   margin-top: 5px;
