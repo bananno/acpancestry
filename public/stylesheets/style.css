@@ -18,6 +18,10 @@ table {
   border-collapse: collapse;
 }
 
+a {
+  color: #00B7FF;
+}
+
 /* PAGE HEADER */
 
 #page-header {
@@ -92,4 +96,20 @@ table {
   height: 30px;
   vertical-align: middle;
   margin-right: 5px;
+}
+
+.person-tree {
+  width: 100%;
+  overflow: scroll;
+}
+
+.person-tree .treecell {
+  margin: 3px;
+  padding: 5px;
+  border: 1px solid black;
+  text-align: center;
+}
+
+.person-tree a {
+  text-decoration: none;
 }

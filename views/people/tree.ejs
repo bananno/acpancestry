@@ -1,20 +1,21 @@
 <%
     let person = params.person;
-    let safety = params.safety || 0;
+    params.safety = params.safety || 0;
 
-    if (safety >= 3) {
+    if (params.safety >= 10) {
         console.log('Tree safety exceeded');
     }
 %>
-<table border="1">
-    <% if (safety < 3 && person.parents) { %>
+
+<table>
+    <% if (params.safety < 10 && person.parents) { %>
         <tr>
             <% person.parents.forEach(parent => { %>
                 <td>
                     <% if (parent) { %>
                         <%- include('./tree', { params: {
                             person: parent,
-                            safety: safety + 1
+                            safety: params.safety + 1
                         }}) %>
                     <% } %>
                 </td>
@@ -23,9 +24,11 @@
     <% } %>
     <tr>
         <td colspan="2">
-            <%- include('../partials/linkToPerson', { params: {
-                person: person,
-            }}) %>
+            <div class="treecell">
+                <%- include('../partials/linkToPerson', { params: {
+                    person: person,
+                }}) %>
+            </div>
         </td>
     </tr>
 </table>
