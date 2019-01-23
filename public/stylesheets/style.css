@@ -51,3 +51,13 @@ table {
 .profile-picture {
   height: 100px;
 }
+
+.fancy-link {
+  margin-top: 5px;
+}
+
+.fancy-link img {
+  height: 30px;
+  vertical-align: middle;
+  margin-right: 5px;
+}
