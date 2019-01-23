@@ -4,25 +4,29 @@ var router = express.Router();
 const database = require('../database/data.js');
 
 router.get('/', function(req, res, next) {
-  res.render('index', {
+  res.render('layout', {
+    view: 'index',
     database: database,
   });
 });
 
 router.get('/people', function(req, res, next) {
-  res.render('people/index', {
+  res.render('layout', {
+    view: 'people/index',
     database: database,
   });
 });
 
 router.get('/events', function(req, res, next) {
-  res.render('events', {
+  res.render('layout', {
+    view: 'events',
     database: database,
   });
 });
 
 router.get('/sources', function(req, res, next) {
-  res.render('sources', {
+  res.render('layout', {
+    view: 'sources',
     database: database,
   });
 });
