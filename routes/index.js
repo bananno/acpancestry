@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const database = require('../database.js');
+const database = require('../database/data.js');
 
 router.get('/', function(req, res, next) {
   res.render('index', {

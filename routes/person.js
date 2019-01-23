@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const database = require('../database.js');
+const database = require('../database/data.js');
 
 router.get('/:personId', function(req, res, next) {
   let personId = req.params.personId;
