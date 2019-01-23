@@ -16,3 +16,27 @@ body {
 table {
   border-collapse: collapse;
 }
+
+/* PAGE HEADER */
+
+#page-header {
+  padding: 20px;
+}
+
+#page-header h1, #page-header h1 a {
+  display: inline-block;
+  color: black;
+  text-decoration: none;
+}
+
+#page-header ul {
+  list-style: none;
+  display: inline-block;
+}
+
+#page-header li {
+  display: inline-block;
+  padding-left: 10px;
+}
+
+/* OTHER */
