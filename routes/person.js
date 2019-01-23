@@ -9,7 +9,7 @@ router.get('/:personId', function(req, res, next) {
     return nextPerson.customId == personId;
   })[0];
 
-  if (currentPerson && currentPerson.length) {
+  if (currentPerson) {
     res.render('layout', {
       view: 'people/layout',
       subview: 'summary',
