@@ -1,11 +1,33 @@
 <%
     let linkUrl = params.link;
     let linkText = params.link;
+    let imageName = 'external-link.png';
+    let showText = false;
 
     if (linkUrl.match(' ')) {
         linkUrl = linkUrl.slice(0, linkUrl.indexOf(' '));
         linkText = linkText.slice(linkText.indexOf(' ') + 1);
+
+        if (params.fancy) {
+            if (linkText == 'Ancestry') {
+                imageName = 'logo-ancestry.png';
+            } else if (linkText == 'FamilySearch') {
+                imageName = 'logo-familysearch.png';
+            } else if (linkText == 'FindAGrave') {
+                imageName = 'logo-findagrave.png';
+            } else {
+                showText = true;
+            }
+        }
     }
 %>
 
-<a href="<%= linkUrl %>" target="_blank"><%= linkText %></a>
+<% if (params.fancy) { %>
+    <% if (showText) { %>
+        <a href="<%= linkUrl %>" target="_blank"><img src="/images/<%= imageName %>" height="35"><%= linkText %></a>
+    <% } else { %>
+        <a href="<%= linkUrl %>" target="_blank"><img src="/images/<%= imageName %>" height="35"></a>
+    <% } %>
+<% } else { %>
+    <a href="<%= linkUrl %>" target="_blank"><%= linkText %></a>
+<% } %>

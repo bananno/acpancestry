@@ -40,12 +40,10 @@
 }}) %>
 
 <h2>Links</h2>
-<ul>
-    <% person.links.forEach(nextLink => { %>
-        <li>
-            <%- include('../partials/formatLink', { params: {
-                link: nextLink,
-            }}) %>
-        </li>
-    <% }); %>
-</ul>
+
+<% person.links.forEach(nextLink => { %>
+    <%- include('../partials/formatLink', { params: {
+        link: nextLink,
+        fancy: true,
+    }}) %>
+<% }); %>
