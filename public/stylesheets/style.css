@@ -113,3 +113,23 @@ a {
 .person-tree a {
   text-decoration: none;
 }
+
+.person-family {
+  margin-top: 10px;
+  margin-left: 5px;
+}
+
+.person-family h3 {
+  display: inline-block;
+  width: 130px;
+  vertical-align: top;
+}
+
+.person-family ul {
+  display: inline-block;
+  list-style: none;
+}
+
+.person-family li {
+  padding-bottom: 5px;
+}

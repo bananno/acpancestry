@@ -1,34 +1,24 @@
 <h2>Family</h2>
-<h3>Parents</h3>
-<ul>
-    <% person.parents.forEach(thisPerson => { %>
-        <li>
-            <%- include('../partials/linkToPerson', { params: {
-                person: thisPerson,
-            }}) %>
-        </li>
-    <% }); %>
-</ul>
-<h3>Spouses</h3>
-<ul>
-    <% person.spouses.forEach(thisPerson => { %>
-        <li>
-            <%- include('../partials/linkToPerson', { params: {
-                person: thisPerson,
-            }}) %>
-        </li>
-    <% }); %>
-</ul>
-<h3>Children</h3>
-<ul>
-    <% person.children.forEach(thisPerson => { %>
-        <li>
-            <%- include('../partials/linkToPerson', { params: {
-                person: thisPerson,
-            }}) %>
-        </li>
-    <% }); %>
-</ul>
+
+<% ['parents', 'spouses', 'siblings', 'children'].forEach(rel => { %>
+    <%
+        if (person[rel] == null || person[rel].length == 0) {
+            return;
+        }
+    %>
+    <div class="person-family">
+        <h3><%= rel %>:</h3>
+        <ul>
+            <% person[rel].forEach(thisPerson => { %>
+                <li>
+                    <%- include('../partials/linkToPerson', { params: {
+                        person: thisPerson,
+                    }}) %>
+                </li>
+            <% }); %>
+        </ul>
+    </div>
+<% }); %>
 
 <h2>Tree</h2>
 
