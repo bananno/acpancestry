@@ -14,7 +14,9 @@
     <ul>
         <% person.parents.forEach(thisPerson => { %>
             <li>
-                <%= thisPerson %>
+                <%- include('./partials/linkToPerson', { params: {
+                    person: thisPerson,
+                }}) %>
             </li>
         <% }); %>
     </ul>
@@ -22,7 +24,9 @@
     <ul>
         <% person.spouses.forEach(thisPerson => { %>
             <li>
-                <%= thisPerson %>
+                <%- include('./partials/linkToPerson', { params: {
+                    person: thisPerson,
+                }}) %>
             </li>
         <% }); %>
     </ul>
@@ -30,7 +34,9 @@
     <ul>
         <% person.children.forEach(thisPerson => { %>
             <li>
-                <%= thisPerson %>
+                <%- include('./partials/linkToPerson', { params: {
+                    person: thisPerson,
+                }}) %>
             </li>
         <% }); %>
     </ul>
