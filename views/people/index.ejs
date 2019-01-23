@@ -1,7 +1,14 @@
-<h1>Lundberg Ancestry</h1>
-<h2>All people:</h2>
-<% database.people.forEach(person => { %>
-    <p>
-        <a href="/person/<%= person.customId %>"><%= person.name %></a>
-    </p>
-<% }); %>
+<h1>All People</h1>
+
+<ul class="people-list">
+    <% database.people.forEach(person => { %>
+        <%
+            if (person.private) {
+                return;
+            }
+        %>
+        <li>
+            <a href="/person/<%= person.customId %>"><%= person.name %></a>
+        </li>
+    <% }); %>
+</ul>
