@@ -88,6 +88,12 @@ a {
 
 /* OTHER */
 
+.error {
+  color: red;
+  font-weight: bold;
+  font-size: 20px;
+}
+
 .fancy-link {
   margin-top: 5px;
 }
