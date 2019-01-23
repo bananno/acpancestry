@@ -10,9 +10,8 @@ data.people.forEach(person => {
 
 data.people.forEach(person => {
   relationshipTypes.forEach(rel => {
-    person[rel] = person[rel].map(relative => {
-      return data.peopleRef[relative] || null;
-    })
+    person[rel] = person[rel].map(relative => data.peopleRef[relative] || null)
+    person[rel] = person[rel].filter(relative => relative != null);
   });
 });
 
