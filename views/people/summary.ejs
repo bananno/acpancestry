@@ -20,13 +20,15 @@
     </div>
 <% }); %>
 
-<h2>Tree</h2>
+<% if (person.parents.length) { %>
+    <h2>Tree</h2>
 
-<div class="person-tree">
-    <%- include('./tree', { params: {
-        person: person,
-    }}) %>
-</div>
+    <div class="person-tree">
+        <%- include('./tree', { params: {
+            person: person,
+        }}) %>
+    </div>
+<% } %>
 
 <% if (person.links && person.links.length) { %>
     <h2>Links</h2>
