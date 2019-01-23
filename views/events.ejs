@@ -22,7 +22,11 @@
                 <%= event.location %>
             </td>
             <td>
-                <%= event.people %>
+                <% event.people.forEach(person => { %>
+                    <p>
+                        <a href="/person/<%= person.customId %>"><%= person.name %></a>
+                    </p>
+                <% }); %>
             </td>
             <td>
                 <%= event.notes %>

@@ -15,4 +15,15 @@ data.people.forEach(person => {
   });
 });
 
+data.events.forEach(event => {
+  event.people = event.people.map(person => {
+    person = data.peopleRef[person];
+    if (person == null || person.private) {
+      return null;
+    }
+    return person;
+  });
+  event.people = event.people.filter(person => person != null);
+});
+
 module.exports = data;
