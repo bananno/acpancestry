@@ -139,3 +139,12 @@ a {
 .person-family li {
   padding-bottom: 5px;
 }
+
+.people-list {
+  list-style: none;
+  margin-top: 20px;
+}
+
+.people-list li {
+  margin: 5px;
+}
