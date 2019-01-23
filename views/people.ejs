@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Lundberg Ancestry | All People</title>
-        <%- include ./partials/header %>
-    </head>
-    <body>
-        <h1>Lundberg Ancestry</h1>
-        <h2>All people:</h2>
-        <% database.people.forEach(person => { %>
-            <p>
-                <a href="/person/<%= person.customId %>"><%= person.name %></a>
-            </p>
-        <% }); %>
-    </body>
+<head>
+    <title>Lundberg Ancestry | All People</title>
+    <%- include ./partials/header %>
+</head>
+<body>
+    <h1>Lundberg Ancestry</h1>
+    <h2>All people:</h2>
+    <% database.people.forEach(person => { %>
+        <p>
+            <a href="/person/<%= person.customId %>"><%= person.name %></a>
+        </p>
+    <% }); %>
+</body>
 </html>
