@@ -11,7 +11,7 @@
     <% if (params.safety < 10 && person.parents) { %>
         <tr>
             <% person.parents.forEach(parent => { %>
-                <td>
+                <td valign="bottom">
                     <% if (parent) { %>
                         <%- include('./tree', { params: {
                             person: parent,
