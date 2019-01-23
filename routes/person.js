@@ -5,6 +5,11 @@ const database = require('../database/data.js');
 
 router.get('/:personId', function(req, res, next) {
   let personId = req.params.personId;
+
+  if (personId == 'root') {
+    personId = '5bce02694df8a32e9026e654';
+  }
+
   let currentPerson = database.people.filter(nextPerson => {
     return nextPerson.customId == personId;
   })[0];
