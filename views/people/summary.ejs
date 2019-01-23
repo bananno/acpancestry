@@ -28,11 +28,13 @@
     }}) %>
 </div>
 
-<h2>Links</h2>
+<% if (person.links && person.links.length) { %>
+    <h2>Links</h2>
 
-<% person.links.forEach(nextLink => { %>
-    <%- include('../partials/formatLink', { params: {
-        link: nextLink,
-        fancy: true,
-    }}) %>
-<% }); %>
+    <% person.links.forEach(nextLink => { %>
+        <%- include('../partials/formatLink', { params: {
+            link: nextLink,
+            fancy: true,
+        }}) %>
+    <% }); %>
+<% } %>
