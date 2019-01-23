@@ -10,6 +10,7 @@ router.get('/:personId', function(req, res, next) {
   })[0];
   res.render('layout', {
     view: 'people/summary',
+    title: currentPerson.name,
     database: database,
     person: currentPerson,
   });
