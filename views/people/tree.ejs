@@ -1,0 +1,19 @@
+
+<table border="1">
+    <tr>
+        <% person.parents.forEach(parent => { %>
+            <td>
+                <%- include('../partials/linkToPerson', { params: {
+                    person: parent,
+                }}) %>
+            </td>
+        <% }); %>
+    </tr>
+    <tr>
+        <td colspan="2">
+            <%- include('../partials/linkToPerson', { params: {
+                person: person,
+            }}) %>
+        </td>
+    </tr>
+</table>

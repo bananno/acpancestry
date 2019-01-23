@@ -39,6 +39,11 @@
         <% }); %>
     </ul>
 
+    <h2>Tree</h2>
+    <%- include('./tree', { params: {
+        person: person,
+    }}) %>
+
     <h2>Links</h2>
     <ul>
         <% person.links.forEach(nextLink => { %>
