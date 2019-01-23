@@ -1,58 +1,49 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Lundberg Ancestry | <%= person.name %></title>
-    <%- include ../partials/header %>
-</head>
-<body>
-    <h1><%= person.name %></h1>
+<h1><%= person.name %></h1>
 
-    <h2>Family</h2>
-    <h3>Parents</h3>
-    <ul>
-        <% person.parents.forEach(thisPerson => { %>
-            <li>
-                <%- include('../partials/linkToPerson', { params: {
-                    person: thisPerson,
-                }}) %>
-            </li>
-        <% }); %>
-    </ul>
-    <h3>Spouses</h3>
-    <ul>
-        <% person.spouses.forEach(thisPerson => { %>
-            <li>
-                <%- include('../partials/linkToPerson', { params: {
-                    person: thisPerson,
-                }}) %>
-            </li>
-        <% }); %>
-    </ul>
-    <h3>Children</h3>
-    <ul>
-        <% person.children.forEach(thisPerson => { %>
-            <li>
-                <%- include('../partials/linkToPerson', { params: {
-                    person: thisPerson,
-                }}) %>
-            </li>
-        <% }); %>
-    </ul>
+<h2>Family</h2>
+<h3>Parents</h3>
+<ul>
+    <% person.parents.forEach(thisPerson => { %>
+        <li>
+            <%- include('../partials/linkToPerson', { params: {
+                person: thisPerson,
+            }}) %>
+        </li>
+    <% }); %>
+</ul>
+<h3>Spouses</h3>
+<ul>
+    <% person.spouses.forEach(thisPerson => { %>
+        <li>
+            <%- include('../partials/linkToPerson', { params: {
+                person: thisPerson,
+            }}) %>
+        </li>
+    <% }); %>
+</ul>
+<h3>Children</h3>
+<ul>
+    <% person.children.forEach(thisPerson => { %>
+        <li>
+            <%- include('../partials/linkToPerson', { params: {
+                person: thisPerson,
+            }}) %>
+        </li>
+    <% }); %>
+</ul>
 
-    <h2>Tree</h2>
-    <%- include('./tree', { params: {
-        person: person,
-    }}) %>
+<h2>Tree</h2>
+<%- include('./tree', { params: {
+    person: person,
+}}) %>
 
-    <h2>Links</h2>
-    <ul>
-        <% person.links.forEach(nextLink => { %>
-            <li>
-                <%- include('../partials/formatLink', { params: {
-                    link: nextLink,
-                }}) %>
-            </li>
-        <% }); %>
-    </ul>
-</body>
-</html>
+<h2>Links</h2>
+<ul>
+    <% person.links.forEach(nextLink => { %>
+        <li>
+            <%- include('../partials/formatLink', { params: {
+                link: nextLink,
+            }}) %>
+        </li>
+    <% }); %>
+</ul>
