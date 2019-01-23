@@ -2,8 +2,22 @@
 <html>
 <head>
     <title>Lundberg Ancestry</title>
+
+    <link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+
+    <link href="/images/favicon.ico" rel="shortcut icon" type="image/icon">
+    <link href="/images/favicon.ico" rel="icon" type="image/icon">
 </head>
 <body>
-    <%- include('./' + view) %>
+    <ul id="main-navigation">
+        <li><a href="/">Home</a></li>
+        <li><a href="/people">All People</a></li>
+        <li><a href="/events">All Events</a></li>
+        <li><a href="/sources">All Sources</a></li>
+    </ul>
+
+    <div id="page-content">
+        <%- include('./' + view) %>
+    </div>
 </body>
 </html>
