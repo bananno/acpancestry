@@ -1,2 +1,32 @@
-<h1>Lundberg Ancestry</h1>
-<h2>All events:</h2>
+<h1>Events</h1>
+
+<table border="1">
+    <tr>
+        <th>title</th>
+        <th>date</th>
+        <th>location</th>
+        <th>people</th>
+        <th>notes</th>
+    </tr>
+    <% database.events.forEach(event => { %>
+        <%
+        %>
+        <tr>
+            <td>
+                <%= event.title %></a>
+            </td>
+            <td>
+                <%= event.date %></a>
+            </td>
+            <td>
+                <%= event.location %></a>
+            </td>
+            <td>
+                <%= event.people %></a>
+            </td>
+            <td>
+                <%= event.notes %></a>
+            </td>
+        </tr>
+    <% }); %>
+</table>
