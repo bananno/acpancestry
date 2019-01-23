@@ -6,9 +6,7 @@
 </head>
 <body>
     <h1><%= person.name %></h1>
-    <p>
-        <a href="/">back</a>
-    </p>
+
     <h2>Family</h2>
     <h3>Parents</h3>
     <ul>
@@ -36,6 +34,17 @@
             <li>
                 <%- include('../partials/linkToPerson', { params: {
                     person: thisPerson,
+                }}) %>
+            </li>
+        <% }); %>
+    </ul>
+
+    <h2>Links</h2>
+    <ul>
+        <% person.links.forEach(nextLink => { %>
+            <li>
+                <%- include('../partials/formatLink', { params: {
+                    link: nextLink,
                 }}) %>
             </li>
         <% }); %>

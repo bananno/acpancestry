@@ -1,0 +1,11 @@
+<%
+    let linkUrl = params.link;
+    let linkText = params.link;
+
+    if (linkUrl.match(' ')) {
+        linkUrl = linkUrl.slice(0, linkUrl.indexOf(' '));
+        linkText = linkText.slice(linkText.indexOf(' ') + 1);
+    }
+%>
+
+<a href="<%= linkUrl %>" target="_blank"><%= linkText %></a>
