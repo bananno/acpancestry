@@ -9,5 +9,30 @@
     <p>
         <a href="/">back</a>
     </p>
+    <h2>Family</h2>
+    <h3>Parents</h3>
+    <ul>
+        <% person.parents.forEach(thisPerson => { %>
+            <li>
+                <%= thisPerson %>
+            </li>
+        <% }); %>
+    </ul>
+    <h3>Spouses</h3>
+    <ul>
+        <% person.spouses.forEach(thisPerson => { %>
+            <li>
+                <%= thisPerson %>
+            </li>
+        <% }); %>
+    </ul>
+    <h3>Children</h3>
+    <ul>
+        <% person.children.forEach(thisPerson => { %>
+            <li>
+                <%= thisPerson %>
+            </li>
+        <% }); %>
+    </ul>
 </body>
 </html>
