@@ -9,7 +9,8 @@ router.get('/:personId', function(req, res, next) {
     return nextPerson.customId == personId;
   })[0];
   res.render('layout', {
-    view: 'people/summary',
+    view: 'people/layout',
+    subview: 'summary',
     title: currentPerson.name,
     database: database,
     person: currentPerson,
