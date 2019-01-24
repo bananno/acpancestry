@@ -1,0 +1,47 @@
+<%
+    const usaStates = {
+        AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+        CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
+        HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
+        KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
+        MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
+        MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+        NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
+        OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
+        SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
+        VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+    };
+
+    let locationComponents = [];
+    let location = params.location;
+
+    if (location) {
+
+        let isUSA = location.country == 'United States';
+
+        if (location.city) {
+            locationComponents.push(location.city);
+        }
+
+        if (location.region2) {
+            locationComponents.push(location.region2);
+        }
+
+        if (isUSA) {
+            if (location.region1) {
+                locationComponents.push(usaStates[location.region1] || location.region1);
+            }
+            locationComponents.push('USA');
+        } else {
+            if (location.region1) {
+                locationComponents.push(location.region1);
+            }
+            if (location.country) {
+                locationComponents.push(location.country);
+            }
+        }
+    }
+
+    let displayLocation = locationComponents.join(', ');
+%>
+<%= displayLocation %>

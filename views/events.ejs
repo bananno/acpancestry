@@ -21,7 +21,9 @@
                 }}) %>
             </td>
             <td>
-                <%= event.location %>
+                <%- include('./partials/formatLocation', { params: {
+                    location: event.location,
+                }}) %>
             </td>
             <td>
                 <% event.people.forEach(person => { %>
