@@ -11,7 +11,7 @@ body {
   background-position: top right;
   background-attachment: fixed;
   background-repeat: no-repeat;
-  background-color: #eaf7ff;
+  background-color: #f0f0f0;
 }
 
 table {
@@ -195,9 +195,15 @@ table.event-list th {
 }
 
 #search-results-filter li {
-  border: 1px solid black;
+  border: 1px solid gray;
   margin-bottom: 5px;
   padding: 5px;
+  background-color: white;
+}
+
+#search-results-filter li.active {
+  background-color: #7ace42;
+  font-weight: bold;
 }
 
 #search-results-filter li:hover {

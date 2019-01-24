@@ -6,31 +6,50 @@
 </form>
 
 <ul id="search-results-filter">
-    <li>Everything</li>
+    <li class="active">Everything</li>
     <li>People</li>
     <li>Events</li>
     <li>Sources</li>
 </ul>
 
 <div id="search-results-box">
-    <% searchResults.people.forEach(person => { %>
-        <p>
-            <%= person.name %>
-        </p>
-    <% }); %>
+    <div class="search-results-section results-people">
+        <% searchResults.people.forEach(person => { %>
+            <p>
+                <%= person.name %>
+            </p>
+        <% }); %>
+    </div>
 
-    <% searchResults.events.forEach(event => { %>
-        <p>
-            <%= event.title %>
-        </p>
-    <% }); %>
+    <div class="search-results-section results-events">
+        <% searchResults.events.forEach(event => { %>
+            <p>
+                <%= event.title %>
+            </p>
+        <% }); %>
+    </div>
 
-    <% searchResults.sources.forEach(source => { %>
-        <p>
-            <%= source.title %>
-        </p>
-    <% }); %>
+    <div class="search-results-section results-sources">
+        <% searchResults.sources.forEach(source => { %>
+            <p>
+                <%= source.title %>
+            </p>
+        <% }); %>
+    </div>
 </div>
 
 <script>
+    $('#search-results-filter li').toArray().forEach(element => {
+        let text = $(element).text().toLowerCase();
+        $(element).click(() => {
+            $('#search-results-filter li').removeClass('active');
+            $(element).addClass('active');
+            if (text == 'everything') {
+                $('.search-results-section').show();
+            } else {
+                $('.search-results-section').hide();
+                $('.search-results-section.results-' + text).show();
+            }
+        });
+    });
 </script>
