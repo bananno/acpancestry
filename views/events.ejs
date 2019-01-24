@@ -16,7 +16,9 @@
                 <%= event.title %>
             </td>
             <td>
-                <%= event.date %>
+                <%- include('./partials/formatDate', { params: {
+                    date: event.date,
+                }}) %>
             </td>
             <td>
                 <%= event.location %>
