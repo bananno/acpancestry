@@ -8,7 +8,9 @@
             }
         %>
         <li>
-            <a href="/person/<%= person.customId %>"><%= person.name %></a>
+            <%- include('../partials/linkToPerson', { params: {
+                person: person,
+            }}) %>
         </li>
     <% }); %>
 </ul>

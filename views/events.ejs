@@ -24,7 +24,9 @@
             <td>
                 <% event.people.forEach(person => { %>
                     <p>
-                        <a href="/person/<%= person.customId %>"><%= person.name %></a>
+                        <%- include('./partials/linkToPerson', { params: {
+                            person: person,
+                        }}) %>
                     </p>
                 <% }); %>
             </td>
