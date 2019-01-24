@@ -1,9 +1,6 @@
 <h1>Search Results</h1>
 
-<p>
-    <b>STRING:</b>
-</p>
-
-<p>
-    <%= search %>
-</p>
+<form action="/search" method="POST" class="search-form">
+    <input name="search" value="<%= search %>">
+    <button type="submit">search</button>
+</form>
