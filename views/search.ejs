@@ -5,20 +5,32 @@
     <button type="submit">search</button>
 </form>
 
-<% searchResults.people.forEach(person => { %>
-    <p>
-        <%= person.name %>
-    </p>
-<% }); %>
+<ul id="search-results-filter">
+    <li>Everything</li>
+    <li>People</li>
+    <li>Events</li>
+    <li>Sources</li>
+</ul>
 
-<% searchResults.events.forEach(event => { %>
-    <p>
-        <%= event.title %>
-    </p>
-<% }); %>
+<div id="search-results-box">
+    <% searchResults.people.forEach(person => { %>
+        <p>
+            <%= person.name %>
+        </p>
+    <% }); %>
 
-<% searchResults.sources.forEach(source => { %>
-    <p>
-        <%= source.title %>
-    </p>
-<% }); %>
+    <% searchResults.events.forEach(event => { %>
+        <p>
+            <%= event.title %>
+        </p>
+    <% }); %>
+
+    <% searchResults.sources.forEach(source => { %>
+        <p>
+            <%= source.title %>
+        </p>
+    <% }); %>
+</div>
+
+<script>
+</script>

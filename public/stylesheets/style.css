@@ -185,3 +185,25 @@ table.event-list td {
 table.event-list th {
   background-color: #d1ecfc;
 }
+
+#search-results-filter {
+  display: inline-block;
+  list-style: none;
+  vertical-align: top;
+  margin-right: 30px;
+  width: 130px;
+}
+
+#search-results-filter li {
+  border: 1px solid black;
+  margin-bottom: 5px;
+  padding: 5px;
+}
+
+#search-results-filter li:hover {
+  cursor: pointer;
+}
+
+#search-results-box {
+  display: inline-block;
+}
