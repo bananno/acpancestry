@@ -4,7 +4,11 @@ const database = require('../database/data.js');
 let searchArr = [];
 
 const processSearchInput = (searchStr) => {
-  searchArr = searchStr.toLowerCase().split(' ');
+  searchStr = searchStr.toLowerCase().trim();
+  if (searchStr == '') {
+    return [];
+  }
+  return searchStr.split(' ');
 }
 
 const includePerson = (person) => {
@@ -24,7 +28,15 @@ const includeEvent = (event) => {
 }
 
 const getSearchResults = (searchStr) => {
-  processSearchInput(searchStr);
+  searchArr = processSearchInput(searchStr);
+
+  if (searchArr.length == 0) {
+    return {
+      people: [],
+      events: [],
+      sources: [],
+    };
+  }
 
   return {
     people: database.people.filter(includePerson),
