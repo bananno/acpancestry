@@ -149,3 +149,13 @@ a {
 .people-list li {
   margin: 5px;
 }
+
+table.event-list th,
+table.event-list td {
+  border: 1px solid black;
+  padding: 3px;
+}
+
+table.event-list th {
+  background-color: #d1ecfc;
+}
