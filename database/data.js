@@ -26,4 +26,6 @@ data.events.forEach(event => {
   event.people = event.people.filter(person => person != null);
 });
 
+data.events = data.events.filter(event => event.people.length > 0);
+
 module.exports = data;
