@@ -4,3 +4,21 @@
     <input name="search" value="<%= search %>">
     <button type="submit">search</button>
 </form>
+
+<% searchResults.people.forEach(person => { %>
+    <p>
+        <%= person.name %>
+    </p>
+<% }); %>
+
+<% searchResults.events.forEach(event => { %>
+    <p>
+        <%= event.title %>
+    </p>
+<% }); %>
+
+<% searchResults.sources.forEach(source => { %>
+    <p>
+        <%= source.title %>
+    </p>
+<% }); %>

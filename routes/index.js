@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 const database = require('../database/data.js');
+const getSearchResults = require('../tools/searchResults.js');
 
 router.get('/', function(req, res, next) {
   res.render('layout', {
@@ -36,10 +37,12 @@ router.get('/sources', function(req, res, next) {
 });
 
 router.post('/search', function(req, res, next) {
+  let searchStr = req.body.search;
   res.render('layout', {
     view: 'search',
     title: 'Search',
-    search: req.body.search,
+    search: searchStr,
+    searchResults: getSearchResults(searchStr),
   });
 });
 
