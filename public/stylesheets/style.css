@@ -87,6 +87,23 @@ a {
   display: inline-block;
 }
 
+/* SEARCH BAR */
+
+#page-header .search-form {
+  display: inline-block;
+  margin-left: 100px;
+}
+
+#page-header .search-form input,
+#page-header .search-form button {
+  padding: 5px;
+  border-radius: 8px;
+}
+
+#page-header .search-form button {
+  cursor: pointer;
+}
+
 /* OTHER */
 
 .error {
@@ -158,19 +175,4 @@ table.event-list td {
 
 table.event-list th {
   background-color: #d1ecfc;
-}
-
-form#search-form {
-  display: inline-block;
-  margin-left: 100px;
-}
-
-form#search-form input,
-form#search-form button {
-  padding: 5px;
-  border-radius: 8px;
-}
-
-form#search-form button {
-  cursor: pointer;
 }
