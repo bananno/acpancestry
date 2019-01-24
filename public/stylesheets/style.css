@@ -78,7 +78,7 @@ a {
 
 .person-header img {
   max-height: 80px;
-  vertical-align: middle;
+  vertical-align: top;
   margin-right: 15px;
   border-radius: 40px;
 }
