@@ -12,10 +12,14 @@ const processSearchInput = (searchStr) => {
 }
 
 const includePerson = (person) => {
-  let tempName = person.name.toLowerCase();
+  let tempTest = person.name.toLowerCase();
 
   for (let i in searchArr) {
-    if (!tempName.match(searchArr[i])) {
+    if (searchArr[i].slice(0, 1) == '-') {
+      if (tempTest.match(searchArr[i].slice(1))) {
+        return false;
+      }
+    } else if (!tempTest.match(searchArr[i])) {
       return false;
     }
   }
@@ -24,10 +28,14 @@ const includePerson = (person) => {
 }
 
 const includeEvent = (event) => {
-  let tempTitle = event.title.toLowerCase();
+  let tempTest = event.title.toLowerCase();
 
   for (let i in searchArr) {
-    if (!tempTitle.match(searchArr[i])) {
+    if (searchArr[i].slice(0, 1) == '-') {
+      if (tempTest.match(searchArr[i].slice(1))) {
+        return false;
+      }
+    } else if (!tempTest.match(searchArr[i])) {
       return false;
     }
   }
