@@ -24,7 +24,15 @@ const includePerson = (person) => {
 }
 
 const includeEvent = (event) => {
-  return false;
+  let tempTitle = event.title.toLowerCase();
+
+  for (let i in searchArr) {
+    if (!tempTitle.match(searchArr[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 const getSearchResults = (searchStr) => {
