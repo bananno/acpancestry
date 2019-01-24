@@ -35,4 +35,12 @@ router.get('/sources', function(req, res, next) {
   });
 });
 
+router.post('/search', function(req, res, next) {
+  res.render('layout', {
+    view: 'search',
+    title: 'Search',
+    search: req.body.search,
+  });
+});
+
 module.exports = router;
