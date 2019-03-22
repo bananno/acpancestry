@@ -2,7 +2,7 @@
 function viewPerson() {
   let personId = PATH.replace('person/', '');
 
-  const person = findPerson(personId);
+  const person = DATABASE.personRef[personId];
 
   if (person == null) {
     setPageTitle('Person Not Found');

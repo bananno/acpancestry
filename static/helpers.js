@@ -11,10 +11,6 @@ function rend(content) {
   $('#page-content').append(content);
 }
 
-function findPerson(personId) {
-  return DATABASE.people.filter(person => personId == person.customId)[0];
-}
-
 function $makePeopleList(people) {
   const $list = $('<ul>');
 
