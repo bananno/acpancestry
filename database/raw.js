@@ -1,4 +1,6 @@
-const people = [
+const DATABASE = {};
+
+DATABASE.people = [
   {"_id":"5bce02fc4df8a32e9026e655","parents":["5bce2777baeb9a33af071f4e","5bce373798a95a3531041618"],"spouses":["5bce02ff4df8a32e9026e656"],"children":["5bce02694df8a32e9026e654","5bdb5332d1ad7f032236f433"],"private":true,"name":"JN","customId":"5bce02fc4df8a32e9026e655"},
   {"_id":"5bce02ff4df8a32e9026e656","parents":["5bce353ce5651a33f85077a8","5bce2799548af033b53ada64"],"spouses":["5bce02fc4df8a32e9026e655"],"children":["5bce02694df8a32e9026e654","5bdb5332d1ad7f032236f433"],"private":true,"name":"SP","customId":"5bce02ff4df8a32e9026e656"},
   {"_id":"5bce0765bcc4162f3eef1c6e","parents":["5bce0782bcc4162f3eef1c70","5bce0788bcc4162f3eef1c71"],"spouses":["5bce0777bcc4162f3eef1c6f","5bdb56d4d5b7c70394449f4e"],"children":["5bce360be5651a33f85077a9","5bce37c698a95a353104161b"],"private":false,"name":"Ole B. Johnson","customId":"OleJohnson","links":["https://www.findagrave.com/cgi-bin/fg.cgi?page=gr&GRid=68151408 FindAGrave","https://www.ancestry.com/family-tree/person/tree/48082533/person/150118414506 Ancestry","https://www.familysearch.org/tree/person/details/L2CW-MTL FamilySearch","http://lundbergancestry.wikia.com/wiki/Ole_Johnson_%26_Anna_Young Lundberg"]},
@@ -75,7 +77,7 @@ const people = [
   {"_id":"5c277fe6941fae0368f62e03","parents":[],"spouses":["5c277fdc941fae0368f62e02"],"children":["5bd8b5a3fabf974800901bdb"],"private":false,"name":"Margaret O'Bryan [Spaulding]","customId":"MargaretOBryan","links":[]}
 ];
 
-const events = [
+DATABASE.events = [
   {"date":{"year":1587,"month":6,"day":24,"display":""},"location":{"country":"","region1":"","region2":"","city":"","notes":"Ilchester, Somerset, England"},"people":["5bfde3668db6d0026a28ab25"],"_id":"5bfde4dc8db6d0026a28ab26","title":"birth","__v":0},
   {"date":{"year":1635,"month":0,"day":0,"display":""},"location":{"country":"United States","region1":"","region2":"","city":"","notes":""},"people":["5bfde3668db6d0026a28ab25"],"_id":"5bfde70e8db6d0026a28ab28","title":"immigration","__v":0},
   {"date":{"year":1676,"month":0,"day":0,"display":"1675 or 1676"},"location":{"country":"United States","region1":"RI","region2":"","city":"Pawtuxet","notes":""},"people":["5bfde3668db6d0026a28ab25"],"_id":"5bfde4fc8db6d0026a28ab27","title":"death","__v":0},
@@ -531,7 +533,4 @@ const events = [
   {"date":{"year":null,"month":0,"day":0},"location":{"country":"Sweden","region1":"","region2":"","city":"","notes":""},"people":["5bce3a1898a95a3531041627"],"_id":"5bd23582f652ea2ab48e93c6","title":"birth","__v":0}
 ];
 
-module.exports = {
-  people: people,
-  events: events,
-};
+module.exports = DATABASE;

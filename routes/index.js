@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const database = require('../database/data.js');
+const database = require('../database/process-express.js');
 const getSearchResults = require('../tools/getSearchResults.js');
 
 router.get('/', function(req, res, next) {
