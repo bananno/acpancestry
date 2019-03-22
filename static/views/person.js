@@ -6,11 +6,26 @@ function viewPerson() {
 
   if (person == null) {
     setPageTitle('Person Not Found');
-    $('#page-content').append('<h1>Person not found: ' + personId + '</h1>');
+    rend('<h1>Person not found: ' + personId + '</h1>');
     return;
   }
 
   setPageTitle(person.name);
 
-  $('#page-content').append('<h1>' + person.name + '</h1>');
+  rend('<h1>' + person.name + '</h1>');
+
+  rend('<h2>Family</h2>');
+
+  ['parents', 'spouses', 'children'].forEach(relationship => {
+    if (person[relationship].length == 0) {
+      return;
+    }
+    const $box = $('<div class="person-family">');
+    $box.append('<h3>' + relationship + ':</h3>');
+    $box.append($makePeopleList(person[relationship]));
+    rend($box);
+  });
+
+  rend('<h2>Tree</h2>');
+  rend('<h2>Links</h2>');
 }

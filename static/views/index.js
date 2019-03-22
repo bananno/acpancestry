@@ -31,11 +31,7 @@ function viewPeople() {
 
   $('#page-content').append('<h1>All People</h1>');
 
-  const $list = $('<ul class="people-list">').appendTo('#page-content');
-
-  DATABASE.people.forEach(person => {
-    $list.append($('<li>').append(linkToPerson(person)));
-  });
+  $makePeopleList(DATABASE.people).addClass('people-list').appendTo('#page-content');
 }
 
 function viewEvents() {
