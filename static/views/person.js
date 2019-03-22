@@ -12,7 +12,16 @@ function viewPerson() {
 
   setPageTitle(person.name);
 
-  rend(`<h1>${person.name}</h1>`);
+  rend(
+    '<div class="person-header">' +
+      '<img src="public/images/generic-profile-picture.png">' +
+      '<div>' +
+        '<h1>' + person.name + '</h1>' +
+        '<p><b>B:</b> bday</p>' +
+        '<p><b>D:</b> dday</p>' +
+      '</div>' +
+    '</div>'
+  );
 
   if (person.private) {
     rend('<p class="person-summary">Some information is hidden to protect the ' +
