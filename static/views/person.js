@@ -14,6 +14,11 @@ function viewPerson() {
 
   rend(`<h1>${person.name}</h1>`);
 
+  if (person.private) {
+    rend('<p class="person-summary">Some information is hidden to protect the ' +
+      'privacy of living people.</p>');
+  }
+
   rend('<h2>Family</h2>');
 
   ['parents', 'spouses', 'children'].forEach(relationship => {

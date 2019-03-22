@@ -136,6 +136,10 @@ a {
   overflow: scroll;
 }
 
+.person-summary {
+  margin-top: 20px;
+}
+
 .person-tree .treecell {
   margin: 3px;
   padding: 5px;
