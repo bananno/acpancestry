@@ -12,9 +12,7 @@ function rend(content) {
 }
 
 function findPerson(personId) {
-  return DATABASE.people.filter(person => {
-    return personId == person._id || personId == person.customId;
-  })[0];
+  return DATABASE.people.filter(person => personId == person.customId)[0];
 }
 
 function $makePeopleList(people) {
@@ -29,12 +27,6 @@ function $makePeopleList(people) {
 }
 
 function linkToPerson(person) {
-  if (typeof person == 'string') {
-    person = findPerson(person);
-    if (person == null) {
-      return '[private]';
-    }
-  }
   let path = ORIGIN + '?person/' + person.customId;
   return '<a href="' + path + '">' + person.name + '</a>';
 }

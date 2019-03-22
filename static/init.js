@@ -2,6 +2,7 @@
 const [ORIGIN, PATH] = getFilePaths();
 
 $(document).ready(() => {
+  processDatabase();
   createHeaderLinks();
   loadContent();
 });
