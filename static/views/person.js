@@ -27,24 +27,39 @@ function viewPerson() {
   });
 
   rend('<h2>Tree</h2>');
-  rend(personTree(person));
+  rend('<div class="person-tree">' + personTree(person) + '</div>');
 
   rend('<h2>Links</h2>');
 }
 
-function personTree(person) {
+function personTree(person, safety) {
+  safety = safety || 0;
+
+  if (safety > 20) {
+    console.log('Tree safety exceeded');
+    return '[error]';
+  }
+
   if (person == null) {
     return '';
   }
 
   return (
-    '<table border="1">' +
+    '<table>' +
       '<tr>' +
-        `<td>${personTree(person.parents[0])}</td>` +
-        `<td>${personTree(person.parents[1])}</td>` +
+        '<td valign="bottom">' +
+          personTree(person.parents[0], safety + 1) +
+        '</td>' +
+        '<td valign="bottom">' +
+          personTree(person.parents[1], safety + 1) +
+        '</td>' +
       '</tr>' +
       '<tr>' +
-        `<td colspan="2">${person.name}</td>` +
+        '<td colspan="2">' +
+          '<div class="treecell">' +
+            linkToPerson(person) +
+          '</div>' +
+        '</td>' +
       '</tr>' +
     '</table>'
   );
