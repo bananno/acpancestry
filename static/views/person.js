@@ -17,8 +17,8 @@ function viewPerson() {
       '<img src="public/images/generic-profile-picture.png">' +
       '<div>' +
         '<h1>' + person.name + '</h1>' +
-        '<p><b>B:</b> bday</p>' +
-        '<p><b>D:</b> dday</p>' +
+        personShowHeaderEvent(person, 'B', person.birth) +
+        personShowHeaderEvent(person, 'D', person.death) +
       '</div>' +
     '</div>'
   );
@@ -44,6 +44,13 @@ function viewPerson() {
   rend('<div class="person-tree">' + personTree(person) + '</div>');
 
   rend('<h2>Links</h2>');
+}
+
+function personShowHeaderEvent(person, abbr, event) {
+  if (person.private || event === undefined) {
+    return '';
+  }
+  return '<p><b>' + abbr + ':</b> ' + formatDate(event.date) + '</p>';
 }
 
 function personTree(person, safety) {
