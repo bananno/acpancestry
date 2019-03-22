@@ -23,6 +23,5 @@ function $makePeopleList(people) {
 }
 
 function linkToPerson(person) {
-  let path = ORIGIN + '?person/' + person.customId;
-  return '<a href="' + path + '">' + person.name + '</a>';
+  return `<a href="${ORIGIN}?person/${person.customId}">${person.name}</a>`;
 }

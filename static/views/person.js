@@ -6,13 +6,13 @@ function viewPerson() {
 
   if (person == null) {
     setPageTitle('Person Not Found');
-    rend('<h1>Person not found: ' + personId + '</h1>');
+    rend(`<h1>Person not found: ${personId}</h1>`);
     return;
   }
 
   setPageTitle(person.name);
 
-  rend('<h1>' + person.name + '</h1>');
+  rend(`<h1>${person.name}</h1>`);
 
   rend('<h2>Family</h2>');
 
@@ -21,7 +21,7 @@ function viewPerson() {
       return;
     }
     const $box = $('<div class="person-family">');
-    $box.append('<h3>' + relationship + ':</h3>');
+    $box.append(`<h3>${relationship}:</h3>`);
     $box.append($makePeopleList(person[relationship]));
     rend($box);
   });
@@ -40,11 +40,11 @@ function personTree(person) {
   return (
     '<table border="1">' +
       '<tr>' +
-        '<td>' + personTree(person.parents[0]) + '</td>' +
-        '<td>' + personTree(person.parents[1]) + '</td>' +
+        `<td>${personTree(person.parents[0])}</td>` +
+        `<td>${personTree(person.parents[1])}</td>` +
       '</tr>' +
       '<tr>' +
-        '<td colspan="2">' + person.name + '</td>' +
+        `<td colspan="2">${person.name}</td>` +
       '</tr>' +
     '</table>'
   );
