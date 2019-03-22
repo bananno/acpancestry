@@ -31,16 +31,32 @@ function loadContent() {
     $('#page-content').append('<h1>Lundberg Ancestry</h1>');
     return;
   }
+
   if (PATH == 'people') {
     $('#page-content').append('<h1>All People</h1>');
+
+    const $list = $('<ul class="people-list">').appendTo('#page-content');
+
+    DATABASE.people.forEach(person => {
+      $list.append($('<li>').append(linkToPerson(person)));
+    });
+
     return;
   }
+
   if (PATH == 'events') {
     $('#page-content').append('<h1>All Events</h1>');
     return;
   }
+
   if (PATH == 'sources') {
     $('#page-content').append('<h1>All Sources</h1>');
     return;
   }
+}
+
+function linkToPerson(person) {
+  let path = ORIGIN + '?person/' + person.customId;
+
+  return '<a href="' + path + '">' + person.name + '</a>';
 }
