@@ -41,9 +41,14 @@ function viewPerson() {
   });
 
   rend('<h2>Tree</h2>');
+
   rend('<div class="person-tree">' + personTree(person) + '</div>');
 
   rend('<h2>Links</h2>');
+
+  person.links.forEach(nextLink => {
+    rend(getFancyLink(nextLink));
+  });
 }
 
 function personShowHeaderEvent(person, abbr, event) {
@@ -83,5 +88,35 @@ function personTree(person, safety) {
         '</td>' +
       '</tr>' +
     '</table>'
+  );
+}
+
+function getFancyLink(link) {
+  let linkUrl = link;
+  let linkText = link;
+  let imageName = 'external-link.png';
+
+  if (linkUrl.match(' ')) {
+    linkUrl = linkUrl.slice(0, linkUrl.indexOf(' '));
+    linkText = linkText.slice(linkText.indexOf(' ') + 1);
+
+    if (linkText == 'Ancestry') {
+      imageName = 'logo-ancestry.png';
+      linkText = '';
+    } else if (linkText == 'FamilySearch') {
+      imageName = 'logo-familysearch.png';
+      linkText = '';
+    } else if (linkText == 'FindAGrave') {
+      imageName = 'logo-findagrave.png';
+      linkText = '';
+    }
+  }
+
+  return (
+    '<div class="fancy-link">' +
+      '<a href="' + linkUrl  + '" target="_blank">' +
+        '<img src="public/images/' + imageName + '">' + linkText +
+      '</a>' +
+    '</div>'
   );
 }
