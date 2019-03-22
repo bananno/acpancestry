@@ -27,5 +27,25 @@ function viewPerson() {
   });
 
   rend('<h2>Tree</h2>');
+  rend(personTree(person));
+
   rend('<h2>Links</h2>');
+}
+
+function personTree(person) {
+  if (person == null) {
+    return '';
+  }
+
+  return (
+    '<table border="1">' +
+      '<tr>' +
+        '<td>' + personTree(person.parents[0]) + '</td>' +
+        '<td>' + personTree(person.parents[1]) + '</td>' +
+      '</tr>' +
+      '<tr>' +
+        '<td colspan="2">' + person.name + '</td>' +
+      '</tr>' +
+    '</table>'
+  );
 }
