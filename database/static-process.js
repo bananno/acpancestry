@@ -8,6 +8,7 @@ function processDatabase() {
   });
 
   DATABASE.people = DATABASE.people.map(getProcessedPerson);
+  DATABASE.events = DATABASE.events.map(getProcessedEvent);
 }
 
 function getProcessedPerson(person) {
@@ -16,8 +17,30 @@ function getProcessedPerson(person) {
       return DATABASE.personRef[otherPerson];
     });
 
-    person[relationship] = person[relationship].filter(otherPerson => otherPerson != null);
+    person[relationship] = removeNullValues(person[relationship]);
   });
 
   return person;
+}
+
+function getProcessedEvent(event) {
+  event.people = event.people.map(person => {
+    person = DATABASE.personRef[person];
+
+    if (person && (event.title === 'birth' || event.title === 'death')) {
+      if (person[event.title] === undefined) {
+        person[event.title] = event;
+      }
+    }
+
+    return person;
+  });
+
+  event.people = removeNullValues(event.people);
+
+  return event;
+}
+
+function removeNullValues(array) {
+  return array.filter(value => value != null);
 }
