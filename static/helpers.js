@@ -25,7 +25,8 @@ function $makePeopleList(people) {
 }
 
 function linkToPerson(person) {
-  return `<a href="${ORIGIN}?person/${person.customId}">${person.name}</a>`;
+  return '<a href="' + ORIGIN + '?person/' + person.customId + '">' +
+    fixSpecialCharacters(person.name) + '</a>';
 }
 
 function formatDate(date) {
@@ -60,4 +61,16 @@ function formatDate(date) {
   }
 
   return dateString;
+}
+
+function removeSpecialCharacters(str) {
+  return str.replace('å', 'a')
+    .replace('“', '"')
+    .replace('”', '"');
+}
+
+function fixSpecialCharacters(str) {
+  return str.replace('å', '&aring;')
+    .replace('“', '"')
+    .replace('”', '"');
 }

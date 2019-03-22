@@ -10,13 +10,13 @@ function viewPerson() {
     return;
   }
 
-  setPageTitle(person.name);
+  setPageTitle(removeSpecialCharacters(person.name));
 
   rend(
     '<div class="person-header">' +
       '<img src="public/images/generic-profile-picture.png">' +
       '<div>' +
-        '<h1>' + person.name + '</h1>' +
+        '<h1>' + fixSpecialCharacters(person.name) + '</h1>' +
         personShowHeaderEvent(person, 'B', person.birth) +
         personShowHeaderEvent(person, 'D', person.death) +
       '</div>' +
