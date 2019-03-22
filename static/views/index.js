@@ -19,6 +19,10 @@ function loadContent() {
   if (PATH == 'sources') {
     return viewSources();
   }
+
+  if (PATH.match('search')) {
+    return viewSearch();
+  }
 }
 
 function viewMain() {
@@ -42,4 +46,11 @@ function viewEvents() {
 function viewSources() {
   setPageTitle('Sources');
   $('#page-content').append('<h1>All Sources</h1>');
+}
+
+function viewSearch() {
+  setPageTitle('Search Results');
+  rend('<h1>Search Results</h1>');
+  const keywords = PATH.slice(7).split('+').filter(word => word.length > 0);
+  $('.search-form [name="search"]').val(keywords.join(' '));
 }
