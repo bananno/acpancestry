@@ -1,4 +1,12 @@
 
+function setPageTitle(title) {
+  if (title && title.length) {
+    document.title = title + ' | Lundberg Ancestry';
+  } else {
+    document.title = 'Lundberg Ancestry';
+  }
+}
+
 function findPerson(personId) {
   return DATABASE.people.filter(person => person.customId == personId)[0];
 }

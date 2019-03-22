@@ -28,11 +28,13 @@ function createHeaderLinks() {
 
 function loadContent() {
   if (PATH == '') {
+    setPageTitle();
     $('#page-content').append('<h1>Lundberg Ancestry</h1>');
     return;
   }
 
   if (PATH == 'people') {
+    setPageTitle('People');
     $('#page-content').append('<h1>All People</h1>');
 
     const $list = $('<ul class="people-list">').appendTo('#page-content');
@@ -50,11 +52,13 @@ function loadContent() {
   }
 
   if (PATH == 'events') {
+    setPageTitle('Events');
     $('#page-content').append('<h1>All Events</h1>');
     return;
   }
 
   if (PATH == 'sources') {
+    setPageTitle('Sources');
     $('#page-content').append('<h1>All Sources</h1>');
     return;
   }
