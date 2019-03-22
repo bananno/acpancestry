@@ -44,6 +44,16 @@ function loadContent() {
     return;
   }
 
+  if (PATH.match('person/')) {
+    let personId = PATH.replace('person/', '');
+
+    const person = DATABASE.people.filter(person => person.customId == personId)[0];
+
+    $('#page-content').append('<h1>' + person.name + '</h1>');
+
+    return;
+  }
+
   if (PATH == 'events') {
     $('#page-content').append('<h1>All Events</h1>');
     return;
