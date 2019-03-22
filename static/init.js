@@ -45,12 +45,7 @@ function loadContent() {
   }
 
   if (PATH.match('person/')) {
-    let personId = PATH.replace('person/', '');
-
-    const person = DATABASE.people.filter(person => person.customId == personId)[0];
-
-    $('#page-content').append('<h1>' + person.name + '</h1>');
-
+    viewPerson();
     return;
   }
 
@@ -63,10 +58,4 @@ function loadContent() {
     $('#page-content').append('<h1>All Sources</h1>');
     return;
   }
-}
-
-function linkToPerson(person) {
-  let path = ORIGIN + '?person/' + person.customId;
-
-  return '<a href="' + path + '">' + person.name + '</a>';
 }
