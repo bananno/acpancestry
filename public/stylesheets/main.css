@@ -6,7 +6,7 @@
 
 body {
   width: 100%;
-  background: url("/images/leaves.png");
+  background: url(/public/images/leaves.png);
   /*background-position: right -5;*/
   background-position: top right;
   background-attachment: fixed;
