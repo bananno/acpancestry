@@ -1,10 +1,22 @@
 /* PAGE CONTENT */
 
 #page-content {
-  width: 1000px;
-  margin: auto;
   padding-top: 30px;
   margin-bottom: 30px;
+  padding: 0px 20px;
+}
+
+@media screen and (max-width: 1000px) {
+  #page-content {
+    width: 100%;
+  }
+}
+
+@media screen and (min-width: 1001px) {
+  #page-content {
+    width: 1000px;
+    margin: auto;
+  }
 }
 
 #page-content h2 {
