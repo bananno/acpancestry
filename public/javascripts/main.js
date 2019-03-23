@@ -1,12 +1,12 @@
 
 $(document).on('click', '#menu-icon', openSideMenu);
-
 $(document).on('click', '#main-navigation .close-me', closeSideMenu);
+$(document).on('click', '#menu-backdrop', closeSideMenu);
 
 function openSideMenu() {
-  $('#main-navigation').addClass('open');
+  $('#main-navigation, #menu-backdrop').addClass('open');
 }
 
 function closeSideMenu() {
-  $('#main-navigation').removeClass('open');
+  $('#main-navigation, #menu-backdrop').removeClass('open');
 }
