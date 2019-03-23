@@ -5,6 +5,11 @@
   width: 100%;
 }
 
+#page-header button {
+  background-color: white;
+  color: black;
+}
+
 /* MAIN TITLE */
 
 #page-header h1, #page-header h1 a {
