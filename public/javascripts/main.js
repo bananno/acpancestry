@@ -4,9 +4,9 @@ $(document).on('click', '#menu-icon', openSideMenu);
 $(document).on('click', '#main-navigation .close-me', closeSideMenu);
 
 function openSideMenu() {
-  $('#main-navigation').css('width', '250px');
+  $('#main-navigation').addClass('open');
 }
 
 function closeSideMenu() {
-  $('#main-navigation').css('width', '0');
+  $('#main-navigation').removeClass('open');
 }
