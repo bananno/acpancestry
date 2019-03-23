@@ -5,7 +5,6 @@ $(document).ready(() => {
   processDatabase();
   createHeaderLinks();
   loadContent();
-  toggleMobileMenu();
 });
 
 function getFilePaths() {
@@ -27,14 +26,4 @@ function createHeaderLinks() {
   $list.append('<li><a href="' + ORIGIN + '?people">People</a></li>');
   $list.append('<li><a href="' + ORIGIN + '?events">Events</a></li>');
   $list.append('<li><a href="' + ORIGIN + '?sources">Sources</a></li>');
-}
-
-function toggleMobileMenu() {
-  $('#menu-icon').click(() => {
-    $('#main-navigation').css('width', '255px');
-  });
-
-  $('#main-navigation .close-me').click(() => {
-    $('#main-navigation').css('width', '0');
-  });
 }
