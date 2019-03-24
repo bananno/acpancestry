@@ -1,6 +1,19 @@
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
   'August', 'September', 'October', 'November', 'December'];
 
+const USE_STATES = {
+    AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+    CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
+    HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
+    KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
+    MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
+    MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+    NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
+    OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
+    SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
+    VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+};
+
 function setPageTitle(title) {
   if (title && title.length) {
     document.title = title + ' | Lundberg Ancestry';
@@ -61,6 +74,39 @@ function formatDate(date) {
   }
 
   return dateString;
+}
+
+function formatLocation(locat) {
+  if (locat == null) {
+    return '';
+  }
+
+  const locationComponents = [];
+  const isUSA = locat.country === 'United States';
+
+  if (locat.city) {
+    locationComponents.push(locat.city);
+  }
+
+  if (locat.region2) {
+    locationComponents.push(locat.region2);
+  }
+
+  if (isUSA) {
+    if (locat.region1) {
+      locationComponents.push(USE_STATES[locat.region1] || locat.region1);
+    }
+    locationComponents.push('USA');
+  } else {
+    if (locat.region1) {
+      locationComponents.push(locat.region1);
+    }
+    if (locat.country) {
+      locationComponents.push(locat.country);
+    }
+  }
+
+  return locationComponents.join(', ');
 }
 
 function removeSpecialCharacters(str) {

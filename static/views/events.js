@@ -13,7 +13,7 @@ function viewEvents() {
 
     addTd($row, event.title);
     addTd($row, formatDate(event.date));
-    addTd($row, ' ');
+    addTd($row, formatLocation(event.location));
     addTd($row, $makePeopleList(event.people));
     addTd($row, event.notes);
   });
