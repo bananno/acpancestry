@@ -35,7 +35,7 @@ function viewPeople() {
 
   $('#page-content').append('<h1>All People</h1>');
 
-  $makePeopleList(DATABASE.people).addClass('people-list').appendTo('#page-content');
+  $makePeopleList(DATABASE.people).appendTo('#page-content');
 }
 
 function viewSources() {

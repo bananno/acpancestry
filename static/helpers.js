@@ -14,7 +14,7 @@ function rend(content) {
 }
 
 function $makePeopleList(people) {
-  const $list = $('<ul>');
+  const $list = $('<ul class="people-list">');
 
   people.forEach(person => {
     const $item = $('<li>').appendTo($list);
@@ -73,4 +73,13 @@ function fixSpecialCharacters(str) {
   return str.replace('å', '&aring;')
     .replace('“', '"')
     .replace('”', '"');
+}
+
+function addTd($row, content) {
+  $row.append($('<td>').append(content));
+}
+
+function $headerRow(array) {
+  return '<tr><th>' + ['title', 'date', 'location', 'people', 'notes'].join('</th><th>') +
+    '</th></tr>';
 }
