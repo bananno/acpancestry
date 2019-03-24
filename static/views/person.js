@@ -30,7 +30,7 @@ function viewPerson() {
 
   rend('<h2>Family</h2>');
 
-  ['parents', 'spouses', 'children'].forEach(relationship => {
+  ['parents', 'siblings', 'spouses', 'children'].forEach(relationship => {
     if (person[relationship].length == 0) {
       return;
     }
