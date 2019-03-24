@@ -38,11 +38,6 @@ function viewPeople() {
   $makePeopleList(DATABASE.people).addClass('people-list').appendTo('#page-content');
 }
 
-function viewEvents() {
-  setPageTitle('Events');
-  $('#page-content').append('<h1>All Events</h1>');
-}
-
 function viewSources() {
   setPageTitle('Sources');
   $('#page-content').append('<h1>All Sources</h1>');
