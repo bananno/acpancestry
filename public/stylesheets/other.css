@@ -1,9 +1,8 @@
 /* PAGE CONTENT */
 
 #page-content {
-  padding-top: 30px;
   margin-bottom: 30px;
-  padding-left: 20px;
+  padding: 30px 20px;
   width: 100%;
   max-width: 1000px;
   margin: auto;
