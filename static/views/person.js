@@ -15,7 +15,7 @@ function viewPerson() {
   rend(
     '<div class="person-header">' +
       '<img src="public/images/generic-profile-picture.png">' +
-      '<div>' +
+      '<div class="person-header-content">' +
         '<h1>' + fixSpecialCharacters(person.name) + '</h1>' +
         personShowHeaderEvent(person, 'B', person.birth) +
         personShowHeaderEvent(person, 'D', person.death) +
@@ -55,7 +55,16 @@ function personShowHeaderEvent(person, abbr, event) {
   if (person.private || event === undefined) {
     return '';
   }
-  return '<p><b>' + abbr + ':</b> ' + formatDate(event.date) + '</p>';
+
+  return (
+    '<div class="person-header-events">' +
+      '<div><b>' + abbr + ':</b></div>' +
+      '<div>' + formatDate(event.date) + '</div>' +
+      '<br>' +
+      '<div>&#160;</div>' +
+      '<div>' + formatLocation(event.location) + '</div>' +
+    '</div>'
+  );
 }
 
 function personTree(person, safety) {

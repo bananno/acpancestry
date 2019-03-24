@@ -23,8 +23,13 @@
   border-radius: 40px;
 }
 
-.person-header div {
+.person-header-content {
   display: inline-block;
+}
+
+.person-header-events div {
+  display: inline-block;
+  min-width: 30px;
 }
 
 /* SEARCH BAR */
@@ -113,7 +118,6 @@
 
 .people-list {
   list-style: none;
-  margin-top: 20px;
 }
 
 .people-list li {
