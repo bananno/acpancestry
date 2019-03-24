@@ -30,6 +30,7 @@
 .person-header-events div {
   display: inline-block;
   min-width: 30px;
+  padding-top: 5px;
 }
 
 /* SEARCH BAR */
