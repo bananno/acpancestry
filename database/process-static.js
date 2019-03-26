@@ -11,6 +11,8 @@ function processDatabase() {
   DATABASE.people.forEach(addPersonChildSiblings);
 
   DATABASE.events = DATABASE.events.map(getProcessedEvent);
+
+  DATABASE.sources = DATABASE.sources.map(getProcessedSource);
 }
 
 function getProcessedPerson(person) {
@@ -53,6 +55,16 @@ function getProcessedEvent(event) {
   });
 
   return event;
+}
+
+function getProcessedSource(source) {
+  source.people = source.people.map(person => {
+    return DATABASE.personRef[person];
+  });
+
+  source.people = removeNullValues(source.people);
+
+  return source;
 }
 
 function removeNullValues(array) {
