@@ -31,10 +31,10 @@ function viewSearch() {
     return source.type == 'document';
   });
   let newspaperList = sourceList.filter(source => {
-    return source.type == 'newsapers';
+    return source.type == 'newspapers';
   });
   let otherSourceList = sourceList.filter(source => {
-    return source.type != 'document' && source.type != 'newsapers';
+    return source.type != 'document' && source.type != 'newspapers';
   });
 
   rend('<h2>People</h2>');
