@@ -126,6 +126,6 @@ function addTd($row, content) {
 }
 
 function $headerRow(array) {
-  return '<tr><th>' + ['title', 'date', 'location', 'people', 'notes'].join('</th><th>') +
+  return '<tr><th>' + array.join('</th><th>') +
     '</th></tr>';
 }
