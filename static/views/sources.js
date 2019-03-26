@@ -30,14 +30,31 @@ function viewOneSource() {
     return;
   }
 
-  rend('<h1>Source</h1>');
-  rend('<p>' + source.type + '</p>');
-  rend('<p>' + source.group + '</p>');
-  rend('<p>' + source.title + '</p>');
+  if (source.type == 'grave') {
+    viewSourceGrave(source);
+  } else {
+    viewSourceOther(source);
+  }
 
   rend('<h2>People</h2>');
   rend($makePeopleList(source.people, 'photo'));
 
   rend('<h2>Links</h2>');
   rend(source.links.map(getFancyLink));
+}
+
+function viewSourceGrave(source) {
+  setPageTitle(source.group);
+  rend('<h1>' + source.group + '</h1>');
+  rend('<h1>' + source.title + '</h1>');
+}
+
+function viewSourceOther(source) {
+  setPageTitle('Source');
+  rend('<h1>Source</h1>');
+  rend('<p>' + source.type + '</p>');
+  rend('<p>' + source.group + '</p>');
+  rend('<p>' + source.title + '</p>');
+  rend('<p>' + formatDate(source.date) + '</p>');
+  rend('<p>' + formatLocation(source.location) + '</p>');
 }
