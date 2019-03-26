@@ -38,11 +38,6 @@ function viewPeople() {
   $makePeopleList(DATABASE.people).appendTo('#page-content');
 }
 
-function viewSources() {
-  setPageTitle('Sources');
-  $('#page-content').append('<h1>All Sources</h1>');
-}
-
 function viewSearch() {
   setPageTitle('Search Results');
   rend('<h1>Search Results</h1>');
