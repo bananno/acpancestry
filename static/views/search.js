@@ -38,7 +38,7 @@ function viewSearch() {
   });
 
   rend('<h2>People</h2>');
-  rend($makePeopleList(peopleList));
+  rend($makePeopleList(peopleList, 'photo'));
 
   rend('<h2>Documents</h2>');
   documentList.forEach(source => {

@@ -26,7 +26,19 @@ function rend(content) {
   $('#page-content').append(content);
 }
 
-function $makePeopleList(people) {
+function $makePeopleList(people, format) {
+  if (format == 'photo') {
+    const $list = $('<div class="people-list">');
+
+    people.forEach(person => {
+      const $item = $('<div>').appendTo($list);
+      $item.append(linkToPerson(person, '<img src="' + person.profileImage + '">'));
+      $item.append(linkToPerson(person));
+    });
+
+    return $list;
+  }
+
   const $list = $('<ul class="people-list">');
 
   people.forEach(person => {
@@ -41,8 +53,9 @@ function localLink(target, text) {
   return '<a href="' + ORIGIN + '?' + target + '">' + text + '</a>';
 }
 
-function linkToPerson(person) {
-  return localLink('person/' + person.customId, fixSpecialCharacters(person.name));
+function linkToPerson(person, text) {
+  text = text || fixSpecialCharacters(person.name);
+  return localLink('person/' + person.customId, text);
 }
 
 function formatDate(date) {
