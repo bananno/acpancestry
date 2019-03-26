@@ -11,7 +11,6 @@ function processDatabase() {
   DATABASE.people.forEach(addPersonChildSiblings);
 
   DATABASE.events = DATABASE.events.map(getProcessedEvent);
-  DATABASE.events = removeNullValues(DATABASE.events);
 }
 
 function getProcessedPerson(person) {
@@ -45,10 +44,6 @@ function getProcessedEvent(event) {
   event.people = event.people.map(person => {
     person = DATABASE.personRef[person];
 
-    if (!person || person.private) {
-      return null;
-    }
-
     if ((event.title === 'birth' || event.title === 'death')
         && person[event.title] === undefined) {
       person[event.title] = event;
@@ -56,12 +51,6 @@ function getProcessedEvent(event) {
 
     return person;
   });
-
-  event.people = removeNullValues(event.people);
-
-  if (event.people.length === 0) {
-    return null;
-  }
 
   return event;
 }
