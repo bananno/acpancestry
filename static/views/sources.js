@@ -11,7 +11,7 @@ function viewSources() {
   DATABASE.sources.forEach(source => {
     const $row = $('<tr>').appendTo($table);
 
-    addTd($row, localLink('source/' + source._id, source.type));
+    addTd($row, linkToSource(source, source.type));
     addTd($row, source.group);
     addTd($row, source.title);
     addTd($row, formatDate(source.date));

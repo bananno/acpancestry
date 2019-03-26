@@ -58,6 +58,11 @@ function linkToPerson(person, text) {
   return localLink('person/' + person.customId, text);
 }
 
+function linkToSource(source, text) {
+  text = text || source.title;
+  return localLink('source/' + source._id, text);
+}
+
 function formatDate(date) {
   if (date == null) {
     return '';

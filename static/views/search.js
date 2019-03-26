@@ -42,16 +42,16 @@ function viewSearch() {
 
   rend('<h2>Documents</h2>');
   documentList.forEach(source => {
-    rend('<p>' + source.title + '</p>');
+    rend('<p>' + linkToSource(source, source.title) + '</p>');
   });
 
   rend('<h2>Newspapers</h2>');
   newspaperList.forEach(source => {
-    rend('<p>' + source.title + '</p>');
+    rend('<p>' + linkToSource(source, source.title) + '</p>');
   });
 
   rend('<h2>Other</h2>');
   otherSourceList.forEach(source => {
-    rend('<p>' + source.title + '</p>');
+    rend('<p>' + linkToSource(source, source.title) + '</p>');
   });
 }
