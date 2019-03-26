@@ -20,6 +20,10 @@ function loadContent() {
     return viewSources();
   }
 
+  if (PATH.match('source/')) {
+    return viewOneSource();
+  }
+
   if (PATH.match('search')) {
     return viewSearch();
   }
