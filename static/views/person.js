@@ -14,7 +14,7 @@ function viewPerson() {
 
   rend(
     '<div class="person-header">' +
-      '<img src="public/images/generic-profile-picture.png">' +
+      '<img src="' + person.profileImage + '">' +
       '<div class="person-header-content">' +
         '<h1>' + fixSpecialCharacters(person.name) + '</h1>' +
         personShowHeaderEvent(person, 'B', person.birth) +
