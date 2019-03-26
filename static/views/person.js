@@ -36,7 +36,8 @@ function viewPerson() {
     }
     const $box = $('<div class="person-family">');
     $box.append(`<h3>${relationship}:</h3>`);
-    $box.append($makePeopleList(person[relationship]));
+    // $box.append($makePeopleList(person[relationship]));
+    $box.append($makePeopleList(person[relationship], 'photo'));
     rend($box);
   });
 

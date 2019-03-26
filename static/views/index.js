@@ -27,13 +27,11 @@ function loadContent() {
 
 function viewMain() {
   setPageTitle();
-  $('#page-content').append('<h1>Lundberg Ancestry</h1>');
+  rend('<h1>Lundberg Ancestry</h1>');
 }
 
 function viewPeople() {
   setPageTitle('People');
-
-  $('#page-content').append('<h1>All People</h1>');
-
-  $makePeopleList(DATABASE.people).appendTo('#page-content');
+  rend('<h1>All People</h1>');
+  rend($makePeopleList(DATABASE.people, 'photo'));
 }

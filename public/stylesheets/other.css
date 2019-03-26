@@ -108,7 +108,7 @@
   vertical-align: top;
 }
 
-.person-family ul {
+.person-family .people-list {
   display: inline-block;
   list-style: none;
 }
