@@ -37,9 +37,12 @@ function $makePeopleList(people) {
   return $list;
 }
 
+function localLink(target, text) {
+  return '<a href="' + ORIGIN + '?' + target + '">' + text + '</a>';
+}
+
 function linkToPerson(person) {
-  return '<a href="' + ORIGIN + '?person/' + person.customId + '">' +
-    fixSpecialCharacters(person.name) + '</a>';
+  return localLink('person/' + person.customId, fixSpecialCharacters(person.name));
 }
 
 function formatDate(date) {
