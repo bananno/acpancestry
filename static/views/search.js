@@ -18,7 +18,22 @@ function viewSearch() {
     return true;
   });
 
+  let cemeteryList = DATABASE.sources.filter(source => {
+    if (source.type != 'grave') {
+      return false;
+    }
+    for (let i = 0; i < keywords.length; i++) {
+      if (source.group.toLowerCase().match(keywords[i]) == null) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   let sourceList = DATABASE.sources.filter(source => {
+    if (source.type == 'grave') {
+      return false;
+    }
     for (let i = 0; i < keywords.length; i++) {
       if (source.title.toLowerCase().match(keywords[i]) == null) {
         return false;
@@ -49,6 +64,15 @@ function viewSearch() {
   newspaperList.forEach(source => {
     rend('<p>' + linkToSource(source, source.title) + '</p>');
   });
+
+  if (cemeteryList.length) {
+    rend('<h2>Cemeteries</h2>');
+
+    cemeteryList.forEach(source => {
+      rend('<p style="padding: 5px 10px;">' + linkToSource(source, source.group) + '<br>' +
+        formatLocation(source.location) + '</p>');
+    });
+  }
 
   rend('<h2>Other</h2>');
   otherSourceList.forEach(source => {
