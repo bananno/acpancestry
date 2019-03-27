@@ -62,8 +62,21 @@ function viewSearch() {
 }
 
 function viewSearchCemeteries(keywords) {
-  const cemeteryList = DATABASE.sources.filter(source => {
-    return source.type == 'grave' && doesStrMatchKeywords(source.group, keywords);
+  const cemeteryList = [];
+  const countEntries = {};
+
+  DATABASE.sources.forEach(source => {
+    if (source.type != 'grave' || !doesStrMatchKeywords(source.group, keywords)) {
+      return;
+    }
+
+    if (countEntries[source.group]) {
+      countEntries[source.group] += 1;
+      return;
+    }
+
+    countEntries[source.group] = 1;
+    cemeteryList.push(source);
   });
 
   if (cemeteryList.length == 0) {
@@ -72,17 +85,16 @@ function viewSearchCemeteries(keywords) {
 
   rend('<h2>Cemeteries</h2>');
 
-  const removeDuplicates = {};
-
   cemeteryList.forEach(source => {
-    if (removeDuplicates[source.group]) {
-      return;
-    }
-
-    removeDuplicates[source.group] = true;
-
-    rend('<p style="padding: 5px 10px;">' + linkToSource(source, source.group) + '<br>' +
-      formatLocation(source.location) + '</p>');
+    rend(
+      '<p style="padding: 5px 10px">' +
+        linkToSource(source, source.group) +
+        '<br>' +
+        formatLocation(source.location) +
+        '<br>' +
+        (countEntries[source.group] == 1 ? '1 grave' : countEntries[source.group] + ' graves') +
+      '</p>'
+    );
   });
 }
 
