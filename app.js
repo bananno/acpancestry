@@ -14,7 +14,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Static files are in the public directory. Second line means that "public/" must be included
-// in the path. This prevents loading the static index.html instead of using "/" route.
+// in the path. This prevents loading the static index.html instead of using "/" route and allows
+// the two versions of the app (static & express) to use the same filepath for public files.
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/public', express.static('public'))
 
