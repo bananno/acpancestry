@@ -32,7 +32,7 @@ function viewSourceGroupCemetery(rootSource) {
     rend('<h2>' + source.title + '</h2>');
 
     source.images.forEach(imageUrl => {
-      rend(makeImage(imageUrl));
+      rend(makeImage(imageUrl, 100, 100));
     });
   });
 }
