@@ -1,13 +1,16 @@
 
 function viewSearch() {
   setPageTitle('Search Results');
-  rend('<h1>Search Results</h1>');
+
   const keywords = PATH.slice(7).toLowerCase().split('+').filter(word => word.length > 0);
   $('.search-form [name="search"]').val(keywords.join(' '));
 
   if (keywords.length === 0) {
+    rend('<h1>Search Results</h1>');
     return;
   }
+
+  rend('<h1>Search Results for "' + keywords.join(' ') + '"</h1>');
 
   let peopleList = DATABASE.people.filter(person => {
     for (let i = 0; i < keywords.length; i++) {
