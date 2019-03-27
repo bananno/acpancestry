@@ -18,18 +18,6 @@ function viewSearch() {
     return true;
   });
 
-  let cemeteryList = DATABASE.sources.filter(source => {
-    if (source.type != 'grave') {
-      return false;
-    }
-    for (let i = 0; i < keywords.length; i++) {
-      if (source.group.toLowerCase().match(keywords[i]) == null) {
-        return false;
-      }
-    }
-    return true;
-  });
-
   let sourceList = DATABASE.sources.filter(source => {
     if (source.type == 'grave') {
       return false;
@@ -65,17 +53,39 @@ function viewSearch() {
     rend('<p>' + linkToSource(source, source.title) + '</p>');
   });
 
-  if (cemeteryList.length) {
-    rend('<h2>Cemeteries</h2>');
-
-    cemeteryList.forEach(source => {
-      rend('<p style="padding: 5px 10px;">' + linkToSource(source, source.group) + '<br>' +
-        formatLocation(source.location) + '</p>');
-    });
-  }
+  viewSearchCemeteries(keywords);
 
   rend('<h2>Other</h2>');
   otherSourceList.forEach(source => {
     rend('<p>' + linkToSource(source, source.title) + '</p>');
   });
+}
+
+function viewSearchCemeteries(keywords) {
+  const cemeteryList = DATABASE.sources.filter(source => {
+    return source.type == 'grave' && doesStrMatchKeywords(source.group, keywords);
+  });
+
+  if (cemeteryList.length == 0) {
+    return;
+  }
+
+  rend('<h2>Cemeteries</h2>');
+
+  cemeteryList.forEach(source => {
+    rend('<p style="padding: 5px 10px;">' + linkToSource(source, source.group) + '<br>' +
+      formatLocation(source.location) + '</p>');
+  });
+}
+
+function doesStrMatchKeywords(str, keywords) {
+  str = str.toLowerCase();
+
+  for (let i = 0; i < keywords.length; i++) {
+    if (str.match(keywords[i]) == null) {
+      return false;
+    }
+  }
+
+  return true;
 }
