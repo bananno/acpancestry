@@ -72,7 +72,15 @@ function viewSearchCemeteries(keywords) {
 
   rend('<h2>Cemeteries</h2>');
 
+  const removeDuplicates = {};
+
   cemeteryList.forEach(source => {
+    if (removeDuplicates[source.group]) {
+      return;
+    }
+
+    removeDuplicates[source.group] = true;
+
     rend('<p style="padding: 5px 10px;">' + linkToSource(source, source.group) + '<br>' +
       formatLocation(source.location) + '</p>');
   });
