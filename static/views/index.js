@@ -24,6 +24,10 @@ function loadContent() {
     return viewOneSource();
   }
 
+  if (PATH.match('sourceGroup/')) {
+    return viewSourceGroup();
+  }
+
   if (PATH.match('search')) {
     return viewSearch();
   }

@@ -91,7 +91,7 @@ function viewSearchCemeteries(keywords) {
   cemeteryList.forEach(source => {
     rend(
       '<p style="padding: 5px 10px">' +
-        linkToSource(source, source.group) +
+        linkToSourceGroup(source, source.group) +
         '<br>' +
         formatLocation(source.location) +
         '<br>' +
