@@ -155,3 +155,33 @@ function $headerRow(array) {
   return '<tr><th>' + array.join('</th><th>') +
     '</th></tr>';
 }
+
+function getFancyLink(link) {
+  let linkUrl = link;
+  let linkText = link;
+  let imageName = 'external-link.png';
+
+  if (linkUrl.match(' ')) {
+    linkUrl = linkUrl.slice(0, linkUrl.indexOf(' '));
+    linkText = linkText.slice(linkText.indexOf(' ') + 1);
+
+    if (linkText == 'Ancestry') {
+      imageName = 'logo-ancestry.png';
+      linkText = '';
+    } else if (linkText == 'FamilySearch') {
+      imageName = 'logo-familysearch.png';
+      linkText = '';
+    } else if (linkText == 'FindAGrave') {
+      imageName = 'logo-findagrave.png';
+      linkText = '';
+    }
+  }
+
+  return (
+    '<div class="fancy-link">' +
+      '<a href="' + linkUrl  + '" target="_blank">' +
+        '<img src="public/images/' + imageName + '">' + linkText +
+      '</a>' +
+    '</div>'
+  );
+}
