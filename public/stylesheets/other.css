@@ -178,18 +178,3 @@ table.event-list th {
 #search-results-box {
   display: inline-block;
 }
-
-/* IMAGE VIEWER */
-
-.image-thumbnail {
-  display: inline-block;
-  cursor: pointer;
-  color: #aaa;
-  font-size: 12px;
-  text-align: center;
-}
-
-.image-thumbnail img {
-  display: block;
-  border: none;
-}

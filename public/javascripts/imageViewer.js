@@ -1,18 +1,36 @@
 
 function makeImage(url, maxHeight, maxWidth) {
-  const $div = $('<div class="image-thumbnail">');
+  const $imageViewer = $('<div class="image-viewer">');
 
-  $div.append('<img src="' + url + '">');
+  const $thumbnail = $('<div class="image-thumbnail">').appendTo($imageViewer);
+  const $popup = $('<div class="image-popup">').appendTo($imageViewer);
+  const $inset = $('<div class="image-inset">').appendTo($popup);
+
+  $thumbnail.append('<img src="' + url + '">');
+  $thumbnail.append('click to enlarge');
+
+  $inset.append('<div>Close</div>');
+  $inset.append('<img src="' + url + '">');
 
   if (maxHeight) {
-    $div.find('img').css('max-height', maxHeight + 'px');
+    $thumbnail.find('img').css('max-height', maxHeight + 'px');
   }
 
   if (maxWidth) {
-    $div.find('img').css('max-width', maxWidth + 'px');
+    $thumbnail.find('img').css('max-width', maxWidth + 'px');
   }
 
-  $div.append('click to enlarge');
+  $thumbnail.click(() => {
+    $popup.show();
+  });
 
-  return $div;
+  $popup.click(() => {
+    $popup.hide();
+  });
+
+  $popup.find('div').click(() => {
+    $popup.hide();
+  });
+
+  return $imageViewer;
 }
