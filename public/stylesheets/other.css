@@ -178,3 +178,9 @@ table.event-list th {
 #search-results-box {
   display: inline-block;
 }
+
+.transcription {
+  background-color: #ddd;
+  padding: 10px;
+  border-radius: 10px;
+}

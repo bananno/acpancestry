@@ -185,3 +185,15 @@ function getFancyLink(link) {
     '</div>'
   );
 }
+
+function formatTranscription(content) {
+  const $div = $('<div class="transcription">');
+
+  content = (content || '').split('\n');
+
+  content.forEach(str => {
+    $div.append('<p>' + str + '</p>');
+  });
+
+  return $div;
+}

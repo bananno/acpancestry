@@ -38,7 +38,7 @@ function viewSourceGroupCemetery(rootSource) {
     rend($makePeopleList(source.people, 'photo'));
 
     if (source.content) {
-      rend('<p>' + source.content + '</p>');
+      rend(formatTranscription(source.content));
     }
 
     if (source.notes) {
