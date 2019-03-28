@@ -88,7 +88,7 @@ function viewSourcesCemeteries() {
     const rootSource = cemeteryList[cemeteryName][0];
 
     rend(
-      '<p style="padding-top: 5px">' +
+      '<p style="padding-top: 15px">' +
         linkToSourceGroup(rootSource, cemeteryName) +
         '<br>' +
         formatLocation(rootSource.location) +
