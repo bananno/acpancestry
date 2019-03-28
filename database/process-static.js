@@ -51,6 +51,9 @@ function getProcessedEvent(event) {
     if ((event.title === 'birth' || event.title === 'death')
         && person[event.title] === undefined) {
       person[event.title] = event;
+    } else if (event.title === 'birth and death') {
+      person.birth = person.birth || event;
+      person.death = person.death || event;
     }
 
     return person;
