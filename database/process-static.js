@@ -59,6 +59,9 @@ function getProcessedEvent(event) {
     return person;
   });
 
+  event.location = event.location || {};
+  event.location.format = formatLocation(event.location);
+
   return event;
 }
 
@@ -68,6 +71,9 @@ function getProcessedSource(source) {
   });
 
   source.people = removeNullValues(source.people);
+
+  source.location = source.location || {};
+  source.location.format = formatLocation(source.location);
 
   return source;
 }
