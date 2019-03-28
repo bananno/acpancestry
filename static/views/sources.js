@@ -64,6 +64,11 @@ function viewSourceOther(source) {
   rend('<p>' + source.title + '</p>');
   rend('<p>' + formatDate(source.date) + '</p>');
   rend('<p>' + formatLocation(source.location) + '</p>');
+
+  if (source.content) {
+    rend('<h2>Transcription</h2>');
+    rend(formatTranscription(source.content));
+  }
 }
 
 function viewSourcesCemeteries() {
