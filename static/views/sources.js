@@ -69,4 +69,32 @@ function viewSourceOther(source) {
 function viewSourcesCemeteries() {
   setPageTitle('Cemeteries');
   rend('<h1>Cemeteries</h1>');
+
+  const cemeteryList = [];
+
+  DATABASE.sources.forEach(source => {
+    if (source.type != 'grave') {
+      return;
+    }
+
+    const cemeteryName = source.group;
+
+    cemeteryList[cemeteryName] = cemeteryList[cemeteryName] || [];
+
+    cemeteryList[cemeteryName].push(source);
+  });
+
+  for (let cemeteryName in cemeteryList) {
+    const rootSource = cemeteryList[cemeteryName][0];
+
+    rend(
+      '<p style="padding-top: 5px">' +
+        linkToSourceGroup(rootSource, cemeteryName) +
+        '<br>' +
+        formatLocation(rootSource.location) +
+        '<br>' +
+        cemeteryList[cemeteryName].length +
+      ' graves</p>'
+    );
+  }
 }
