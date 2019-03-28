@@ -200,14 +200,8 @@ function formatTranscription(content) {
         wasTable = true;
       }
 
-      if (str.slice(0, 2) == '||') {
-        str = '<th>' + str.slice(2);
-      } else {
-        str = '<td>' + str.slice(1);
-      }
-
-      str = str.split('||').join('<th>')
-      str = str.split('|').join('<td>')
+      str = str.replace(/\|\|/g, '<th>');
+      str = str.replace(/\|/g, '<td>');
 
       $div.find('table:last').append('<tr>' + str + '</tr>');
       return;
