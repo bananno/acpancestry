@@ -65,6 +65,13 @@ function viewSourceOther(source) {
   rend('<p>' + formatDate(source.date) + '</p>');
   rend('<p>' + formatLocation(source.location) + '</p>');
 
+  if (source.images.length) {
+    rend('<h2>Images</h2>');
+    source.images.forEach(imageUrl => {
+      rend(makeImage(imageUrl, 100));
+    });
+  }
+
   if (source.content) {
     rend('<h2>Transcription</h2>');
     rend(formatTranscription(source.content));
