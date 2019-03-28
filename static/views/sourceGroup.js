@@ -34,5 +34,19 @@ function viewSourceGroupCemetery(rootSource) {
     source.images.forEach(imageUrl => {
       rend(makeImage(imageUrl, 100, 100));
     });
+
+    rend($makePeopleList(source.people, 'photo'));
+
+    if (source.content) {
+      rend('<p>' + source.content + '</p>');
+    }
+
+    if (source.notes) {
+      rend('<p>' + source.notes + '</p>');
+    }
+
+    source.links.forEach(linkUrl => {
+      rend(getFancyLink(linkUrl));
+    });
   });
 }
