@@ -61,9 +61,11 @@ function personShowHeaderEvent(person, abbr, event) {
     '<div class="person-header-events">' +
       '<div><b>' + abbr + ':</b></div>' +
       '<div>' + formatDate(event.date) + '</div>' +
-      '<br>' +
-      '<div>&#160;</div>' +
-      '<div>' + formatLocation(event.location) + '</div>' +
+      (event.location.format ? (
+        '<br>' +
+        '<div>&#160;</div>' +
+        '<div>' + event.location.format + '</div>'
+      ) : '') +
     '</div>'
   );
 }
