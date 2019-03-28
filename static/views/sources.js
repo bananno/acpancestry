@@ -4,6 +4,13 @@ function viewSources() {
   const $table = $('<table class="event-list" border="1">');
 
   rend('<h1>All Sources</h1>');
+
+  rend(
+    '<ul>' +
+      '<li>' + localLink('sources/cemeteries', 'Cemeteries') + '</li>' +
+    '</ul>'
+  );
+
   rend($table);
 
   $table.append($headerRow(['type', 'group', 'title', 'date', 'location', 'people']));
@@ -57,4 +64,9 @@ function viewSourceOther(source) {
   rend('<p>' + source.title + '</p>');
   rend('<p>' + formatDate(source.date) + '</p>');
   rend('<p>' + formatLocation(source.location) + '</p>');
+}
+
+function viewSourcesCemeteries() {
+  setPageTitle('Cemeteries');
+  rend('<h1>Cemeteries</h1>');
 }

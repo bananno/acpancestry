@@ -24,6 +24,10 @@ function loadContent() {
     return viewOneSource();
   }
 
+  if (PATH.match('sources/cemeteries')) {
+    return viewSourcesCemeteries();
+  }
+
   if (PATH.match('sourceGroup/')) {
     return viewSourceGroup();
   }
