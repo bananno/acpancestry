@@ -26,3 +26,11 @@ table {
 a {
   color: #00B7FF;
 }
+
+ul.bullet {
+  margin-left: 20px;
+}
+
+ul.bullet li {
+  margin-top: 5px;
+}
