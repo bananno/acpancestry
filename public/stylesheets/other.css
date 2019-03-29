@@ -185,7 +185,8 @@ table.event-list th {
   border-radius: 10px;
 }
 
-.transcription th, td {
+.transcription th,
+.transcription td {
   border: 1px solid black;
   padding: 2px;
   font-size: 12px;
