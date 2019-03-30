@@ -28,6 +28,10 @@ function loadContent() {
     return viewSourcesCemeteries();
   }
 
+  if (PATH.match('sources/newspapers')) {
+    return viewSourcesNewspapers();
+  }
+
   if (PATH.match('sourceGroup/')) {
     return viewSourceGroup();
   }

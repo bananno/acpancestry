@@ -8,6 +8,7 @@ function viewSources() {
   rend(
     '<ul>' +
       '<li>' + localLink('sources/cemeteries', 'Cemeteries') + '</li>' +
+      '<li>' + localLink('sources/newspapers', 'Newspapers') + '</li>' +
     '</ul>'
   );
 
@@ -118,6 +119,39 @@ function viewSourcesCemeteries() {
         '<br>' +
         cemeteryList[cemeteryName].length +
       ' graves</p>'
+    );
+  }
+}
+
+function viewSourcesNewspapers() {
+  setPageTitle('Newspapers');
+  rend('<h1>Newspapers</h1>');
+
+  const newspaperList = [];
+
+  DATABASE.sources.forEach(source => {
+    if (source.type != 'newspaper') {
+      return;
+    }
+
+    const newspaperName = source.group;
+
+    newspaperList[newspaperName] = newspaperList[newspaperName] || [];
+
+    newspaperList[newspaperName].push(source);
+  });
+
+  for (let newspaperName in newspaperList) {
+    const rootSource = newspaperList[newspaperName][0];
+
+    rend(
+      '<p style="padding-top: 15px">' +
+        linkToSourceGroup(rootSource, newspaperName) +
+        '<br>' +
+        (rootSource.location.format ? rootSource.location.format + '<br>' : '') +
+        (newspaperList[newspaperName].length == 1 ? '1 article'
+          : newspaperList[newspaperName].length + 'articles') +
+      '</p>'
     );
   }
 }
