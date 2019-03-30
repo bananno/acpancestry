@@ -37,7 +37,7 @@ function viewSearch() {
     return source.type == 'document';
   });
   let newspaperList = sourceList.filter(source => {
-    return source.type == 'newspapers';
+    return source.type == 'newspaper';
   });
   let otherSourceList = sourceList.filter(source => {
     return source.type != 'document' && source.type != 'newspapers';
@@ -48,20 +48,25 @@ function viewSearch() {
 
   rend('<h2>Documents</h2>');
   documentList.forEach(source => {
-    rend('<p>' + linkToSource(source, source.title) + '</p>');
+    rend('<p style="padding: 5px;">' +
+      linkToSource(source, source.group + ' - ' + source.title) + '</p>');
   });
 
   rend('<h2>Newspapers</h2>');
   newspaperList.forEach(source => {
-    rend('<p>' + linkToSource(source, source.title) + '</p>');
+    rend('<p style="padding: 5px;">' + linkToSource(source, source.group + ' - ' +
+      source.title + ' - ' + source.date.format) + '</p>');
   });
 
   viewSearchCemeteries(keywords);
 
-  rend('<h2>Other</h2>');
-  otherSourceList.forEach(source => {
-    rend('<p>' + linkToSource(source, source.title) + '</p>');
-  });
+  if (otherSourceList) {
+    rend('<h2>Other</h2>');
+    otherSourceList.forEach(source => {
+      rend('<p style="padding: 5px;">' + linkToSource(source, source.group + ' - ' +
+        source.title) + '</p>');
+    });
+  }
 }
 
 function viewSearchCemeteries(keywords) {

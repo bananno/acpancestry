@@ -72,6 +72,9 @@ function getProcessedSource(source) {
 
   source.people = removeNullValues(source.people);
 
+  source.date = source.date || {};
+  source.date.format = formatDate(source.date);
+
   source.location = source.location || {};
   source.location.format = formatLocation(source.location);
 
