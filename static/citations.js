@@ -25,6 +25,8 @@ function $makeCitationList(citations) {
 
   $table.append('<tr><th colspan="2">item</th><th>information</th><th>source</th></tr>');
 
+  let [previousItem1, previousItem2] = [null, null];
+
   citations.forEach(citation => {
     let [item1, item2] = [citation.item, ''];
     let citationSourceText = citation.source.group + ' - ' + citation.source.title;
@@ -32,6 +34,18 @@ function $makeCitationList(citations) {
     if (item1.match(' - ')) {
       item2 = item1.slice(item1.indexOf(' - ') + 3);
       item1 = item1.slice(0, item1.indexOf(' - '));
+    }
+
+    if (item1 == previousItem1) {
+      item1 = '';
+      if (item2 == previousItem2) {
+        item2 = '';
+      } else {
+        previousItem2 = item2;
+      }
+    } else {
+      previousItem1 = item1;
+      previousItem2 = item2;
     }
 
     $table.append(
