@@ -36,26 +36,25 @@ function $makeCitationList(citations) {
       item1 = item1.slice(0, item1.indexOf(' - '));
     }
 
-    if (item1 == previousItem1) {
-      item1 = '';
-      if (item2 == previousItem2) {
-        item2 = '';
-      } else {
-        previousItem2 = item2;
-      }
-    } else {
-      previousItem1 = item1;
-      previousItem2 = item2;
-    }
+    const $row = $('<tr>').appendTo($table);
 
     $table.append(
       '<tr>' +
-        '<td>' + item1 + '</td>' +
-        '<td>' + item2 + '</td>' +
+        '<td class="repeat-' + (previousItem1 == item1) + '">' +
+          item1 +
+        '</td>' +
+        '<td class="repeat-' + (previousItem1 == item1 && previousItem2 == item2) + '">' +
+          item2 +
+        '</td>' +
         '<td>' + citation.information + '</td>' +
-        '<td>' + linkToSource(citation.source, citationSourceText) + '</td>' +
+        '<td>' +
+          linkToSource(citation.source, citationSourceText) +
+        '</td>' +
       '</tr>'
     );
+
+    previousItem1 = item1;
+    previousItem2 = item2;
   });
 
   return $table;

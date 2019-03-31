@@ -2,6 +2,12 @@
 
 .citation-list th {
   border: 2px solid #bbb;
+  font-weight: bold;
+}
+
+.citation-list th,
+.citation-list td {
+  padding: 5px 10px;
 }
 
 .citation-list tr td:first-child {
@@ -12,24 +18,15 @@
   border-right: 1px solid #bbb;
 }
 
-.citation-list th, .citation-list td {
-  padding: 5px 10px;
-}
-
 .citation-list tr:last-child td {
   border-bottom: 1px solid #bbb;
 }
 
-.citation-cell {
-  border-top: 1px solid #bbb;
-  border-bottom: 1px solid #bbb;
-}
-
-.citation-item {
+.citation-list td {
   border-top: 1px solid #bbb;
 }
 
-.citation-item-repeat {
+.citation-list td.repeat-true {
   color: transparent;
-  border-color: red;
+  border-color: transparent;
 }
