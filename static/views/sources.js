@@ -1,4 +1,42 @@
 
+const sourceCategories = [
+  ['all', 'View All'],
+  ['cemeteries', 'Cemeteries'],
+  ['newspapers', 'Newspapers'],
+  ['censusUSA', 'US Federal Census'],
+  ['censusState', 'US State Census'],
+  ['censusOther', 'Other Census'],
+  ['draft', 'WWI & WWII Draft'],
+  ['indexOnly', 'Index-only Records'],
+  ['other', 'Other Sources'],
+];
+
+function routeSources() {
+  if (PATH == 'sources') {
+    return viewSources();
+  }
+
+  if (PATH.match('source/')) {
+    return viewOneSource();
+  }
+
+  if (PATH.match('sourceGroup/')) {
+    return viewSourceGroup();
+  }
+
+  const sourceCategory = PATH.slice(8);
+
+  if (sourceCategory == 'cemeteries') {
+    return viewSourcesCemeteries();
+  }
+
+  if (sourceCategory == 'newspapers') {
+    return viewSourcesNewspapers();
+  }
+
+  rend('OTHER CATEGORY: ' + sourceCategory);
+}
+
 function viewSources() {
   setPageTitle('Sources');
   const $table = $('<table class="event-list" border="1">');
@@ -7,8 +45,9 @@ function viewSources() {
 
   rend(
     '<ul>' +
-      '<li>' + localLink('sources/cemeteries', 'Cemeteries') + '</li>' +
-      '<li>' + localLink('sources/newspapers', 'Newspapers') + '</li>' +
+      sourceCategories.map(([path, title]) => {
+        return ('<li>' + localLink('sources/' + path, title) + '</li>');
+      }).join('') +
     '</ul>'
   );
 

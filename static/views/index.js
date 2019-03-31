@@ -16,24 +16,8 @@ function loadContent() {
     return viewEvents();
   }
 
-  if (PATH == 'sources') {
-    return viewSources();
-  }
-
-  if (PATH.match('source/')) {
-    return viewOneSource();
-  }
-
-  if (PATH.match('sources/cemeteries')) {
-    return viewSourcesCemeteries();
-  }
-
-  if (PATH.match('sources/newspapers')) {
-    return viewSourcesNewspapers();
-  }
-
-  if (PATH.match('sourceGroup/')) {
-    return viewSourceGroup();
+  if (PATH.length > 5 && PATH.slice(0, 6) == 'source') {
+    return routeSources();
   }
 
   if (PATH.match('search')) {
