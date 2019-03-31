@@ -1,10 +1,15 @@
 
 function processDatabase() {
   DATABASE.personRef = {};
+  DATABASE.sourceRef = {};
 
   DATABASE.people.forEach(person => {
     DATABASE.personRef[person._id] = person;
     DATABASE.personRef[person.customId] = person;
+  });
+
+  DATABASE.sources.forEach(source => {
+    DATABASE.sourceRef[source._id] = source;
   });
 
   DATABASE.people = DATABASE.people.map(getProcessedPerson);
@@ -13,6 +18,8 @@ function processDatabase() {
   DATABASE.events = DATABASE.events.map(getProcessedEvent);
 
   DATABASE.sources = DATABASE.sources.map(getProcessedSource);
+
+  DATABASE.citations = DATABASE.citations.map(getProcessedCitation);
 }
 
 function getProcessedPerson(person) {
@@ -26,7 +33,7 @@ function getProcessedPerson(person) {
 
   person.siblings = [];
   person.links = person.links || [];
-
+  person.citations = [];
   person.profileImage = person.profileImage || 'public/images/generic-profile-picture.png';
 
   return person;
@@ -59,6 +66,8 @@ function getProcessedEvent(event) {
     return person;
   });
 
+  event.date = event.date || {};
+  event.date.format = formatDate(event.date);
   event.location = event.location || {};
   event.location.format = formatLocation(event.location);
 
@@ -74,11 +83,19 @@ function getProcessedSource(source) {
 
   source.date = source.date || {};
   source.date.format = formatDate(source.date);
-
   source.location = source.location || {};
   source.location.format = formatLocation(source.location);
+  source.citations = [];
 
   return source;
+}
+
+function getProcessedCitation(citation) {
+  citation.person = DATABASE.personRef[citation.person];
+  citation.source = DATABASE.sourceRef[citation.source];
+  citation.person.citations.push(citation);
+  citation.source.citations.push(citation);
+  return citation;
 }
 
 function removeNullValues(array) {
