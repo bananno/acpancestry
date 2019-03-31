@@ -1,6 +1,6 @@
 
 const sourceCategories = [
-  ['all', 'View All'],
+  ['all', 'View All Sources'],
   ['cemeteries', 'Cemeteries'],
   ['newspapers', 'Newspapers'],
   ['censusUSA', 'US Federal Census'],
@@ -13,7 +13,7 @@ const sourceCategories = [
 
 function routeSources() {
   if (PATH == 'sources') {
-    return viewSources();
+    return viewSourcesIndex();
   }
 
   if (PATH.match('source/')) {
@@ -37,6 +37,10 @@ function routeSources() {
   setPageTitle(categoryTitle);
   rend('<h1>' + categoryTitle + '</h1>');
 
+  if (categoryPath == 'all') {
+    return viewSourcesAll();
+  }
+
   if (categoryPath == 'cemeteries') {
     return viewSourcesCemeteries();
   }
@@ -48,12 +52,9 @@ function routeSources() {
   rend('OTHER CATEGORY: ' + categoryPath);
 }
 
-function viewSources() {
+function viewSourcesIndex() {
   setPageTitle('Sources');
-  const $table = $('<table class="event-list" border="1">');
-
-  rend('<h1>All Sources</h1>');
-
+  rend('<h1>Sources</h1>');
   rend(
     '<ul>' +
       sourceCategories.map(([path, title]) => {
@@ -61,6 +62,10 @@ function viewSources() {
       }).join('') +
     '</ul>'
   );
+}
+
+function viewSourcesAll() {
+  const $table = $('<table class="event-list" border="1">');
 
   rend($table);
 
