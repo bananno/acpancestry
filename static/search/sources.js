@@ -7,9 +7,11 @@ function viewSearchDocuments(keywords) {
   if (documentList.length) {
     rend('<h2>Documents</h2>');
     documentList.forEach(source => {
+      let linkText = source.group + ' - ' + source.title;
+      linkText = highlightKeywords(linkText, keywords);
       rend(
         '<p style="padding: 5px;" class="search-result-item">' +
-          linkToSource(source, source.group + ' - ' + source.title) +
+          linkToSource(source, linkText) +
         '</p>'
       );
     });
@@ -25,9 +27,11 @@ function viewSearchOtherSources(keywords) {
   if (otherSourceList.length) {
     rend('<h2>Other Sources</h2>');
     otherSourceList.forEach(source => {
+      let linkText = source.group + ' - ' + source.title;
+      linkText = highlightKeywords(linkText, keywords);
       rend(
         '<p style="padding: 5px;" class="search-result-item">' +
-          linkToSource(source, source.group + ' - ' + source.title) +
+          linkToSource(source, linkText) +
         '</p>'
       );
     });
