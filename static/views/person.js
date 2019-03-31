@@ -53,7 +53,7 @@ function viewPerson() {
 
   if (person.citations.length) {
     rend('<h2>Citations</h2>');
-    rend(citationList(person.citations));
+    rend($makeCitationList(person.citations));
   }
 }
 
