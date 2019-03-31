@@ -1,14 +1,45 @@
 
 const sourceCategories = [
-  ['all', 'View All Sources'],
-  ['cemeteries', 'Cemeteries'],
-  ['newspapers', 'Newspapers'],
-  ['censusUSA', 'US Federal Census'],
-  ['censusState', 'US State Census'],
-  ['censusOther', 'Other Census'],
-  ['draft', 'WWI & WWII Draft'],
-  ['indexOnly', 'Index-only Records'],
-  ['other', 'Other Sources'],
+  {
+    path: 'all',
+    title: 'All Sources',
+    pathText: 'View All',
+    route: viewSourcesAll,
+  },
+  {
+    path: 'cemeteries',
+    title: 'Cemeteries',
+    route: viewSourcesCemeteries,
+  },
+  {
+    path: 'newspapers',
+    title: 'Newspapers',
+    route: viewSourcesNewspapers,
+  },
+  {
+    path: 'censusUSA',
+    title: 'US Federal Census',
+  },
+  {
+    path: 'censusState',
+    title: 'US State Census',
+  },
+  {
+    path: 'censusOther',
+    title: 'Other Census',
+  },
+  {
+    path: 'draft',
+    title: 'WWI & WWII Draft',
+  },
+  {
+    path: 'indexOnly',
+    title: 'Index-only Records',
+  },
+  {
+    path: 'other',
+    title: 'Other Sources',
+  },
 ];
 
 function routeSources() {
@@ -26,30 +57,20 @@ function routeSources() {
 
   const categoryPath = PATH.slice(8);
 
-  const categoryTitle = sourceCategories.filter(([path, title]) => {
-    return path === categoryPath;
-  }).map(arr => arr[1])[0];
+  const category = sourceCategories.filter(category => {
+    return category.path === categoryPath;
+  })[0];
 
-  if (categoryTitle === undefined) {
+  if (category === undefined) {
     return pageNotFound();
   }
 
-  setPageTitle(categoryTitle);
-  rend('<h1>' + categoryTitle + '</h1>');
+  setPageTitle(category.title);
+  rend('<h1>' + category.title + '</h1>');
 
-  if (categoryPath == 'all') {
-    return viewSourcesAll();
+  if (category.route) {
+    return category.route();
   }
-
-  if (categoryPath == 'cemeteries') {
-    return viewSourcesCemeteries();
-  }
-
-  if (categoryPath == 'newspapers') {
-    return viewSourcesNewspapers();
-  }
-
-  rend('OTHER CATEGORY: ' + categoryPath);
 }
 
 function viewSourcesIndex() {
@@ -57,8 +78,10 @@ function viewSourcesIndex() {
   rend('<h1>Sources</h1>');
   rend(
     '<ul>' +
-      sourceCategories.map(([path, title]) => {
-        return ('<li>' + localLink('sources/' + path, title) + '</li>');
+      sourceCategories.map(category => {
+        return ('<li>' +
+          localLink('sources/' + category.path, category.pathText || category.title) +
+        '</li>');
       }).join('') +
     '</ul>'
   );
@@ -169,8 +192,9 @@ function viewSourcesCemeteries() {
         '<br>' +
         formatLocation(rootSource.location) +
         '<br>' +
-        cemeteryList[cemeteryName].length +
-      ' graves</p>'
+        (cemeteryList[cemeteryName].length == 1 ? '1 grave'
+          : cemeteryList[cemeteryName].length + ' graves') +
+      '</p>'
     );
   }
 }
