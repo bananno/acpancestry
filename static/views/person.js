@@ -50,6 +50,11 @@ function viewPerson() {
   person.links.forEach(nextLink => {
     rend(getFancyLink(nextLink));
   });
+
+  if (person.citations.length) {
+    rend('<h2>Citations</h2>');
+    rend(citationList(person.citations));
+  }
 }
 
 function personShowHeaderEvent(person, abbr, event) {

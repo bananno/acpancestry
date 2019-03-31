@@ -1,0 +1,35 @@
+/* CITATION LIST */
+
+.citation-list th {
+  border: 2px solid #bbb;
+}
+
+.citation-list tr td:first-child {
+  border-left: 1px solid #bbb;
+}
+
+.citation-list tr td:last-child {
+  border-right: 1px solid #bbb;
+}
+
+.citation-list th, .citation-list td {
+  padding: 5px 10px;
+}
+
+.citation-list tr:last-child td {
+  border-bottom: 1px solid #bbb;
+}
+
+.citation-cell {
+  border-top: 1px solid #bbb;
+  border-bottom: 1px solid #bbb;
+}
+
+.citation-item {
+  border-top: 1px solid #bbb;
+}
+
+.citation-item-repeat {
+  color: transparent;
+  border-color: red;
+}
