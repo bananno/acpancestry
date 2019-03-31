@@ -23,6 +23,8 @@ function loadContent() {
   if (PATH.match('search')) {
     return viewSearch();
   }
+
+  return pageNotFound();
 }
 
 function viewMain() {
@@ -34,4 +36,9 @@ function viewPeople() {
   setPageTitle('People');
   rend('<h1>All People</h1>');
   rend($makePeopleList(DATABASE.people, 'photo'));
+}
+
+function pageNotFound() {
+  setPageTitle('Page Not Found');
+  rend('<h1>Page Not Found</h1>');
 }

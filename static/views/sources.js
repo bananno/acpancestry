@@ -24,17 +24,28 @@ function routeSources() {
     return viewSourceGroup();
   }
 
-  const sourceCategory = PATH.slice(8);
+  const categoryPath = PATH.slice(8);
 
-  if (sourceCategory == 'cemeteries') {
+  const categoryTitle = sourceCategories.filter(([path, title]) => {
+    return path === categoryPath;
+  }).map(arr => arr[1])[0];
+
+  if (categoryTitle === undefined) {
+    return pageNotFound();
+  }
+
+  setPageTitle(categoryTitle);
+  rend('<h1>' + categoryTitle + '</h1>');
+
+  if (categoryPath == 'cemeteries') {
     return viewSourcesCemeteries();
   }
 
-  if (sourceCategory == 'newspapers') {
+  if (categoryPath == 'newspapers') {
     return viewSourcesNewspapers();
   }
 
-  rend('OTHER CATEGORY: ' + sourceCategory);
+  rend('OTHER CATEGORY: ' + categoryPath);
 }
 
 function viewSources() {
@@ -130,9 +141,6 @@ function viewSourceOther(source) {
 }
 
 function viewSourcesCemeteries() {
-  setPageTitle('Cemeteries');
-  rend('<h1>Cemeteries</h1>');
-
   const cemeteryList = [];
 
   DATABASE.sources.forEach(source => {
@@ -163,9 +171,6 @@ function viewSourcesCemeteries() {
 }
 
 function viewSourcesNewspapers() {
-  setPageTitle('Newspapers');
-  rend('<h1>Newspapers</h1>');
-
   const newspaperList = [];
 
   DATABASE.sources.forEach(source => {
