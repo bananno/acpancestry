@@ -150,7 +150,7 @@ function viewSourcesNewspapers() {
         '<br>' +
         (rootSource.location.format ? rootSource.location.format + '<br>' : '') +
         (newspaperList[newspaperName].length == 1 ? '1 article'
-          : newspaperList[newspaperName].length + 'articles') +
+          : newspaperList[newspaperName].length + ' articles') +
       '</p>'
     );
   }
