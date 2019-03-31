@@ -191,3 +191,8 @@ table.event-list th {
   padding: 2px;
   font-size: 12px;
 }
+
+.highlight-search-result {
+  font-weight: bold;
+  text-decoration: underline;
+}

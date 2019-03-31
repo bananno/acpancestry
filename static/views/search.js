@@ -11,26 +11,18 @@ function viewSearch() {
   }
 
   rend('<h1>Search Results for "' + keywords.join(' ') + '"</h1>');
+  rend('<p style="padding-top:10px;" id="number-of-search-results"></p>');
 
-  let peopleList = DATABASE.people.filter(person => {
-    for (let i = 0; i < keywords.length; i++) {
-      if (person.name.toLowerCase().match(keywords[i]) == null) {
-        return false;
-      }
-    }
-    return true;
+  const peopleList = DATABASE.people.filter(person => {
+    return doesStrMatchKeywords(person.name, keywords);
   });
 
   let sourceList = DATABASE.sources.filter(source => {
-    if (source.type == 'grave') {
+    if (source.type == 'grave' && source.type != 'newspaper') {
       return false;
     }
-    for (let i = 0; i < keywords.length; i++) {
-      if (source.title.toLowerCase().match(keywords[i]) == null) {
-        return false;
-      }
-    }
-    return true;
+
+    return doesStrMatchKeywords(source.title, keywords);
   });
 
   const documentList = sourceList.filter(source => {
@@ -41,6 +33,8 @@ function viewSearch() {
     return source.type != 'document' && source.type != 'newspaper'
       && source.type != 'grave';
   });
+
+  let totalResults = peopleList.length + documentList.length + otherSourceList.length;
 
   if (peopleList.length) {
     rend('<h2>People</h2>');
@@ -55,8 +49,8 @@ function viewSearch() {
     });
   }
 
-  viewSearchCemeteriesOrNewspapers('Newspapers', 'newspaper', keywords, 'article');
-  viewSearchCemeteriesOrNewspapers('Cemeteries', 'grave', keywords, 'grave');
+  totalResults += viewSearchCemeteriesOrNewspapers('Newspapers', 'newspaper', keywords, 'article');
+  totalResults += viewSearchCemeteriesOrNewspapers('Cemeteries', 'grave', keywords, 'grave');
 
   if (otherSourceList.length) {
     rend('<h2>Other</h2>');
@@ -65,6 +59,13 @@ function viewSearch() {
         source.title) + '</p>');
     });
   }
+
+  viewSearchEvents(keywords);
+
+  totalResults += $('.search-result-item').length;
+
+  $('#number-of-search-results').append(totalResults == 1 ? '1 result' : totalResults +
+    ' results');
 }
 
 function viewSearchCemeteriesOrNewspapers(title, sourceType, keywords, entryName) {
@@ -86,7 +87,7 @@ function viewSearchCemeteriesOrNewspapers(title, sourceType, keywords, entryName
   });
 
   if (groupList.length == 0) {
-    return;
+    return 0;
   }
 
   rend('<h2>' + title + '</h2>');
@@ -103,6 +104,44 @@ function viewSearchCemeteriesOrNewspapers(title, sourceType, keywords, entryName
       '</p>'
     );
   });
+
+  return groupList.length;
+}
+
+function viewSearchEvents(keywords) {
+  const eventsList = DATABASE.events.filter(event => {
+    let searchItems = [event.title, event.location.format, event.notes];
+
+     event.people.forEach(person => {
+      searchItems.push(person.name);
+     });
+
+    return doesStrMatchKeywords(searchItems.join(' '), keywords);
+  });
+
+  if (eventsList.length) {
+    rend('<h2>Events</h2>');
+  }
+
+  eventsList.forEach(event => {
+    const people = event.people.map(person => person.name);
+
+    rend(
+      '<p class="search-result-item" style="padding-top: 10px">' +
+        highlightKeywords(event.title, keywords) +
+      '</p>' +
+      '<p style="padding-top: 2px">' +
+        highlightKeywords(people.join(', '), keywords) +
+      '</p>' +
+      (event.notes && event.notes.length ?
+      '<p style="padding-top: 2px">' +
+        highlightKeywords(event.notes, keywords) +
+      '</p>' : '') +
+      '<p style="padding-top: 2px">' +
+        highlightKeywords([event.location.format, event.date.format].join(' '), keywords) +
+      '</p>'
+    );
+  });
 }
 
 function doesStrMatchKeywords(str, keywords) {
@@ -115,4 +154,35 @@ function doesStrMatchKeywords(str, keywords) {
   }
 
   return true;
+}
+
+function highlightKeywords(str, keywords, i) {
+  if (str.length == 0) {
+    return str;
+  }
+
+  if (i == null) {
+    keywords = keywords.sort((a, b) => {
+      return b.length - a.length;
+    });
+    i = 0;
+  }
+
+  if (i >= keywords.length) {
+    return str;
+  }
+
+  let p1 = str.toLowerCase().indexOf(keywords[i]);
+
+  if (p1 == -1) {
+    return highlightKeywords(str, keywords, i + 1);
+  }
+
+  let p2 = p1 + keywords[i].length;
+
+  return highlightKeywords(str.slice(0, p1), keywords, i + 1) +
+    '<span class="highlight-search-result">' + str.slice(p1, p2) + '</span>' +
+    highlightKeywords(str.slice(p2), keywords, i);
+
+  return str;
 }
