@@ -33,34 +33,32 @@ function viewSearch() {
     return true;
   });
 
-  let documentList = sourceList.filter(source => {
+  const documentList = sourceList.filter(source => {
     return source.type == 'document';
   });
-  let newspaperList = sourceList.filter(source => {
-    return source.type == 'newspaper';
-  });
-  let otherSourceList = sourceList.filter(source => {
-    return source.type != 'document' && source.type != 'newspapers';
-  });
 
-  rend('<h2>People</h2>');
-  rend($makePeopleList(peopleList, 'photo'));
-
-  rend('<h2>Documents</h2>');
-  documentList.forEach(source => {
-    rend('<p style="padding: 5px;">' +
-      linkToSource(source, source.group + ' - ' + source.title) + '</p>');
+  const otherSourceList = sourceList.filter(source => {
+    return source.type != 'document' && source.type != 'newspaper'
+      && source.type != 'grave';
   });
 
-  rend('<h2>Newspapers</h2>');
-  newspaperList.forEach(source => {
-    rend('<p style="padding: 5px;">' + linkToSource(source, source.group + ' - ' +
-      source.title + ' - ' + source.date.format) + '</p>');
-  });
+  if (peopleList.length) {
+    rend('<h2>People</h2>');
+    rend($makePeopleList(peopleList, 'photo'));
+  }
 
-  viewSearchCemeteries(keywords);
+  if (documentList.length) {
+    rend('<h2>Documents</h2>');
+    documentList.forEach(source => {
+      rend('<p style="padding: 5px;">' +
+        linkToSource(source, source.group + ' - ' + source.title) + '</p>');
+    });
+  }
 
-  if (otherSourceList) {
+  viewSearchCemeteriesOrNewspapers('Newspapers', 'newspaper', keywords, 'article');
+  viewSearchCemeteriesOrNewspapers('Cemeteries', 'grave', keywords, 'grave');
+
+  if (otherSourceList.length) {
     rend('<h2>Other</h2>');
     otherSourceList.forEach(source => {
       rend('<p style="padding: 5px;">' + linkToSource(source, source.group + ' - ' +
@@ -69,12 +67,12 @@ function viewSearch() {
   }
 }
 
-function viewSearchCemeteries(keywords) {
-  const cemeteryList = [];
+function viewSearchCemeteriesOrNewspapers(title, sourceType, keywords, entryName) {
+  const groupList = [];
   const countEntries = {};
 
   DATABASE.sources.forEach(source => {
-    if (source.type != 'grave' || !doesStrMatchKeywords(source.group, keywords)) {
+    if (source.type != sourceType || !doesStrMatchKeywords(source.group, keywords)) {
       return;
     }
 
@@ -84,23 +82,24 @@ function viewSearchCemeteries(keywords) {
     }
 
     countEntries[source.group] = 1;
-    cemeteryList.push(source);
+    groupList.push(source);
   });
 
-  if (cemeteryList.length == 0) {
+  if (groupList.length == 0) {
     return;
   }
 
-  rend('<h2>Cemeteries</h2>');
+  rend('<h2>' + title + '</h2>');
 
-  cemeteryList.forEach(source => {
+  groupList.forEach(source => {
     rend(
       '<p style="padding: 5px 10px">' +
         linkToSourceGroup(source, source.group) +
         '<br>' +
         formatLocation(source.location) +
         '<br>' +
-        (countEntries[source.group] == 1 ? '1 grave' : countEntries[source.group] + ' graves') +
+        countEntries[source.group] + ' ' + entryName +
+        (countEntries[source.group] == 1 ? '' : 's') +
       '</p>'
     );
   });
