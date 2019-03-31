@@ -34,35 +34,39 @@ function viewSearch() {
       && source.type != 'grave';
   });
 
-  let totalResults = peopleList.length + documentList.length + otherSourceList.length;
-
   if (peopleList.length) {
     rend('<h2>People</h2>');
-    rend($makePeopleList(peopleList, 'photo'));
+    rend($makePeopleList(peopleList, 'photo', keywords));
   }
 
   if (documentList.length) {
     rend('<h2>Documents</h2>');
     documentList.forEach(source => {
-      rend('<p style="padding: 5px;">' +
-        linkToSource(source, source.group + ' - ' + source.title) + '</p>');
+      rend(
+        '<p style="padding: 5px;" class="search-result-item">' +
+          linkToSource(source, source.group + ' - ' + source.title) +
+        '</p>'
+      );
     });
   }
 
-  totalResults += viewSearchCemeteriesOrNewspapers('Newspapers', 'newspaper', keywords, 'article');
-  totalResults += viewSearchCemeteriesOrNewspapers('Cemeteries', 'grave', keywords, 'grave');
+  viewSearchCemeteriesOrNewspapers('Newspapers', 'newspaper', keywords, 'article');
+  viewSearchCemeteriesOrNewspapers('Cemeteries', 'grave', keywords, 'grave');
 
   if (otherSourceList.length) {
-    rend('<h2>Other</h2>');
+    rend('<h2>Other Sources</h2>');
     otherSourceList.forEach(source => {
-      rend('<p style="padding: 5px;">' + linkToSource(source, source.group + ' - ' +
-        source.title) + '</p>');
+      rend(
+        '<p style="padding: 5px;" class="search-result-item">' +
+          linkToSource(source, source.group + ' - ' + source.title) +
+        '</p>'
+      );
     });
   }
 
   viewSearchEvents(keywords);
 
-  totalResults += $('.search-result-item').length;
+  const totalResults = $('.search-result-item').length;
 
   $('#number-of-search-results').append(totalResults == 1 ? '1 result' : totalResults +
     ' results');
@@ -94,7 +98,7 @@ function viewSearchCemeteriesOrNewspapers(title, sourceType, keywords, entryName
 
   groupList.forEach(source => {
     rend(
-      '<p style="padding: 5px 10px">' +
+      '<p style="padding: 5px 10px" class="search-result-item">' +
         linkToSourceGroup(source, source.group) +
         '<br>' +
         formatLocation(source.location) +
@@ -104,8 +108,6 @@ function viewSearchCemeteriesOrNewspapers(title, sourceType, keywords, entryName
       '</p>'
     );
   });
-
-  return groupList.length;
 }
 
 function viewSearchEvents(keywords) {
@@ -124,22 +126,31 @@ function viewSearchEvents(keywords) {
   }
 
   eventsList.forEach(event => {
-    const people = event.people.map(person => person.name);
+    let people = event.people.map(person => highlightKeywords(person.name, keywords));
+
+    let line1 = highlightKeywords(event.title, keywords);
+    let lines = [];
+
+    if (['birth', 'death', 'marriage'].indexOf(event.title) >= 0) {
+      line1 += ' - ' + people.join(' & ');
+    } else {
+      lines.push(people.join(', '));
+    }
+
+    lines.push(highlightKeywords(event.location.format, keywords));
+    lines.push(highlightKeywords(event.date.format, keywords));
+    lines.push(highlightKeywords(event.notes, keywords));
 
     rend(
-      '<p class="search-result-item" style="padding-top: 10px">' +
-        highlightKeywords(event.title, keywords) +
-      '</p>' +
-      '<p style="padding-top: 2px">' +
-        highlightKeywords(people.join(', '), keywords) +
-      '</p>' +
-      (event.notes && event.notes.length ?
-      '<p style="padding-top: 2px">' +
-        highlightKeywords(event.notes, keywords) +
-      '</p>' : '') +
-      '<p style="padding-top: 2px">' +
-        highlightKeywords([event.location.format, event.date.format].join(' '), keywords) +
-      '</p>'
+      '<p class="search-result-item" style="padding-top: 10px">' + line1 + '</p>' +
+      lines.map(str => {
+        if (str == null || str == '') {
+          return '';
+        }
+        return (
+          '<p style="padding-top: 2px">' + str + '</p>'
+        );
+      }).join('')
     );
   });
 }
@@ -157,7 +168,7 @@ function doesStrMatchKeywords(str, keywords) {
 }
 
 function highlightKeywords(str, keywords, i) {
-  if (str.length == 0) {
+  if (str == null || str.length == 0) {
     return str;
   }
 

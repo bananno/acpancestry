@@ -26,14 +26,17 @@ function rend(content) {
   $('#page-content').append(content);
 }
 
-function $makePeopleList(people, format) {
+function $makePeopleList(people, format, keywords) {
   if (format == 'photo') {
     const $list = $('<div class="people-list">');
 
     people.forEach(person => {
       const $item = $('<div>').appendTo($list);
+      if (keywords) {
+        $item.addClass('search-result-item');
+      }
       $item.append(linkToPerson(person, '<img src="' + person.profileImage + '">'));
-      $item.append(linkToPerson(person));
+      $item.append(linkToPerson(person, null, keywords));
     });
 
     return $list;
@@ -43,7 +46,7 @@ function $makePeopleList(people, format) {
 
   people.forEach(person => {
     const $item = $('<li>').appendTo($list);
-    $item.append(linkToPerson(person));
+    $item.append(linkToPerson(person, null, keywords));
   });
 
   return $list;
@@ -53,8 +56,11 @@ function localLink(target, text) {
   return '<a href="' + ORIGIN + '?' + target + '">' + text + '</a>';
 }
 
-function linkToPerson(person, text) {
+function linkToPerson(person, text, keywords) {
   text = text || fixSpecialCharacters(person.name);
+  if (keywords) {
+    text = highlightKeywords(text, keywords);
+  }
   return localLink('person/' + person.customId, text);
 }
 
