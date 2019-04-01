@@ -238,11 +238,15 @@ function viewSourcesCensusUSA() {
       return source.group == ('Census USA ' + year);
     });
 
-    if (list.length == 0) {
-      continue;
+    if (year == 1890) {
+      rend('<h2>1890</h2>');
+      rend('<p>Most of the 1890 census was destroyed in a 1921 fire.</p>');
+    } else {
+      if (list.length == 0) {
+        continue;
+      }
+      rend('<h2>' + year + '</h2>');
     }
-
-    rend('<h2>' + year + '</h2>');
 
     list.forEach((source, i) => {
       rend(
