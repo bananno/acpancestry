@@ -240,7 +240,11 @@ function viewSourcesCensusUSA() {
 
     if (year == 1890) {
       rend('<h2>1890</h2>');
-      rend('<p>Most of the 1890 census was destroyed in a 1921 fire.</p>');
+      rend(
+        '<p style="padding-left: 10px;">' +
+          'Most of the 1890 census was destroyed in a 1921 fire.' +
+        '</p>'
+      );
     } else {
       if (list.length == 0) {
         continue;
@@ -250,10 +254,10 @@ function viewSourcesCensusUSA() {
 
     list.forEach((source, i) => {
       rend(
-        '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px">' +
+        '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
           linkToSourceGroup(source, source.title) +
         '</p>' +
-        '<p style="padding-top: 2px">' +
+        '<p style="padding-top: 2px; padding-left: 10px;">' +
           source.location.format +
         '</p>'
       );
