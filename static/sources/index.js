@@ -19,6 +19,7 @@ const sourceCategories = [
   {
     path: 'censusUSA',
     title: 'US Federal Census',
+    route: viewSourcesCensusUSA,
   },
   {
     path: 'censusState',
@@ -226,5 +227,32 @@ function viewSourcesNewspapers() {
           : newspaperList[newspaperName].length + ' articles') +
       '</p>'
     );
+  }
+}
+
+function viewSourcesCensusUSA() {
+  const groupList = [];
+
+  for (let year = 1790; year <= 1950; year += 10) {
+    const list = DATABASE.sources.filter(source => {
+      return source.group == ('Census USA ' + year);
+    });
+
+    if (list.length == 0) {
+      continue;
+    }
+
+    rend('<h2>' + year + '</h2>');
+
+    list.forEach((source, i) => {
+      rend(
+        '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px">' +
+          linkToSourceGroup(source, source.title) +
+        '</p>' +
+        '<p style="padding-top: 2px">' +
+          source.location.format +
+        '</p>'
+      );
+    });
   }
 }
