@@ -76,7 +76,13 @@ function personShowHeaderEvent(person, abbr, event) {
 }
 
 function personTree(person, safety) {
-  safety = safety || 0;
+  let treeStyle = '';
+
+  if (safety == undefined) {
+    safety = 0;
+  } else {
+    treeStyle = ' style="min-width: 100%;"';
+  }
 
   if (safety > 20) {
     console.log('Tree safety exceeded');
@@ -88,7 +94,7 @@ function personTree(person, safety) {
   }
 
   return (
-    '<table>' +
+    '<table' + treeStyle + '>' +
       '<tr>' +
         '<td valign="bottom">' +
           personTree(person.parents[0], safety + 1) +
