@@ -19,10 +19,11 @@ function getPathPlaces() {
   }
 
   let places = PATH.replace('places/', '').split('/').map(place => {
+    let placeFix = place.replace(/\%20/g, ' ').replace(/\+/g, ' ');
     return {
       path: place,
-      true: place.replace(/\+/g, ' '),
-      text: place.replace(/\+/g, ' '),
+      true: placeFix,
+      text: placeFix,
     };
   });
 
