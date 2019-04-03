@@ -193,13 +193,26 @@ function getFancyLink(link) {
 }
 
 function formatTranscription(content) {
-  const $div = $('<div class="transcription">');
+  const $mainDiv = $('<div>');
 
   content = (content || '').split('\n');
 
   let wasTable = false;
+  let $div = $('<div class="transcription">').appendTo($mainDiv);
 
   content.forEach(str => {
+    if (str.slice(0, 7) == '[below:') {
+      str = str.replace('[below: ', '');
+      str = str.replace(']', ':');
+      $mainDiv.append('<p style="padding: 5px;">' + str + '</p>');
+      wasTable = false;
+      if ($div.html() == '') {
+        $div.remove();
+      }
+      $div = $('<div class="transcription">').appendTo($mainDiv);
+      return;
+    }
+
     if (str.slice(0, 1) == '|') {
       if (!wasTable) {
         $div.append('<table>');
@@ -217,5 +230,5 @@ function formatTranscription(content) {
     $div.append('<p>' + str + '</p>');
   });
 
-  return $div;
+  return $mainDiv;
 }
