@@ -6,15 +6,30 @@ function viewPlaces() {
     return viewPlacesIndex();
   }
 
-  rend('<p>' + localLink('places', 'Places') + '</p>');
+  if (places[0] == 'USA') {
+    places[0] = 'United States';
+  }
+
+  if (places.length == 1) {
+    setPageTitle(places[0]);
+    rend('<p class="header-trail">' + localLink('places', 'Places') + '</p>');
+    rend('<h1>' + places[0] + '</h1>');
+    return viewPlacesByCountry(places[0]);
+  }
+
+  if (places.length == 2) {
+    rend(
+      '<p class="header-trail">' +
+        localLink('places', 'Places') +
+        ' &#8594; ' +
+        localLink('places/' + places[0], places[0]) +
+      '</p>'
+    );
+  }
 
   places.forEach(place => {
     rend('<p>' + place  + '</p>');
   });
-
-  if (places.length == 1) {
-    viewPlacesByCountry(places[0]);
-  }
 }
 
 function getPlacesList() {
@@ -74,13 +89,6 @@ function viewPlacesIndex() {
 }
 
 function viewPlacesByCountry(country) {
-  if (country == 'USA') {
-    country = 'United States';
-  }
-
-  setPageTitle(country);
-  rend('<h1>' + country + '</h1>');
-
   const region1List = [];
   const listByRegion = {};
   listByRegion['Not Specified'] = [];
