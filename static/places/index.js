@@ -1,6 +1,6 @@
 
 function viewPlaces() {
-  const places = getPlacesList();
+  const places = getPathPlaces();
 
   if (places.length == 0) {
     return viewPlacesIndex();
@@ -27,25 +27,7 @@ function viewPlaces() {
   rend('<h1>Place not found</h1>');
 }
 
-function showPageTitleAndHeader(places) {
-  let mostSpecificPlace = places[places.length - 1].text;
-
-  setPageTitle(mostSpecificPlace);
-
-  let tempPath = 'places';
-  let links = [localLink('places', 'Places')];
-
-  for (let i = 0; i < places.length - 1; i++) {
-    tempPath += '/' + places[i].path;
-    links.push(localLink(tempPath, places[i].text));
-  }
-
-  rend('<p class="header-trail">' + links.join(' &#8594; ') + '</p>');
-
-  rend('<h1>' + mostSpecificPlace + '</h1>');
-}
-
-function getPlacesList() {
+function getPathPlaces() {
   if (PATH == 'places') {
     return [];
   }
@@ -75,6 +57,24 @@ function getPlacesList() {
   }
 
   return places;
+}
+
+function showPageTitleAndHeader(places) {
+  let mostSpecificPlace = places[places.length - 1].text;
+
+  setPageTitle(mostSpecificPlace);
+
+  let tempPath = 'places';
+  let links = [localLink('places', 'Places')];
+
+  for (let i = 0; i < places.length - 1; i++) {
+    tempPath += '/' + places[i].path;
+    links.push(localLink(tempPath, places[i].text));
+  }
+
+  rend('<p class="header-trail">' + links.join(' &#8594; ') + '</p>');
+
+  rend('<h1>' + mostSpecificPlace + '</h1>');
 }
 
 function viewPlacesIndex() {
