@@ -1,5 +1,27 @@
 
 function viewPlaces() {
+  const places = getPlacesList();
+
+  if (places.length == 0) {
+    return viewPlacesIndex();
+  }
+
+  rend('<p>' + localLink('places', 'Places') + '</p>');
+
+  places.forEach(place => {
+    rend('<p>' + place  + '</p>');
+  });
+}
+
+function getPlacesList() {
+  if (PATH == 'places') {
+    return [];
+  }
+
+  return PATH.replace('places/', '').replace(/\+/g, ' ').split('/');
+}
+
+function viewPlacesIndex() {
   setPageTitle('Places');
   rend('<h1>Places</h1>');
 
@@ -23,6 +45,12 @@ function viewPlaces() {
   });
 
   countryList.forEach(country => {
-    rend('<p>' + country + ' (' + listByCountry[country].length + ')</p>');
+    let path = country.replace(/ /g, '+');
+    rend(
+      '<p>' +
+        localLink('places/' + path, country) +
+        ' (' + listByCountry[country].length + ')' +
+      '</p>'
+    );
   });
 }
