@@ -24,6 +24,10 @@ function loadContent() {
     return viewSearch();
   }
 
+  if (PATH.match('place')) {
+    return viewPlaces();
+  }
+
   return pageNotFound();
 }
 
