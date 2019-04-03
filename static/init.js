@@ -22,8 +22,10 @@ function getFilePaths() {
 function createHeaderLinks() {
   $('#page-header h1').append('<a href="' + ORIGIN + '">Lundberg Ancestry</a>');
   const $list = $('#main-navigation ul');
+
   $list.append('<li><a href="' + ORIGIN + '">Home</a></li>');
-  $list.append('<li><a href="' + ORIGIN + '?people">People</a></li>');
-  $list.append('<li><a href="' + ORIGIN + '?events">Events</a></li>');
-  $list.append('<li><a href="' + ORIGIN + '?sources">Sources</a></li>');
+
+  ['People', 'Events', 'Sources', 'Places'].forEach(nav => {
+    $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');
+  });
 }
