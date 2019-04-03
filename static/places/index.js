@@ -1,35 +1,16 @@
 
 function viewPlaces() {
-  const places = getPathPlaces();
+  const placePath = getPathPlaces();
 
-  const [placeList, items] = getItemsByPlace(places);
+  const [placeList, items] = getItemsByPlace(placePath);
 
-  console.log(placeList);
-  console.log(items);
+  showPageTitleAndHeader(placePath);
 
-  if (places.length == 0) {
-    return viewPlacesIndex();
+  if (placePath.length == 4) {
+    viewPlacesItemList(items);
+  } else {
+    viewPlacesIndex(placePath, placeList);
   }
-
-  showPageTitleAndHeader(places);
-
-  if (places.length == 1) {
-    return viewPlacesByCountry(places[0].true);
-  }
-
-  if (places.length == 2) {
-    return;
-  }
-
-  if (places.length == 3) {
-    return;
-  }
-
-  if (places.length == 4) {
-    return;
-  }
-
-  rend('<h1>Place not found</h1>');
 }
 
 function getPathPlaces() {
@@ -64,24 +45,24 @@ function getPathPlaces() {
   return places;
 }
 
-function getItemsByPlace(places) {
+function getItemsByPlace(placePath) {
   const placeLevels = ['country', 'region1', 'region2', 'city'];
   const placeList = [];
   const foundPlaceAlready = [];
-  const mostSpecificLevel = placeLevels[places.length];
+  const mostSpecificLevel = placeLevels[placePath.length];
 
   const items = [...DATABASE.events, ...DATABASE.sources].filter((item, t) => {
-    for (let i = 0; i < places.length; i++) {
-      if (item.location[placeLevels[i]] != places[i].true) {
+    for (let i = 0; i < placePath.length; i++) {
+      if (item.location[placeLevels[i]] != placePath[i].true) {
         return false;
       }
     }
 
-    if (!mostSpecificLevel) {
+    if (placePath.length == 4) {
       return true;
     }
 
-    const itemPlace = item.location[mostSpecificLevel] || 'Not specified';
+    const itemPlace = item.location[mostSpecificLevel];
 
     if (!foundPlaceAlready[itemPlace]) {
       placeList.push(itemPlace);
@@ -94,17 +75,23 @@ function getItemsByPlace(places) {
   return [placeList, items];
 }
 
-function showPageTitleAndHeader(places) {
-  let mostSpecificPlace = places[places.length - 1].text;
+function showPageTitleAndHeader(placePath) {
+  if (placePath.length == 0) {
+    setPageTitle('Places');
+    rend('<h1>Places</h1>');
+    return;
+  }
+
+  let mostSpecificPlace = placePath[placePath.length - 1].text;
 
   setPageTitle(mostSpecificPlace);
 
   let tempPath = 'places';
   let links = [localLink('places', 'Places')];
 
-  for (let i = 0; i < places.length - 1; i++) {
-    tempPath += '/' + places[i].path;
-    links.push(localLink(tempPath, places[i].text));
+  for (let i = 0; i < placePath.length - 1; i++) {
+    tempPath += '/' + placePath[i].path;
+    links.push(localLink(tempPath, placePath[i].text));
   }
 
   rend('<p class="header-trail">' + links.join(' &#8594; ') + '</p>');
@@ -112,99 +99,15 @@ function showPageTitleAndHeader(places) {
   rend('<h1>' + mostSpecificPlace + '</h1>');
 }
 
-function viewPlacesIndex() {
-  setPageTitle('Places');
-  rend('<h1>Places</h1>');
-
-  const countryList = [];
-  const listByCountry = {};
-  listByCountry['none'] = [];
-
-  [...DATABASE.events, ...DATABASE.sources].forEach(item => {
-    let country = item.location.country;
-
-    if (country) {
-      if (!listByCountry[country]) {
-        countryList.push(country);
-        listByCountry[country] = [];
-      }
-    } else {
-      country = 'none';
-    }
-
-    listByCountry[country].push(item);
-  });
-
-  countryList.sort((a, b) => {
-    let diff = listByCountry[b].length - listByCountry[a].length;
-    return diff == 0 ? (a < b ? -1 : 1) : diff;
-  });
-
-  [...countryList, 'none'].forEach(country => {
-    let [linkPath, linkText] = [country, country];
-
-    if (country == 'United States') {
-      linkPath = 'USA';
-    } else if (country == 'none') {
-      linkText = 'Country not specified';
-    }
-
-    linkPath = linkPath.replace(/ /g, '+');
-
-    rend(
-      '<p>' +
-        localLink('places/' + linkPath, linkText) +
-        ' (' + listByCountry[country].length + ')' +
-      '</p>'
-    );
+function viewPlacesIndex(placePath, placeList) {
+  let path = 'places/';
+  placeList.forEach(place => {
+    rend('<p>' + localLink(path + place, place) + '</p>');
   });
 }
 
-function viewPlacesByCountry(country) {
-  const region1List = [];
-  const listByRegion = {};
-  listByRegion['Not Specified'] = [];
-
-  [...DATABASE.events, ...DATABASE.sources].forEach(item => {
-    if (item.location.country != country) {
-      return;
-    }
-
-    let region = item.location.region1;
-
-    if (region) {
-      if (!listByRegion[region]) {
-        region1List.push(region);
-        listByRegion[region] = [];
-      }
-    } else {
-      region = 'Not Specified';
-    }
-
-    listByRegion[region].push(item);
-  });
-
-  region1List.sort((a, b) => {
-    return a < b ? -1 : 1;
-  });
-
-  [...region1List, 'Not Specified'].forEach(region => {
-    let regionPath = region;
-    let regionText = region;
-
-    if (regionPath == 'Not Specified') {
-      regionPath = 'State not specified';
-    } if (country == 'United States') {
-      regionText = USA_STATES[regionPath || ''] || regionPath;
-    }
-
-    let path = (country + '/' + regionPath).replace(/ /g, '+');
-
-    rend(
-      '<p>' +
-        localLink('places/' + path, regionText) +
-        ' (' + listByRegion[region].length + ')' +
-      '</p>'
-    );
+function viewPlacesItemList(items) {
+  items.forEach(item => {
+    rend('<p>' + item.title + '</p>');
   });
 }
