@@ -32,15 +32,15 @@ function showPageTitleAndHeader(places) {
 
   setPageTitle(mostSpecificPlace);
 
-  let headerTrail = '<p class="header-trail">' + localLink('places', 'Places');
   let tempPath = 'places';
+  let links = [localLink('places', 'Places')];
 
   for (let i = 0; i < places.length - 1; i++) {
     tempPath += '/' + places[i].path;
-    headerTrail += ' &#8594; ' + localLink(tempPath, places[i].text);
+    links.push(localLink(tempPath, places[i].text));
   }
 
-  rend(headerTrail + '</p>');
+  rend('<p class="header-trail">' + links.join(' &#8594; ') + '</p>');
 
   rend('<h1>' + mostSpecificPlace + '</h1>');
 }
