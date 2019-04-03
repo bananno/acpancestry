@@ -2,34 +2,63 @@
 function viewPlaces() {
   const places = getPlacesList();
 
+  console.log(places);
+
   if (places.length == 0) {
     return viewPlacesIndex();
   }
 
-  if (places[0] == 'USA') {
-    places[0] = 'United States';
-  }
-
   if (places.length == 1) {
-    setPageTitle(places[0]);
+    setPageTitle(places[0].text);
     rend('<p class="header-trail">' + localLink('places', 'Places') + '</p>');
-    rend('<h1>' + places[0] + '</h1>');
-    return viewPlacesByCountry(places[0]);
+    rend('<h1>' + places[0].text + '</h1>');
+    return viewPlacesByCountry(places[0].true);
   }
 
   if (places.length == 2) {
+    setPageTitle(places[1].text);
     rend(
       '<p class="header-trail">' +
         localLink('places', 'Places') +
         ' &#8594; ' +
-        localLink('places/' + places[0], places[0]) +
+        localLink('places/' + places[0].path, places[0].text) +
       '</p>'
     );
+    rend('<h1>' + places[1].text + '</h1>')
+    return;
   }
 
-  places.forEach(place => {
-    rend('<p>' + place  + '</p>');
-  });
+  if (places.length == 3) {
+    setPageTitle(places[2].text);
+    rend(
+      '<p class="header-trail">' +
+        localLink('places', 'Places') +
+        ' &#8594; ' +
+        localLink('places/' + places[0].path, places[0].text) +
+        ' &#8594; ' +
+        localLink('places/' + places[1].path, places[1].text) +
+      '</p>'
+    );
+    rend('<h1>' + places[2].text + '</h1>')
+    return;
+  }
+
+  if (places.length == 4) {
+    setPageTitle(places[3].text);
+    rend(
+      '<p class="header-trail">' +
+        localLink('places', 'Places') +
+        ' &#8594; ' +
+        localLink('places/' + places[0].path, places[0].text) +
+        ' &#8594; ' +
+        localLink('places/' + places[1].path, places[1].text) +
+      '</p>'
+    );
+    rend('<h1>' + places[3].text + '</h1>')
+    return;
+  }
+
+  rend('<h1>Place not found</h1>');
 }
 
 function getPlacesList() {
@@ -37,7 +66,31 @@ function getPlacesList() {
     return [];
   }
 
-  return PATH.replace('places/', '').replace(/\+/g, ' ').split('/');
+  let places = PATH.replace('places/', '').split('/').map(place => {
+    return {
+      path: place,
+      true: place.replace(/\+/g, ' '),
+      text: place.replace(/\+/g, ' '),
+    };
+  });
+
+  if (places.length == 0) {
+    return [];
+  }
+
+  if (places[0].text == 'United States' || places[0].text == 'USA') {
+    places[0].path = 'USA';
+    places[0].text = 'United States';
+    places[0].true = 'United States';
+
+    if (places.length > 1) {
+      if (USA_STATES[places[1].text]) {
+        places[1].text = USA_STATES[places[1].text];
+      }
+    }
+  }
+
+  return places;
 }
 
 function viewPlacesIndex() {
