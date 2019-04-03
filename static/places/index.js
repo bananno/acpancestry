@@ -2,6 +2,11 @@
 function viewPlaces() {
   const places = getPathPlaces();
 
+  const [placeList, items] = getItemsByPlace(places);
+
+  console.log(placeList);
+  console.log(items);
+
   if (places.length == 0) {
     return viewPlacesIndex();
   }
@@ -57,6 +62,36 @@ function getPathPlaces() {
   }
 
   return places;
+}
+
+function getItemsByPlace(places) {
+  const placeLevels = ['country', 'region1', 'region2', 'city'];
+  const placeList = [];
+  const foundPlaceAlready = [];
+  const mostSpecificLevel = placeLevels[places.length];
+
+  const items = [...DATABASE.events, ...DATABASE.sources].filter((item, t) => {
+    for (let i = 0; i < places.length; i++) {
+      if (item.location[placeLevels[i]] != places[i].true) {
+        return false;
+      }
+    }
+
+    if (!mostSpecificLevel) {
+      return true;
+    }
+
+    const itemPlace = item.location[mostSpecificLevel] || 'Not specified';
+
+    if (!foundPlaceAlready[itemPlace]) {
+      placeList.push(itemPlace);
+      foundPlaceAlready[itemPlace] = true;
+    }
+
+    return true;
+  });
+
+  return [placeList, items];
 }
 
 function showPageTitleAndHeader(places) {
