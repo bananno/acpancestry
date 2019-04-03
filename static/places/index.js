@@ -56,11 +56,19 @@ function viewPlacesIndex() {
   });
 
   [...countryList, 'none'].forEach(country => {
-    let path = country.replace(/ /g, '+');
-    let linkText = country == 'none' ? 'Country not specified' : country;
+    let [linkPath, linkText] = [country, country];
+
+    if (country == 'United States') {
+      linkPath = 'USA';
+    } else if (country == 'none') {
+      linkText = 'Country not specified';
+    }
+
+    linkPath = linkPath.replace(/ /g, '+');
+
     rend(
       '<p>' +
-        localLink('places/' + path, linkText) +
+        localLink('places/' + linkPath, linkText) +
         ' (' + listByCountry[country].length + ')' +
       '</p>'
     );
@@ -68,6 +76,10 @@ function viewPlacesIndex() {
 }
 
 function viewPlacesByCountry(country) {
+  if (country == 'USA') {
+    country = 'United States';
+  }
+
   const region1List = [];
   const listByRegion = {};
   listByRegion['Not Specified'] = [];
