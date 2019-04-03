@@ -2,63 +2,47 @@
 function viewPlaces() {
   const places = getPlacesList();
 
-  console.log(places);
-
   if (places.length == 0) {
     return viewPlacesIndex();
   }
 
+  showPageTitleAndHeader(places);
+
   if (places.length == 1) {
-    setPageTitle(places[0].text);
-    rend('<p class="header-trail">' + localLink('places', 'Places') + '</p>');
-    rend('<h1>' + places[0].text + '</h1>');
     return viewPlacesByCountry(places[0].true);
   }
 
   if (places.length == 2) {
-    setPageTitle(places[1].text);
-    rend(
-      '<p class="header-trail">' +
-        localLink('places', 'Places') +
-        ' &#8594; ' +
-        localLink('places/' + places[0].path, places[0].text) +
-      '</p>'
-    );
-    rend('<h1>' + places[1].text + '</h1>')
     return;
   }
 
   if (places.length == 3) {
-    setPageTitle(places[2].text);
-    rend(
-      '<p class="header-trail">' +
-        localLink('places', 'Places') +
-        ' &#8594; ' +
-        localLink('places/' + places[0].path, places[0].text) +
-        ' &#8594; ' +
-        localLink('places/' + places[1].path, places[1].text) +
-      '</p>'
-    );
-    rend('<h1>' + places[2].text + '</h1>')
     return;
   }
 
   if (places.length == 4) {
-    setPageTitle(places[3].text);
-    rend(
-      '<p class="header-trail">' +
-        localLink('places', 'Places') +
-        ' &#8594; ' +
-        localLink('places/' + places[0].path, places[0].text) +
-        ' &#8594; ' +
-        localLink('places/' + places[1].path, places[1].text) +
-      '</p>'
-    );
-    rend('<h1>' + places[3].text + '</h1>')
     return;
   }
 
   rend('<h1>Place not found</h1>');
+}
+
+function showPageTitleAndHeader(places) {
+  let mostSpecificPlace = places[places.length - 1].text;
+
+  setPageTitle(mostSpecificPlace);
+
+  let headerTrail = '<p class="header-trail">' + localLink('places', 'Places');
+  let tempPath = 'places';
+
+  for (let i = 0; i < places.length - 1; i++) {
+    tempPath += '/' + places[i].path;
+    headerTrail += ' &#8594; ' + localLink(tempPath, places[i].text);
+  }
+
+  rend(headerTrail + '</p>');
+
+  rend('<h1>' + mostSpecificPlace + '</h1>');
 }
 
 function getPlacesList() {
