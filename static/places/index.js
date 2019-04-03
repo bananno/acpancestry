@@ -85,12 +85,16 @@ function viewPlacesByCountry(country) {
     listByRegion[region].push(item);
   });
 
+  region1List.sort((a, b) => {
+    return a < b ? -1 : 1;
+  });
+
   [...region1List, 'Not Specified'].forEach(region => {
     let regionPath = region;
     let regionText = region;
 
     if (regionPath == 'Not Specified') {
-      regionPath = 'Other';
+      regionPath = 'State not specified';
     } if (country == 'United States') {
       regionText = USA_STATES[regionPath || ''] || regionPath;
     }
