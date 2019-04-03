@@ -6,7 +6,9 @@ function viewPlaces() {
 
   showPageTitleAndHeader(placePath);
 
-  if (placePath.length == 4) {
+  if (items.length == 0) {
+    rend('<p style="margin-top: 10px;">There is no information available for this place.</p>');
+  } else if (placePath.length == 4) {
     viewPlacesItemList(items);
   } else {
     viewPlacesIndex(placePath, placeList);
