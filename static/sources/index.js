@@ -7,14 +7,18 @@ const sourceCategories = [
     route: viewSourcesAll,
   },
   {
-    path: 'cemeteries',
-    title: 'Cemeteries',
-    route: viewSourcesCemeteries,
+    path: 'photos',
+    title: 'Photographs',
   },
   {
     path: 'newspapers',
     title: 'Newspapers',
-    route: viewSourcesNewspapers,
+    route: () => { viewListOfNewspapersOrCemeteries('newspaper', 'article'); },
+  },
+  {
+    path: 'cemeteries',
+    title: 'Cemeteries',
+    route: () => { viewListOfNewspapersOrCemeteries('grave', 'grave'); },
   },
   {
     path: 'censusUSA',
@@ -106,62 +110,31 @@ function viewSourcesAll() {
   });
 }
 
-function viewSourcesCemeteries() {
-  const cemeteryList = [];
+function viewListOfNewspapersOrCemeteries(sourceType, entryName) {
+  const groupList = [];
 
   DATABASE.sources.forEach(source => {
-    if (source.type != 'grave') {
+    if (source.type != sourceType) {
       return;
     }
 
-    const cemeteryName = source.group;
+    const groupName = source.group;
 
-    cemeteryList[cemeteryName] = cemeteryList[cemeteryName] || [];
+    groupList[groupName] = groupList[groupName] || [];
 
-    cemeteryList[cemeteryName].push(source);
+    groupList[groupName].push(source);
   });
 
-  for (let cemeteryName in cemeteryList) {
-    const rootSource = cemeteryList[cemeteryName][0];
+  for (let groupName in groupList) {
+    const rootSource = groupList[groupName][0];
 
     rend(
       '<p style="padding-top: 15px">' +
-        linkToSourceGroup(rootSource, cemeteryName) +
-        '<br>' +
-        formatLocation(rootSource.location) +
-        '<br>' +
-        (cemeteryList[cemeteryName].length == 1 ? '1 grave'
-          : cemeteryList[cemeteryName].length + ' graves') +
-      '</p>'
-    );
-  }
-}
-
-function viewSourcesNewspapers() {
-  const newspaperList = [];
-
-  DATABASE.sources.forEach(source => {
-    if (source.type != 'newspaper') {
-      return;
-    }
-
-    const newspaperName = source.group;
-
-    newspaperList[newspaperName] = newspaperList[newspaperName] || [];
-
-    newspaperList[newspaperName].push(source);
-  });
-
-  for (let newspaperName in newspaperList) {
-    const rootSource = newspaperList[newspaperName][0];
-
-    rend(
-      '<p style="padding-top: 15px">' +
-        linkToSourceGroup(rootSource, newspaperName) +
+        linkToSourceGroup(rootSource, groupName) +
         '<br>' +
         (rootSource.location.format ? rootSource.location.format + '<br>' : '') +
-        (newspaperList[newspaperName].length == 1 ? '1 article'
-          : newspaperList[newspaperName].length + ' articles') +
+        groupList[groupName].length + ' ' + entryName +
+        (groupList[groupName].length == 1 ? '' : 's') +
       '</p>'
     );
   }
