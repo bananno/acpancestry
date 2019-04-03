@@ -1,7 +1,8 @@
 
 function viewSearchDocuments(keywords) {
   const documentList = DATABASE.sources.filter(source => {
-    return source.type == 'document' && doesStrMatchKeywords(source.title, keywords);
+    let searchString = source.title + source.content;
+    return source.type == 'document' && doesStrMatchKeywords(searchString, keywords);
   });
 
   if (documentList.length) {
