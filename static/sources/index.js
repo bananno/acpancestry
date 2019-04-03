@@ -77,15 +77,14 @@ function routeSources() {
 function viewSourcesIndex() {
   setPageTitle('Sources');
   rend('<h1>Sources</h1>');
-  rend(
-    '<ul>' +
-      sourceCategories.map(category => {
-        return ('<li>' +
-          localLink('sources/' + category.path, category.pathText || category.title) +
-        '</li>');
-      }).join('') +
-    '</ul>'
-  );
+
+  sourceCategories.forEach(category => {
+    rend(
+      '<p style="margin-top: 8px; font-size: 18px;">' +
+        localLink('sources/' + category.path, category.pathText || category.title) +
+      '</p>'
+    );
+  });
 }
 
 function viewSourcesAll() {

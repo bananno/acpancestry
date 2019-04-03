@@ -24,8 +24,16 @@ function viewSourceGroup() {
 
 function viewSourceGroupCemetery(rootSource) {
   const cemeteryName = rootSource.group;
-
   setPageTitle(cemeteryName);
+
+  rend(
+    '<p style="margin-bottom: 10px; font-size: 15px;">' +
+      '<u>' + localLink('sources', 'Sources') + '</u>' +
+      ' &#8594; ' +
+      '<u>' + localLink('sources/cemeteries', 'Cemeteries') + '</u>' +
+    '</p>'
+  );
+
   rend('<h1>' + cemeteryName + '</h1>');
   rend('<p style="padding-top: 10px;">' + formatLocation(rootSource.location) + '</p>');
 
@@ -58,8 +66,16 @@ function viewSourceGroupCemetery(rootSource) {
 
 function viewSourceGroupNewspaper(rootSource) {
   const newspaperName = rootSource.group;
-
   setPageTitle(newspaperName);
+
+  rend(
+    '<p style="margin-bottom: 10px; font-size: 15px;">' +
+      '<u>' + localLink('sources', 'Sources') + '</u>' +
+      ' &#8594; ' +
+      '<u>' + localLink('sources/newspapers', 'Newspapers') + '</u>' +
+    '</p>'
+  );
+
   rend('<h1>' + newspaperName + '</h1>');
   rend('<p style="padding-top: 10px;">' + formatLocation(rootSource.location) + '</p>');
 
