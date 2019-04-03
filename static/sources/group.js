@@ -27,10 +27,10 @@ function viewSourceGroupCemeteryOrNewspaper(rootSource, group, showDate) {
   setPageTitle(groupName);
 
   rend(
-    '<p style="margin-bottom: 10px; font-size: 15px;">' +
-      '<u>' + localLink('sources', 'Sources') + '</u>' +
+    '<p class="header-trail">' +
+      localLink('sources', 'Sources') +
       ' &#8594; ' +
-      '<u>' + localLink('sources/' + group.toLowerCase(), group) + '</u>' +
+      localLink('sources/' + group.toLowerCase(), group) +
     '</p>'
   );
 

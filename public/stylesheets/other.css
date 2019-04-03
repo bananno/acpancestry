@@ -201,3 +201,12 @@ table.event-list th {
   font-weight: bold;
   text-decoration: underline;
 }
+
+.header-trail {
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.header-trail a {
+  text-decoration: underline;
+}
