@@ -13,8 +13,6 @@ function viewPlaces() {
   });
 
   if (places.length == 1) {
-    setPageTitle(places[0]);
-    rend('<h1>' + places[0] + '</h1>');
     viewPlacesByCountry(places[0]);
   }
 }
@@ -79,6 +77,9 @@ function viewPlacesByCountry(country) {
   if (country == 'USA') {
     country = 'United States';
   }
+
+  setPageTitle(country);
+  rend('<h1>' + country + '</h1>');
 
   const region1List = [];
   const listByRegion = {};
