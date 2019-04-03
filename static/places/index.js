@@ -33,7 +33,7 @@ function viewPlacesIndex() {
 
   const countryList = [];
   const listByCountry = {};
-  listByCountry['Not Specified'] = [];
+  listByCountry['none'] = [];
 
   [...DATABASE.events, ...DATABASE.sources].forEach(item => {
     let country = item.location.country;
@@ -44,17 +44,23 @@ function viewPlacesIndex() {
         listByCountry[country] = [];
       }
     } else {
-      country = 'Not Specified';
+      country = 'none';
     }
 
     listByCountry[country].push(item);
   });
 
-  countryList.forEach(country => {
+  countryList.sort((a, b) => {
+    let diff = listByCountry[b].length - listByCountry[a].length;
+    return diff == 0 ? (a < b ? -1 : 1) : diff;
+  });
+
+  [...countryList, 'none'].forEach(country => {
     let path = country.replace(/ /g, '+');
+    let linkText = country == 'none' ? 'Country not specified' : country;
     rend(
       '<p>' +
-        localLink('places/' + path, country) +
+        localLink('places/' + path, linkText) +
         ' (' + listByCountry[country].length + ')' +
       '</p>'
     );
