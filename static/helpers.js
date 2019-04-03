@@ -143,12 +143,14 @@ function formatLocation(locat) {
 
 function removeSpecialCharacters(str) {
   return str.replace('å', 'a')
+    .replace('ö', 'o')
     .replace('“', '"')
     .replace('”', '"');
 }
 
 function fixSpecialCharacters(str) {
   return str.replace('å', '&aring;')
+    .replace(/ö/g, '&ouml;')
     .replace('“', '"')
     .replace('”', '"');
 }
@@ -221,6 +223,7 @@ function formatTranscription(content) {
 
       str = str.replace(/\|\|/g, '<th>');
       str = str.replace(/\|/g, '<td>');
+      str = fixSpecialCharacters(str);
 
       $div.find('table:last').append('<tr>' + str + '</tr>');
       return;
