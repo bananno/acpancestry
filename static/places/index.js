@@ -122,8 +122,18 @@ function viewPlacesIndex(placePath, placeList) {
 
   let path = ['places', ...(placePath.map(place => place.path))].join('/') + '/';
 
+  placeList.sort((a, b) => {
+    let [str1, str2] = [b.text.toLowerCase(), a.text.toLowerCase()];
+    const swap = (str1 > str2 || str1 == 'other') && str2 != 'other';
+    return swap ? -1 : 1;
+  });
+
   placeList.forEach(place => {
-    rend('<p>' + localLink(path + place.path, place.text) + '</p>');
+    rend(
+      '<p style="padding-top: 5px;">' +
+        localLink(path + place.path, place.text) +
+      '</p>'
+    );
   });
 }
 
