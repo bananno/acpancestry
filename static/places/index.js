@@ -56,7 +56,7 @@ function getItemsByPlace(placePath) {
 
   const items = [...DATABASE.events, ...DATABASE.sources].filter((item, t) => {
     for (let i = 0; i < placePath.length; i++) {
-      if (item.location[placeLevels[i]] != placePath[i].true) {
+      if (!placeMatch(item.location[placeLevels[i]], placePath[i].true)) {
         return false;
       }
     }
@@ -79,6 +79,13 @@ function getItemsByPlace(placePath) {
   });
 
   return [placeList, items];
+}
+
+function placeMatch(itemPlace, compareStr) {
+  if (compareStr == 'other') {
+    return itemPlace == null || itemPlace == '';
+  }
+  return itemPlace == compareStr;
 }
 
 function showPageTitleAndHeader(placePath) {
