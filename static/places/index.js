@@ -68,7 +68,10 @@ function getItemsByPlace(placePath) {
     const itemPlace = item.location[mostSpecificLevel] || 'other';
 
     if (!foundPlaceAlready[itemPlace]) {
-      placeList.push(itemPlace);
+      placeList.push({
+        path: itemPlace,
+        text: itemPlace,
+      });
       foundPlaceAlready[itemPlace] = true;
     }
 
@@ -103,25 +106,24 @@ function showPageTitleAndHeader(placePath) {
 }
 
 function viewPlacesIndex(placePath, placeList) {
+  if (placePath.length == 0) {
+    placeList = placeList.map(place => {
+      if (place.path == 'United States') {
+        place.path = 'USA';
+      }
+      return place;
+    });
+  } else if (placePath.length == 1 && placePath[0].path == 'USA') {
+    placeList = placeList.map(place => {
+      place.text = USA_STATES[place.text] || 'other';
+      return place;
+    });
+  }
+
   let path = ['places', ...(placePath.map(place => place.path))].join('/') + '/';
 
-  if (placePath.length == 0) {
-    placeList.forEach(place => {
-      path += place == 'United States' ? 'USA' : place;
-      rend('<p>' + localLink(path, place) + '</p>');
-    });
-    return;
-  }
-
-  if (placePath.length == 1 && placePath[0].path == 'USA') {
-    placeList.forEach(place => {
-      rend('<p>' + localLink(path + place, USA_STATES[place] || 'other') + '</p>');
-    });
-    return;
-  }
-
   placeList.forEach(place => {
-    rend('<p>' + localLink(path + place, place) + '</p>');
+    rend('<p>' + localLink(path + place.path, place.text) + '</p>');
   });
 }
 
