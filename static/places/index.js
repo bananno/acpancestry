@@ -113,27 +113,9 @@ function showPageTitleAndHeader(placePath) {
 }
 
 function viewPlacesIndex(placePath, placeList) {
-  if (placePath.length == 0) {
-    placeList = placeList.map(place => {
-      if (place.path == 'United States') {
-        place.path = 'USA';
-      }
-      return place;
-    });
-  } else if (placePath.length == 1 && placePath[0].path == 'USA') {
-    placeList = placeList.map(place => {
-      place.text = USA_STATES[place.text] || 'other';
-      return place;
-    });
-  }
+  placeList = editPlaceNames(placePath, placeList);
 
   let path = ['places', ...(placePath.map(place => place.path))].join('/') + '/';
-
-  placeList.sort((a, b) => {
-    let [str1, str2] = [b.text.toLowerCase(), a.text.toLowerCase()];
-    const swap = (str1 > str2 || str1 == 'other') && str2 != 'other';
-    return swap ? -1 : 1;
-  });
 
   placeList.forEach(place => {
     rend(
@@ -142,4 +124,38 @@ function viewPlacesIndex(placePath, placeList) {
       '</p>'
     );
   });
+}
+
+function editPlaceNames(placePath, placeList) {
+  let otherText = 'other';
+
+  if (placePath.length == 0) {
+    otherText = 'location not specified';
+    placeList = placeList.map(place => {
+      if (place.path == 'United States') {
+        place.path = 'USA';
+      }
+      return place;
+    });
+  } else if (placePath.length == 1 && placePath[0].path == 'USA') {
+    otherText = 'state not specified';
+    placeList = placeList.map(place => {
+      place.text = USA_STATES[place.text] || 'other';
+      return place;
+    });
+  } else if (placePath.length == 2 && placePath[0].path == 'USA') {
+    otherText = 'county not specified';
+  }
+
+  placeList.sort((a, b) => {
+    let [str1, str2] = [b.text.toLowerCase(), a.text.toLowerCase()];
+    const swap = (str1 > str2 || str1 == 'other') && str2 != 'other';
+    return swap ? -1 : 1;
+  });
+
+  if (placeList[placeList.length - 1].text == 'other') {
+    placeList[placeList.length - 1].text = otherText;
+  }
+
+  return placeList;
 }
