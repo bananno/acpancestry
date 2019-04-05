@@ -111,25 +111,26 @@ function viewSourcesAll() {
 }
 
 function viewListOfNewspapersOrCemeteries(sourceType, entryName) {
-  const groupList = [];
-
-  DATABASE.sources.forEach(source => {
-    if (source.type != sourceType) {
-      return;
-    }
-
-    const groupName = source.group;
-
-    groupList[groupName] = groupList[groupName] || [];
-
-    groupList[groupName].push(source);
-  });
+  const groupList = createListOfNewspapersOrCemeteries(sourceType);
 
   for (let groupName in groupList) {
     const item = sourceListitemCemeteryOrNewspaper(groupList[groupName][0], entryName,
       groupList[groupName].length);
     rend(item);
   }
+}
+
+function createListOfNewspapersOrCemeteries(sourceType, sourceList) {
+  const groupList = [];
+  (sourceList || DATABASE.sources).forEach(source => {
+    if (source.type != sourceType) {
+      return;
+    }
+    const groupName = source.group;
+    groupList[groupName] = groupList[groupName] || [];
+    groupList[groupName].push(source);
+  });
+  return groupList;
 }
 
 function viewSourcesCensusUSA() {
