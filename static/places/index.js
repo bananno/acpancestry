@@ -96,6 +96,12 @@ function showPageTitleAndHeader(placePath) {
   }
 
   let mostSpecificPlace = placePath[placePath.length - 1].text;
+  let showAll = false;
+
+  if (mostSpecificPlace == 'all') {
+    mostSpecificPlace = placePath[placePath.length - 2].text;
+    showAll = true;
+  }
 
   setPageTitle(mostSpecificPlace);
 
@@ -109,13 +115,21 @@ function showPageTitleAndHeader(placePath) {
 
   rend('<p class="header-trail">' + links.join(' &#8594; ') + '</p>');
 
-  rend('<h1>' + mostSpecificPlace + '</h1>');
+  rend('<h1>' + mostSpecificPlace + (showAll ? ' - all' : '') + '</h1>');
 }
 
 function viewPlacesIndex(placePath, placeList) {
   placeList = editPlaceNames(placePath, placeList);
 
   let path = ['places', ...(placePath.map(place => place.path))].join('/') + '/';
+
+  if (placeListShouldAllowViewAll(placePath)) {
+    rend(
+      '<p style="padding-top: 5px;">' +
+        localLink(path + 'all', 'view all') +
+      '</p>'
+    );
+  }
 
   placeList.forEach(place => {
     rend(
@@ -124,6 +138,16 @@ function viewPlacesIndex(placePath, placeList) {
       '</p>'
     );
   });
+}
+
+function placeListShouldAllowViewAll(placePath) {
+  if (placePath.length == 0) {
+    return false;
+  }
+  if (placePath.length == 1 && placePath[0].path == 'USA') {
+    return false;
+  }
+  return true;
 }
 
 function editPlaceNames(placePath, placeList) {
