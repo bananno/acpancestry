@@ -1,5 +1,5 @@
 
-function viewPlacesItemList(itemList) {
+function viewPlacesItemList(itemList, hideLocation) {
   [['Cemeteries', 'grave', 'grave'],
   ['Newspapers', 'newspaper', 'article']].forEach(([sectionTitle, sourceType, entryName]) => {
     const groupList = createListOfNewspapersOrCemeteries(sourceType, itemList);
@@ -14,7 +14,7 @@ function viewPlacesItemList(itemList) {
       const rootSource = groupList[groupName][0];
       const numItems = groupList[groupName].length;
 
-      rend(sourceListitemCemeteryOrNewspaper(rootSource, entryName, numItems, true));
+      rend(sourceListitemCemeteryOrNewspaper(rootSource, entryName, numItems, hideLocation));
     }
   });
 
