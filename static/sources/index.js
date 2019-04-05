@@ -126,17 +126,9 @@ function viewListOfNewspapersOrCemeteries(sourceType, entryName) {
   });
 
   for (let groupName in groupList) {
-    const rootSource = groupList[groupName][0];
-
-    rend(
-      '<p style="padding-top: 15px">' +
-        linkToSourceGroup(rootSource, groupName) +
-        '<br>' +
-        (rootSource.location.format ? rootSource.location.format + '<br>' : '') +
-        groupList[groupName].length + ' ' + entryName +
-        (groupList[groupName].length == 1 ? '' : 's') +
-      '</p>'
-    );
+    const item = sourceListitemCemeteryOrNewspaper(groupList[groupName][0], entryName,
+      groupList[groupName].length);
+    rend(item);
   }
 }
 
