@@ -1,18 +1,20 @@
 
+const placeLevels = ['country', 'region1', 'region2', 'city'];
+
 function getItemsByPlace(placePath) {
-  const placeLevels = ['country', 'region1', 'region2', 'city'];
   const placeList = [];
   const foundPlaceAlready = [];
   const mostSpecificLevel = placeLevels[placePath.length];
 
+  const listOfItemsOnly = mostSpecificLevel == 'city'
+    || placePath[placePath.length - 1].path == 'all';
+
   const items = [...DATABASE.events, ...DATABASE.sources].filter((item, t) => {
-    for (let i = 0; i < placePath.length; i++) {
-      if (!placeMatch(item.location[placeLevels[i]], placePath[i].true)) {
-        return false;
-      }
+    if (!placeMatch(item.location, placePath)) {
+      return false;
     }
 
-    if (placePath.length == 4) {
+    if (listOfItemsOnly) {
       return true;
     }
 
@@ -32,11 +34,30 @@ function getItemsByPlace(placePath) {
   return [placeList, items];
 }
 
-function placeMatch(itemPlace, compareStr) {
-  if (compareStr == 'other') {
-    return itemPlace == null || itemPlace == '';
+function placeMatch(itemLocation, placePath) {
+  for (let i = 0; i < placePath.length; i++) {
+    let levelName = placeLevels[i];
+    let itemPlace = itemLocation[levelName];
+    let placeName = placePath[i].true;
+
+    if (placeName == 'other') {
+      if (itemPlace == null || itemPlace == '') {
+        continue;
+      }
+    }
+
+    if (placeName == 'all') {
+      return true;
+    }
+
+    if (itemPlace == placeName) {
+      continue;
+    }
+
+    return false;
   }
-  return itemPlace == compareStr;
+
+  return true;
 }
 
 function editPlaceNames(placePath, placeList) {

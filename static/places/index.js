@@ -10,7 +10,7 @@ function viewPlaces() {
 
   if (items.length == 0) {
     rend('<p style="margin-top: 10px;">There is no information available for this place.</p>');
-  } else if (placePath.length == 4) {
+  } else if (placePath.length == 4 || placePath[placePath.length - 1].path == 'all') {
     viewPlacesItemList(items);
   } else {
     viewPlacesIndex(placePath, placeList);
