@@ -7,7 +7,7 @@ function getItemsByPlace(placePath) {
   const mostSpecificLevel = placeLevels[placePath.length];
 
   const listOfItemsOnly = mostSpecificLevel == 'city'
-    || placePath[placePath.length - 1].path == 'all';
+    || (placePath.length && placePath[placePath.length - 1].path == 'all');
 
   const items = [...DATABASE.events, ...DATABASE.sources].filter((item, t) => {
     if (!placeMatch(item.location, placePath)) {
