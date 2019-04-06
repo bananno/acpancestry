@@ -22,6 +22,8 @@ function viewPerson() {
     });
   }
 
+  showPersonTimeline(person);
+
   if (person.citations.length) {
     rend('<h2>Citations</h2>');
     rend($makeCitationList(person.citations));
