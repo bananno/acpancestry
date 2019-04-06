@@ -1,7 +1,6 @@
 
 function viewPerson() {
-  let personId = PATH.replace('person/', '');
-
+  const personId = PATH.replace('person/', '');
   const person = DATABASE.personRef[personId];
 
   if (person == null) {
@@ -10,6 +9,26 @@ function viewPerson() {
     return;
   }
 
+  showPersonHeader(person);
+  showPersonFamily(person);
+
+  rend('<h2>Tree</h2>');
+  rend('<div class="person-tree">' + personTree(person) + '</div>');
+
+  if (person.links.length) {
+    rend('<h2>Links</h2>');
+    person.links.forEach(nextLink => {
+      rend(getFancyLink(nextLink));
+    });
+  }
+
+  if (person.citations.length) {
+    rend('<h2>Citations</h2>');
+    rend($makeCitationList(person.citations));
+  }
+}
+
+function showPersonHeader(person) {
   setPageTitle(removeSpecialCharacters(person.name));
 
   rend(
@@ -26,34 +45,6 @@ function viewPerson() {
   if (person.private) {
     rend('<p class="person-summary">Some information is hidden to protect the ' +
       'privacy of living people.</p>');
-  }
-
-  rend('<h2>Family</h2>');
-
-  ['parents', 'siblings', 'spouses', 'children'].forEach(relationship => {
-    if (person[relationship].length == 0) {
-      return;
-    }
-    const $box = $('<div class="person-family">');
-    $box.append(`<h3>${relationship}:</h3>`);
-    // $box.append($makePeopleList(person[relationship]));
-    $box.append($makePeopleList(person[relationship], 'photo'));
-    rend($box);
-  });
-
-  rend('<h2>Tree</h2>');
-
-  rend('<div class="person-tree">' + personTree(person) + '</div>');
-
-  rend('<h2>Links</h2>');
-
-  person.links.forEach(nextLink => {
-    rend(getFancyLink(nextLink));
-  });
-
-  if (person.citations.length) {
-    rend('<h2>Citations</h2>');
-    rend($makeCitationList(person.citations));
   }
 }
 
@@ -73,6 +64,21 @@ function personShowHeaderEvent(person, abbr, event) {
       ) : '') +
     '</div>'
   );
+}
+
+function showPersonFamily(person) {
+  rend('<h2>Family</h2>');
+
+  ['parents', 'siblings', 'spouses', 'children'].forEach(relationship => {
+    if (person[relationship].length == 0) {
+      return;
+    }
+
+    const $box = $('<div class="person-family">');
+    $box.append(`<h3>${relationship}:</h3>`);
+    $box.append($makePeopleList(person[relationship], 'photo'));
+    rend($box);
+  });
 }
 
 function personTree(person, safety) {
