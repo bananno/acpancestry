@@ -30,6 +30,25 @@ function getPersonTimelineItems(person) {
     }
   });
 
+  person.children.forEach(relative => {
+    addFamilyEvents(relative, 'child');
+  });
+
+  person.spouses.forEach(relative => {
+    addFamilyEvents(relative, 'spouse');
+  });
+
+  function addFamilyEvents(person, relationship) {
+    DATABASE.events.forEach(item => {
+      if (item.people.indexOf(person) >= 0 && item.title == 'birth') {
+        let newItem = {...item};
+        newItem.relationship = relationship;
+        newItem.event = true;
+        list.push(newItem);
+      }
+    });
+  }
+
   const dateParts = ['year', 'month', 'day'];
 
   list.sort((item1, item2) => {
@@ -67,10 +86,16 @@ function showPersonTimelineItem(item) {
   const $col1 = $('<div class="column timeline-item-date-place">').appendTo($div);
   const $col2 = $('<div class="column timeline-item-info">').appendTo($div);
 
+  let showPeopleList = true;
+
   if (item.event && (item.title == 'birth' || item.title == 'death')) {
-    $div.addClass('main-event');
-    if (item.people.length == 1) {
-      showPeopleList = false;
+    if (item.relationship) {
+      $div.addClass('family-event');
+    } else {
+      $div.addClass('main-event');
+      if (item.people.length == 1) {
+        showPeopleList = false;
+      }
     }
   }
 
@@ -107,10 +132,14 @@ function showPersonTimelineItem(item) {
       $col1.append(makeImage(item.images[0], 100, 100));
     }
   } else {
-    $col2.append('<p><b>' + item.title + '</b></p>');
+    if (item.relationship) {
+      $col2.append('<p><b>' + item.title + ' of ' + item.relationship + '</b></p>');
+    } else {
+      $col2.append('<p><b>' + item.title + '</b></p>');
+    }
   }
 
-  if (item.people.length > 1) {
+  if (showPeopleList) {
     $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
   }
 

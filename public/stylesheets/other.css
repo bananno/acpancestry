@@ -224,6 +224,10 @@ table.event-list th {
   border-color: black;
 }
 
+.timeline-item.family-event {
+  background-color: #fff;
+}
+
 .timeline-item .column {
   display: inline-block;
   vertical-align: text-top;
