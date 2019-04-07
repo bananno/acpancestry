@@ -210,3 +210,22 @@ table.event-list th {
 .header-trail a {
   text-decoration: underline;
 }
+
+.timeline-item {
+  font-size: 15px;
+  border: 1px solid #ccc;
+  margin: 5px;
+  padding: 0px 5px;
+  background-color: #eee;
+  border-radius: 5px;
+}
+
+.timeline-item div {
+  display: inline-block;
+  vertical-align: text-top;
+  padding: 5px;
+}
+
+.timeline-item .timeline-item-date-place {
+  width: 250px;
+}
