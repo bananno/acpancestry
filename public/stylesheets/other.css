@@ -221,6 +221,7 @@ table.event-list th {
 
 .timeline-item.main-event {
   background-color: #ddd;
+  border-color: black;
 }
 
 .timeline-item .column {
@@ -231,4 +232,8 @@ table.event-list th {
 
 .timeline-item .timeline-item-date-place {
   width: 250px;
+}
+
+.timeline-item .timeline-item-info {
+  width: calc(100% - 250px);
 }

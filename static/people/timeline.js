@@ -1,5 +1,9 @@
 
 function showPersonTimeline(person) {
+  if (person.private) {
+    return;
+  }
+
   rend('<h2>Timeline</h2>');
 
   const items = getPersonTimelineItems(person);
@@ -29,6 +33,11 @@ function getPersonTimelineItems(person) {
   const dateParts = ['year', 'month', 'day'];
 
   list.sort((item1, item2) => {
+    // if there is no date on either item, the cemetery should be rated higher
+    if (!item1.date.year && !item2.date.year) {
+      return item1.type == 'grave' ? -1 : 0;
+    }
+
     for (let i = 0; i < 3; i++) {
       const datePart1 = item1.date[dateParts[i]];
       const datePart2 = item2.date[dateParts[i]];
@@ -56,10 +65,13 @@ function showPersonTimelineItem(item) {
   rend($div);
 
   const $col1 = $('<div class="column timeline-item-date-place">').appendTo($div);
-  const $col2 = $('<div class="column">').appendTo($div);
+  const $col2 = $('<div class="column timeline-item-info">').appendTo($div);
 
   if (item.event && (item.title == 'birth' || item.title == 'death')) {
     $div.addClass('main-event');
+    if (item.people.length == 1) {
+      showPeopleList = false;
+    }
   }
 
   if (item.date.format) {
@@ -84,18 +96,29 @@ function showPersonTimelineItem(item) {
     } else {
       $col2.append('<p><b>' + item.type + '</b></p>');
     }
-    $col2.append('<p>' + linkToSource(item, item.group + ' - ' + item.title) + '</p>');
+
+    $col2.append(
+      '<p style="margin-top: 5px;">' +
+        linkToSource(item, item.group + (item.type == 'grave' ? '' : ' - ' + item.title)) +
+      '</p>'
+    );
+
+    if (item.images.length) {
+      $col1.append(makeImage(item.images[0], 100, 100));
+    }
   } else {
     $col2.append('<p><b>' + item.title + '</b></p>');
   }
 
+  if (item.people.length > 1) {
+    $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
+  }
+
   if (item.notes) {
-    $col2.append('<p>' + item.notes + '</p>');
+    $col2.append(
+      '<p style="margin-top: 5px;">' +
+        item.notes.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
+      '</p>'
+    );
   }
-
-  if (item.type == 'photo' && item.images.length) {
-    $col1.append(makeImage(item.images[0], 100));
-  }
-
-  $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
 }
