@@ -41,22 +41,30 @@ function showPersonTimelineItem(item) {
   const $div = $('<div class="timeline-item">');
   rend($div);
 
-  $div.append(
-    '<div class="timeline-item-date-place">' +
-      (item.date.format ? '<b>' + item.date.format + '</b>' : '') +
-      (item.date.format && item.location.format ? '<br>' : '') +
-      item.location.format +
-    '</div>'
-  );
-
+  const $col1 = $('<div class="timeline-item-date-place">').appendTo($div);
   const $col2 = $('<div>').appendTo($div);
 
-  $col2.append(
-    [item.type,
-    item.group,
-    item.title,
-    item.people ? item.people.map(person => person.name).join(', ') : '',
-    item.location.note
-    ].filter(attr => attr).join('<br>')
-  );
+  if (item.date.format) {
+    $col1.append('<p><b>' + item.date.format + '</b></p>');
+  }
+
+  if (item.location.format) {
+    $col1.append('<p>' + item.location.format + '</p>');
+  }
+
+  if (item.location.note) {
+    $col1.append('<p><i>(' + item.location.note + ')</i></p>');
+  }
+
+  if (item.type) {
+    $col2.append('<p>' + item.group + ' - ' + item.title + '</p>');
+  } else {
+    $col2.append('<p><b>' + item.title + '</b></p>');
+  }
+
+  if (item.note) {
+    $col2.append('<p>' + item.note + '</p>');
+  }
+
+  $col2.append($makePeopleList(item.people, 'photo'));
 }
