@@ -46,9 +46,9 @@ function getPersonTimelineItems(person) {
     addFamilyEvents(relative, 'spouse');
   });
 
-  function addFamilyEvents(person, relationship) {
+  function addFamilyEvents(relative, relationship) {
     DATABASE.events.forEach(item => {
-      if (item.people.indexOf(person) >= 0 && item.title == 'birth') {
+      if (includeRelativeItem(relative, relationship, item)) {
         let newItem = {...item};
         newItem.relationship = relationship;
         newItem.event = true;
@@ -57,31 +57,39 @@ function getPersonTimelineItems(person) {
     });
   }
 
+  function includeRelativeItem(relative, relationship, item) {
+    if (item.people.indexOf(relative) < 0) {
+      return false;
+    }
+    // always include spouse's birth & death; exclude other spouse events.
+    if (relationship == 'spouse') {
+      return item.title == 'birth' || item.title == 'death';
+    }
+    // always include child's birth.
+    if (item.title == 'birth') {
+      return true;
+    }
+    // include child's death if it is during person's life or within 5 years after person's death.
+    if (item.title == 'death') {
+      return item.date.year && person.death.date.year
+        && item.date.year - person.death.date.year < 5;
+    }
+    // include other child events if they are during person's life.
+    if (isDateBeforeDate(item.date, person.death) || areDatesEqual(item.date, person.death)) {
+      return true;
+    }
+    return false;
+  }
+
   const dateParts = ['year', 'month', 'day'];
 
-  list.sort((item1, item2) => {
-    // if there is no date on either item, the cemetery should be rated higher
-    if (!item1.date.year && !item2.date.year) {
-      return item1.type == 'grave' ? -1 : 0;
+  list.sort((secondItem, firstItem) => {
+    // if there is no date on either item, the cemetery should be rated higher.
+    if (!firstItem.date.year && !secondItem.date.year) {
+      return secondItem.type == 'grave' ? -1 : 1;
     }
 
-    for (let i = 0; i < 3; i++) {
-      const datePart1 = item1.date[dateParts[i]];
-      const datePart2 = item2.date[dateParts[i]];
-
-      if (datePart1 == null) {
-        return 0;
-      }
-
-      if (datePart2 == null) {
-        return -1;
-      }
-
-      if (datePart2 != datePart1) {
-        return datePart1 - datePart2;
-      }
-    }
-    return 0;
+    return isDateBeforeDate(secondItem.date, firstItem.date) ? -1 : 1;
   });
 
   return list;

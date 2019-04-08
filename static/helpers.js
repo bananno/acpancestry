@@ -219,3 +219,31 @@ function formatTranscription(content) {
 
   return $mainDiv;
 }
+
+function areDatesEqual(date1, date2) {
+  if (date1 == null || date2 == null) {
+    return date1 == null && date2 == null;
+  }
+  return date1.year == date2.year && date1.month == date2.month && date1.day == date2.day;
+}
+
+function isDateBeforeDate(date1, date2) {
+  const dateParts1 = [date1.year, date1.month, date1.day];
+  const dateParts2 = [date2.year, date2.month, date2.day];
+
+  for (let i = 0; i < 3; i++) {
+    if (dateParts2[i] == null) {
+      return true;
+    }
+
+    if (dateParts1[i] == null) {
+      return false;
+    }
+
+    if (dateParts1[i] != dateParts2[i]) {
+      return dateParts1[i] < dateParts2[i];
+    }
+  }
+
+  return false;
+}
