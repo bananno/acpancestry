@@ -8,6 +8,14 @@ function showPersonTimeline(person) {
 
   const items = getPersonTimelineItems(person);
 
+  rend(
+    '<div class="timeline-key">' +
+      '<div class="timeline-life">life events</div>' +
+      '<div class="timeline-source">sources</div>' +
+      '<div class="timeline-family">family events</div>' +
+    '</div>'
+  );
+
   items.forEach(showPersonTimelineItem);
 }
 
@@ -83,20 +91,20 @@ function showPersonTimelineItem(item) {
   const $div = $('<div class="timeline-item">');
   rend($div);
 
-  const $col1 = $('<div class="column timeline-item-date-place">').appendTo($div);
-  const $col2 = $('<div class="column timeline-item-info">').appendTo($div);
+  const $col1 = $('<div class="column column1">').appendTo($div);
+  const $col2 = $('<div class="column column2">').appendTo($div);
 
   let showPeopleList = true;
 
-  if (item.event && (item.title == 'birth' || item.title == 'death')) {
-    if (item.relationship) {
-      $div.addClass('family-event');
-    } else {
-      $div.addClass('main-event');
-      if (item.people.length == 1) {
-        showPeopleList = false;
-      }
+  if (item.relationship) {
+    $div.addClass('timeline-family');
+  } else if (item.event) {
+    $div.addClass('timeline-life');
+    if (item.people.length == 1) {
+      showPeopleList = false;
     }
+  } else {
+    $div.addClass('timeline-source');
   }
 
   if (item.date.format) {
