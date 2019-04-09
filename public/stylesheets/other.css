@@ -84,12 +84,12 @@
 
 .timeline-key .timeline-life,
 .timeline-item.timeline-life {
-  background-color: #fff;
+  background-color: #e3ebf9;
 }
 
 .timeline-key .timeline-source,
 .timeline-item.timeline-source {
-  background-color: #e3ebf9;
+  background-color: #fff;
 }
 
 .timeline-key .timeline-family,
