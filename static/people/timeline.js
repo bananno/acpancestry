@@ -61,11 +61,11 @@ function getPersonTimelineItems(person) {
       return false;
     }
 
-    const afterPersonsBirth = isDateBeforeDate(person.birth.date, item.date)
-      || areDatesEqual(person.birth.date, item.date);
+    const afterPersonsBirth = person.birth && (isDateBeforeDate(person.birth.date, item.date)
+      || areDatesEqual(person.birth.date, item.date));
 
-    const beforePersonsDeath = isDateBeforeDate(item.date, person.death.date)
-      || areDatesEqual(item.date, person.death.date);
+    const beforePersonsDeath = person.death && (isDateBeforeDate(item.date, person.death.date)
+      || areDatesEqual(item.date, person.death.date));
 
     const duringPersonsLife = afterPersonsBirth && beforePersonsDeath;
 
