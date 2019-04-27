@@ -181,11 +181,21 @@ function showPersonTimelineItem(item) {
     $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
   }
 
-  if (item.notes) {
-    $col2.append(
-      '<p style="margin-top: 5px;">' +
-        item.notes.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
-      '</p>'
-    );
+  if (item.source) {
+    if (item.summary) {
+      $col2.append(
+        '<p style="margin-top: 5px;">' +
+          item.summary.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
+        '</p>'
+      );
+    }
+  } else {
+    if (item.notes) {
+      $col2.append(
+        '<p style="margin-top: 5px;">' +
+          item.notes.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
+        '</p>'
+      );
+    }
   }
 }
