@@ -1,12 +1,7 @@
 
 function viewSearchEvents(keywords) {
   const eventsList = DATABASE.events.filter(event => {
-    let searchItems = [event.title, event.location.format, event.notes];
-
-     event.people.forEach(person => {
-      searchItems.push(person.name);
-     });
-
+    const searchItems = [event.title, event.location.format, event.notes];
     return doesStrMatchKeywords(searchItems.join(' '), keywords);
   });
 
@@ -15,12 +10,11 @@ function viewSearchEvents(keywords) {
   }
 
   eventsList.forEach(event => {
-    let people = event.people.map(person => highlightKeywords(person.name, keywords));
-
+    const lines = [];
     let line1 = highlightKeywords(event.title, keywords);
-    let lines = [];
 
-    if (['birth', 'death', 'marriage'].indexOf(event.title) >= 0) {
+    const people = event.people.map(person => person.name);
+    if (['birth', 'death', 'birth and death', 'marriage'].indexOf(event.title) >= 0) {
       line1 += ' - ' + people.join(' & ');
     } else {
       lines.push(people.join(', '));
