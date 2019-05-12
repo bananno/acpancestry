@@ -2,7 +2,7 @@
 function viewPlacesItemList(itemList, hideLocation) {
   [['Cemeteries', 'grave', 'grave'],
   ['Newspapers', 'newspaper', 'article']].forEach(([sectionTitle, sourceType, entryName]) => {
-    const groupList = createListOfNewspapersOrCemeteries(sourceType, itemList);
+    const groupList = createListOfNewspapersOrCemeteries(sourceType, itemList)[1];
     let needHeader = true;
 
     for (let groupName in groupList) {

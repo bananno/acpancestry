@@ -111,26 +111,47 @@ function viewSourcesAll() {
 }
 
 function viewListOfNewspapersOrCemeteries(sourceType, entryName) {
-  const groupList = createListOfNewspapersOrCemeteries(sourceType);
+  const groupNameList = createListOfNewspapersOrCemeteries(sourceType)[0];
+  let previousHeader = null;
 
-  for (let groupName in groupList) {
-    const item = sourceListitemCemeteryOrNewspaper(groupList[groupName][0], entryName,
-      groupList[groupName].length);
+  groupNameList.forEach(sourceGroup => {
+    if (previousHeader != sourceGroup.header) {
+      rend('<h2>' + sourceGroup.header + '</h2>');
+      previousHeader = sourceGroup.header;
+    }
+    const item = sourceListitemCemeteryOrNewspaper(sourceGroup.root, entryName,
+      sourceGroup.sources.length);
     rend(item);
-  }
+  });
 }
 
 function createListOfNewspapersOrCemeteries(sourceType, sourceList) {
-  const groupList = [];
+  const groupNameList = [];
+  const sourcesInGroup = [];
+
   (sourceList || DATABASE.sources).forEach(source => {
     if (source.type != sourceType) {
       return;
     }
     const groupName = source.group;
-    groupList[groupName] = groupList[groupName] || [];
-    groupList[groupName].push(source);
+    if (!sourcesInGroup[groupName]) {
+      sourcesInGroup[groupName] = [];
+      groupNameList.push({
+        name: groupName,
+        root: source,
+        sources: sourcesInGroup[groupName],
+        header: source.location.country == 'United States' && source.location.region1
+          ? USA_STATES[source.location.region1] : 'Other',
+      });
+    }
+    sourcesInGroup[groupName].push(source);
   });
-  return groupList;
+
+  groupNameList.sort((a, b) => {
+    return (a.header != 'Other' && a.header < b.header) ? -1 : 0;
+  });
+
+  return [groupNameList, sourcesInGroup];
 }
 
 function viewSourcesCensusUSA() {
