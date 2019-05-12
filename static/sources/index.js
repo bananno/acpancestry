@@ -9,6 +9,7 @@ const sourceCategories = [
   {
     path: 'photos',
     title: 'Photographs',
+    route: viewListOfPhotographs,
   },
   {
     path: 'newspapers',
@@ -107,6 +108,37 @@ function viewSourcesAll() {
     addTd($row, formatDate(source.date));
     addTd($row, formatLocation(source.location));
     addTd($row, $makePeopleList(source.people));
+  });
+}
+
+function viewListOfPhotographs() {
+  const photos = DATABASE.sources.filter(source => source.type == 'photo');
+
+  photos.forEach(source => {
+    rend('<h2>' + source.title + '</h2>');
+    source.images.forEach(img => {
+      rend(makeImage(img, 200).css('margin-right', '5px'));
+    });
+
+    if (source.content) {
+      rend(formatTranscription(source.content));
+    }
+
+    rend($makePeopleList(source.people, 'photo'));
+
+    if (source.summary) {
+      source.summary.split('\n').forEach(text => {
+        rend('<p>' + text + '</p>');
+      });
+    }
+
+    if (source.notes) {
+      source.notes.split('\n').forEach(text => {
+        rend('<p>' + text + '</p>');
+      });
+    }
+
+    rend(source.links.map(getFancyLink));
   });
 }
 
