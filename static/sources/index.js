@@ -47,6 +47,7 @@ const sourceCategories = [
   {
     path: 'other',
     title: 'Other Sources',
+    route: viewSourcesOther,
   },
 ];
 
@@ -256,6 +257,33 @@ function viewSourcesCensusOther() {
       '</p>' +
       '<p style="padding-top: 2px; padding-left: 10px;">' +
         source.location.format +
+      '</p>'
+    );
+  });
+}
+
+function viewSourcesOther() {
+  const list = DATABASE.sources.filter(source => {
+    return source.type != 'photo'
+      && source.type != 'grave'
+      && source.type != 'newspaper'
+      && !source.group.match('Census')
+      && source.group != 'World War I draft'
+      && source.group != 'World War II draft';
+  });
+
+  rend(list.length);
+
+  list.forEach((source, i) => {
+    rend(
+      '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
+        linkToSourceGroup(source, source.group + ' - ' + source.title) +
+      '</p>' +
+      '<p style="padding-top: 2px; padding-left: 10px;">' +
+        source.location.format +
+      '</p>' +
+      '<p style="padding-top: 2px; padding-left: 10px;">' +
+        source.date.format +
       '</p>'
     );
   });
