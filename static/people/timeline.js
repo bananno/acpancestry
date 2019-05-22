@@ -61,6 +61,12 @@ function getPersonTimelineItems(person) {
       return false;
     }
 
+    // Avoid duplicate timeline entries. Skip if the event has been added for the main person or
+    // for another family member.
+    if (list.filter(item => item._id == item._id).length) {
+      return false;
+    }
+
     const afterPersonsBirth = person.birth && (isDateBeforeDate(person.birth.date, item.date)
       || areDatesEqual(person.birth.date, item.date));
 
