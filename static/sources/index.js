@@ -44,6 +44,7 @@ const sourceCategories = [
   {
     path: 'indexOnly',
     title: 'Index-only Records',
+    route: viewSourcesIndexOnly,
   },
   {
     path: 'other',
@@ -259,11 +260,28 @@ function viewSourcesDraft() {
   showSourceList(list2, true, true, false);
 }
 
+function viewSourcesIndexOnly() {
+  const list = DATABASE.sources.filter(source => {
+    return source.type == 'index';
+  });
+
+  rend(
+    '<p style="padding: 10px 0;">' +
+      'These sources come from online databases. Some of these records are transcribed from ' +
+      'original documents and images which are not directly available online. Others are from ' +
+      'web-only databases.' +
+    '</p>'
+  );
+
+  showSourceList(list, true, true, true);
+}
+
 function viewSourcesOther() {
   const list = DATABASE.sources.filter(source => {
     return source.type != 'photo'
       && source.type != 'grave'
       && source.type != 'newspaper'
+      && source.type != 'index'
       && !source.group.match('Census')
       && source.group != 'World War I draft'
       && source.group != 'World War II draft';
