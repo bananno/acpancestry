@@ -29,10 +29,12 @@ const sourceCategories = [
   {
     path: 'censusState',
     title: 'US State Census',
+    route: viewSourcesCensusState,
   },
   {
     path: 'censusOther',
     title: 'Other Census',
+    route: viewSourcesCensusOther,
   },
   {
     path: 'draft',
@@ -219,4 +221,42 @@ function viewSourcesCensusUSA() {
       );
     });
   }
+}
+
+function viewSourcesCensusState() {
+  const list = DATABASE.sources.filter(isItemStateCensus);
+
+  list.forEach((source, i) => {
+    rend(
+      '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
+        linkToSourceGroup(source, source.group + ' - ' + source.title) +
+      '</p>' +
+      '<p style="padding-top: 2px; padding-left: 10px;">' +
+        source.location.format +
+      '</p>'
+    );
+  });
+}
+
+function isItemStateCensus(source) {
+  return source.group.match('Census Minnesota')
+    || source.group.match('Census Nebraska');
+}
+
+function viewSourcesCensusOther() {
+  const list = DATABASE.sources.filter(source => {
+    return source.group.match('Census') && !source.group.match('Census USA')
+      && !isItemStateCensus(source);
+  });
+
+  list.forEach((source, i) => {
+    rend(
+      '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
+        linkToSourceGroup(source, source.group + ' - ' + source.title) +
+      '</p>' +
+      '<p style="padding-top: 2px; padding-left: 10px;">' +
+        source.location.format +
+      '</p>'
+    );
+  });
 }
