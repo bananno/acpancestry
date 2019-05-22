@@ -25,10 +25,22 @@ function sourceListitemCemeteryOrNewspaper(rootSource, entryName, numEntries, hi
   );
 }
 
-function showSourceList(sourceList, showLocation, showDate, showGroup) {
-  sourceList.forEach((source, i) => {
+function showSourceList(sourceList, showLocation, showDate, showGroup, getHeaderName) {
+  let previousHeader;
+  let firstItem = true;
+
+  sourceList.forEach(source => {
+    if (getHeaderName) {
+      let newHeader = getHeaderName(source);
+      if (newHeader != previousHeader) {
+        rend('<h2>' + newHeader + '</h2>');
+        previousHeader = newHeader;
+        firstItem = true;
+      }
+    }
+
     rend(
-      '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
+      '<p style="padding-top: ' + (firstItem ? '5' : '15') + 'px; padding-left: 10px;">' +
         linkToSource(source, (showGroup ? source.group + ' - ' : '') + source.title) +
       '</p>'
     );
@@ -48,5 +60,7 @@ function showSourceList(sourceList, showLocation, showDate, showGroup) {
         '</p>'
       );
     }
+
+    firstItem = false;
   });
 }

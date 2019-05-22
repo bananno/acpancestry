@@ -219,7 +219,14 @@ function viewSourcesCensusUSA() {
 
 function viewSourcesCensusState() {
   const list = DATABASE.sources.filter(isItemStateCensus);
-  showSourceList(list, true, true, true);
+
+  list.sort((a, b) => {
+    return (a.group < b.group) ? -1 : 0;
+  });
+
+  const getHeaderName = source => USA_STATES[source.location.region1];
+
+  showSourceList(list, true, true, true, getHeaderName);
 }
 
 function isItemStateCensus(source) {
