@@ -38,7 +38,8 @@ const sourceCategories = [
   },
   {
     path: 'draft',
-    title: 'WWI & WWII Draft',
+    title: 'Military Draft Registration',
+    route: viewSourcesDraft,
   },
   {
     path: 'indexOnly',
@@ -262,6 +263,28 @@ function viewSourcesCensusOther() {
   });
 }
 
+function viewSourcesDraft() {
+  const list1 = DATABASE.sources.filter(source => {
+    return source.group == 'World War I draft';
+  });
+
+  const list2 = DATABASE.sources.filter(source => {
+    return source.group == 'World War I draft';
+  });
+
+  rend('<h2>World War I</h2>');
+
+  list1.forEach((source, i) => {
+    showSourceInList(source, true, true, source.title);
+  });
+
+  rend('<h2>World War II</h2>');
+
+  list2.forEach((source, i) => {
+    showSourceInList(source, i, true, true, source.title);
+  });
+}
+
 function viewSourcesOther() {
   const list = DATABASE.sources.filter(source => {
     return source.type != 'photo'
@@ -287,4 +310,16 @@ function viewSourcesOther() {
       '</p>'
     );
   });
+}
+
+function showSourceInList(source, i, showLocation, showDate, title) {
+  rend(
+    '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
+      linkToSource(source, title) +
+    '</p>' +
+    (showLocation ? ('<p style="padding-top: 2px; padding-left: 10px;">' + source.location.format
+      + '</p>') : '') +
+    (showDate ? ('<p style="padding-top: 2px; padding-left: 10px;">' + source.date.format
+      + '</p>') : '')
+  );
 }
