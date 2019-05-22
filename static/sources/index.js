@@ -213,16 +213,7 @@ function viewSourcesCensusUSA() {
       rend('<h2>' + year + '</h2>');
     }
 
-    list.forEach((source, i) => {
-      rend(
-        '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
-          linkToSourceGroup(source, source.title) +
-        '</p>' +
-        '<p style="padding-top: 2px; padding-left: 10px;">' +
-          source.location.format +
-        '</p>'
-      );
-    });
+    showSourceList(list, true, false, false);
   }
 }
 
