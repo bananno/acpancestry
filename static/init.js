@@ -29,3 +29,9 @@ function createHeaderLinks() {
     $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');
   });
 }
+
+Array.prototype.trueSort = function(callback) {
+  this.sort((a, b) => {
+    return callback(a, b) ? -1 : 0;
+  });
+};

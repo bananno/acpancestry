@@ -184,8 +184,8 @@ function createListOfNewspapersOrCemeteries(sourceType, sourceList) {
     sourcesInGroup[groupName].push(source);
   });
 
-  groupNameList.sort((a, b) => {
-    return (a.header != 'Other' && a.header < b.header) ? -1 : 0;
+  groupNameList.trueSort((a, b) => {
+    return a.header != 'Other' && a.header < b.header;
   });
 
   return [groupNameList, sourcesInGroup];
@@ -220,8 +220,8 @@ function viewSourcesCensusUSA() {
 function viewSourcesCensusState() {
   const list = DATABASE.sources.filter(isItemStateCensus);
 
-  list.sort((a, b) => {
-    return (a.group < b.group) ? -1 : 0;
+  list.trueSort((a, b) => {
+    return a.group < b.group;
   });
 
   const getHeaderName = source => USA_STATES[source.location.region1];
