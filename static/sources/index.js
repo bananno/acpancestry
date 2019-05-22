@@ -227,17 +227,7 @@ function viewSourcesCensusUSA() {
 
 function viewSourcesCensusState() {
   const list = DATABASE.sources.filter(isItemStateCensus);
-
-  list.forEach((source, i) => {
-    rend(
-      '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
-        linkToSourceGroup(source, source.group + ' - ' + source.title) +
-      '</p>' +
-      '<p style="padding-top: 2px; padding-left: 10px;">' +
-        source.location.format +
-      '</p>'
-    );
-  });
+  showSourceList(list, true, true, true);
 }
 
 function isItemStateCensus(source) {
@@ -251,16 +241,7 @@ function viewSourcesCensusOther() {
       && !isItemStateCensus(source);
   });
 
-  list.forEach((source, i) => {
-    rend(
-      '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
-        linkToSourceGroup(source, source.group + ' - ' + source.title) +
-      '</p>' +
-      '<p style="padding-top: 2px; padding-left: 10px;">' +
-        source.location.format +
-      '</p>'
-    );
-  });
+  showSourceList(list, true, true, true);
 }
 
 function viewSourcesDraft() {
@@ -269,20 +250,13 @@ function viewSourcesDraft() {
   });
 
   const list2 = DATABASE.sources.filter(source => {
-    return source.group == 'World War I draft';
+    return source.group == 'World War II draft';
   });
 
   rend('<h2>World War I</h2>');
-
-  list1.forEach((source, i) => {
-    showSourceInList(source, true, true, source.title);
-  });
-
+  showSourceList(list1, true, true, false);
   rend('<h2>World War II</h2>');
-
-  list2.forEach((source, i) => {
-    showSourceInList(source, i, true, true, source.title);
-  });
+  showSourceList(list2, true, true, false);
 }
 
 function viewSourcesOther() {
@@ -295,31 +269,31 @@ function viewSourcesOther() {
       && source.group != 'World War II draft';
   });
 
-  rend(list.length);
-
-  list.forEach((source, i) => {
-    rend(
-      '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
-        linkToSourceGroup(source, source.group + ' - ' + source.title) +
-      '</p>' +
-      '<p style="padding-top: 2px; padding-left: 10px;">' +
-        source.location.format +
-      '</p>' +
-      '<p style="padding-top: 2px; padding-left: 10px;">' +
-        source.date.format +
-      '</p>'
-    );
-  });
+  showSourceList(list, true, true, true);
 }
 
-function showSourceInList(source, i, showLocation, showDate, title) {
-  rend(
-    '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
-      linkToSource(source, title) +
-    '</p>' +
-    (showLocation ? ('<p style="padding-top: 2px; padding-left: 10px;">' + source.location.format
-      + '</p>') : '') +
-    (showDate ? ('<p style="padding-top: 2px; padding-left: 10px;">' + source.date.format
-      + '</p>') : '')
-  );
+function showSourceList(sourceList, showLocation, showDate, showGroup) {
+  sourceList.forEach((source, i) => {
+    rend(
+      '<p style="padding-top: ' + (i == 0 ? '5' : '15') + 'px; padding-left: 10px;">' +
+        linkToSource(source, (showGroup ? source.group + ' - ' : '') + source.title) +
+      '</p>'
+    );
+
+    if (showLocation) {
+      rend(
+        '<p style="padding-top: 2px; padding-left: 10px;">' +
+          source.location.format +
+        '</p>'
+      );
+    }
+
+    if (showDate) {
+      rend(
+        '<p style="padding-top: 2px; padding-left: 10px;">' +
+          source.date.format +
+        '</p>'
+      );
+    }
+  });
 }
