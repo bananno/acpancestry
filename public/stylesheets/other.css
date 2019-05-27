@@ -98,17 +98,22 @@
 }
 
 .timeline-item .column {
-  display: inline-block;
   vertical-align: text-top;
   padding: 5px;
 }
 
-.timeline-item .column1 {
-  width: 250px;
-}
+@media screen and (min-width: 650px) {
+  .timeline-item .column {
+    display: inline-block;
+  }
 
-.timeline-item .column2 {
-  width: calc(100% - 250px);
+  .timeline-item .column1 {
+    width: 250px;
+  }
+
+  .timeline-item .column2 {
+    width: calc(100% - 250px);
+  }
 }
 
 /* OTHER */
