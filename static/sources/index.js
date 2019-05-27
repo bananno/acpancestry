@@ -303,5 +303,24 @@ function viewSourcesOther() {
       && source.group != 'World War II draft';
   });
 
-  showSourceList(list, true, true, true);
+  list.trueSort((a, b) => a.group < b.group);
+
+  const listBaptism = list.filter(source => source.group.match('Baptism'));
+  const listMarriage = list.filter(source => source.group.match('Marriage'));
+  const listPassengers = list.filter(source => source.group.match('Passenger'));
+
+  const listOther = list.filter(source => {
+    return !source.group.match('Baptism')
+      && !source.group.match('Marriage')
+      && !source.group.match('Passenger');
+  });
+
+  rend('<h2>Baptism</h2>');
+  showSourceList(listBaptism, true, true, true);
+  rend('<h2>Marriage</h2>');
+  showSourceList(listMarriage, true, true, true);
+  rend('<h2>Immigration & Travel</h2>');
+  showSourceList(listPassengers, true, true, true);
+  rend('<h2>Other</h2>');
+  showSourceList(listOther, true, true, true);
 }
