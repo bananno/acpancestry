@@ -1,4 +1,10 @@
 
+const testList = [];
+
+function test(callback) {
+  testList.push(callback);
+}
+
 function runTests() {
   if (ENV == 'dev') {
     new RunTests();
@@ -8,11 +14,22 @@ function runTests() {
 class RunTests {
   constructor() {
     this.realDatabase = {...DATABASE};
-    this.stubDatabase();
+
+    const methods = {
+      title: this.setTitle,
+      stub: this.stubDatabase,
+      assertEqual: this.assertEqual,
+    };
+
+    testList.forEach(callback => {
+      this.clearDatabase();
+      callback(methods);
+    });
+
     this.restoreVariables();
   }
 
-  stubDatabase() {
+  clearDatabase() {
     DATABASE.people = [];
     DATABASE.sources = [];
     DATABASE.events = [];
@@ -25,5 +42,16 @@ class RunTests {
     for (let db in DATABASE) {
       DATABASE[db] = this.realDatabase[db];
     }
+  }
+
+  stubDatabase() {
+  }
+
+  setTitle(str) {
+    rend('<h2 style="color:red">[title] ' + str + '</h2>');
+  }
+
+  assertEqual(subtitle, expectedValue, actualValue) {
+    rend('<p style="color:blue">[test] ' + subtitle + '</p>')
   }
 }
