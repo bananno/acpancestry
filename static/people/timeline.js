@@ -63,7 +63,7 @@ function getPersonTimelineItems(person) {
 
     // Avoid duplicate timeline entries. Skip if the event has been added for the main person or
     // for another family member.
-    if (list.filter(item => item._id == item._id).length) {
+    if (list.filter(it => it._id == item._id).length) {
       return false;
     }
 
