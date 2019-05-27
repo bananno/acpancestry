@@ -28,6 +28,10 @@ function loadContent() {
     return viewPlaces();
   }
 
+  if (PATH == 'test' && ENV == 'dev') {
+    return viewTests();
+  }
+
   return pageNotFound();
 }
 
@@ -40,6 +44,11 @@ function viewPeople() {
   setPageTitle('People');
   rend('<h1>All People</h1>');
   rend($makePeopleList(DATABASE.people, 'photo'));
+}
+
+function viewTests() {
+  setPageTitle('Tests');
+  rend('<h1>Tests</h1>');
 }
 
 function pageNotFound() {

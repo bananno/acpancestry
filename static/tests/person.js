@@ -13,9 +13,9 @@ test(t => {
 
   const event1 = {};
 
-  t.stub();
+  t.stubDatabase();
 
-  t.title('Person timeline family events');
+  t.setTitle('Person timeline family events');
 
   t.assertEqual('Person timeline includes child birth.',
     true,

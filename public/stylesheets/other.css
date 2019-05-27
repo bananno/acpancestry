@@ -116,6 +116,12 @@
   }
 }
 
+/* TESTS */
+
+.unit-test.test-passing-false {
+  color: red;
+}
+
 /* OTHER */
 
 .error {
