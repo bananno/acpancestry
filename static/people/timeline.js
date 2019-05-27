@@ -57,54 +57,7 @@ function getPersonTimelineItems(person) {
   }
 
   function includeRelativeItem(relative, relationship, item) {
-    if (item.people.indexOf(relative) < 0) {
-      return false;
-    }
-
-    // Avoid duplicate timeline entries. Skip if the event has been added for the main person or
-    // for another family member.
-    if (list.filter(it => it._id == item._id).length) {
-      return false;
-    }
-
-    const afterPersonsBirth = person.birth && (isDateBeforeDate(person.birth.date, item.date)
-      || areDatesEqual(person.birth.date, item.date));
-
-    const beforePersonsDeath = person.death && (isDateBeforeDate(item.date, person.death.date)
-      || areDatesEqual(item.date, person.death.date));
-
-    const duringPersonsLife = afterPersonsBirth && beforePersonsDeath;
-
-    // include parent's death if it happens before person's death.
-    if (relationship == 'parent') {
-      return item.title == 'death' && beforePersonsDeath;
-    }
-
-    // include siblings's birth or death if it happens during person's life.
-    if (relationship == 'sibling') {
-      return (item.title == 'birth' || item.title == 'death') && duringPersonsLife;
-    }
-
-    // always include spouse's birth & death; exclude other spouse events.
-    if (relationship == 'spouse') {
-      return item.title == 'birth' || item.title == 'death';
-    }
-
-    if (relationship == 'child') {
-      // always include child's birth.
-      if (item.title == 'birth') {
-        return true;
-      }
-      // include child's death if it is during person's life or within 5 years after person's death.
-      if (item.title == 'death') {
-        return item.date.year && person.death.date.year
-          && item.date.year - person.death.date.year < 5;
-      }
-      // include other child events if they are during person's life.
-      return beforePersonsDeath;
-    }
-
-    return false;
+    return shouldIncludeTimelineFamilyItem(person, list, relative, relationship, item);
   }
 
   const dateParts = ['year', 'month', 'day'];
@@ -119,6 +72,57 @@ function getPersonTimelineItems(person) {
   });
 
   return list;
+}
+
+function shouldIncludeTimelineFamilyItem(person, list, relative, relationship, item) {
+  if (item.people.indexOf(relative) < 0) {
+    return false;
+  }
+
+  // Avoid duplicate timeline entries. Skip if the event has been added for the main person or
+  // for another family member.
+  if (list.filter(it => it._id == item._id).length) {
+    return false;
+  }
+
+  const afterPersonsBirth = person.birth && (isDateBeforeDate(person.birth.date, item.date)
+    || areDatesEqual(person.birth.date, item.date));
+
+  const beforePersonsDeath = person.death && (isDateBeforeDate(item.date, person.death.date)
+    || areDatesEqual(item.date, person.death.date));
+
+  const duringPersonsLife = afterPersonsBirth && beforePersonsDeath;
+
+  // include parent's death if it happens before person's death.
+  if (relationship == 'parent') {
+    return item.title == 'death' && beforePersonsDeath;
+  }
+
+  // include siblings's birth or death if it happens during person's life.
+  if (relationship == 'sibling') {
+    return (item.title == 'birth' || item.title == 'death') && duringPersonsLife;
+  }
+
+  // always include spouse's birth & death; exclude other spouse events.
+  if (relationship == 'spouse') {
+    return item.title == 'birth' || item.title == 'death';
+  }
+
+  if (relationship == 'child') {
+    // always include child's birth.
+    if (item.title == 'birth') {
+      return true;
+    }
+    // include child's death if it is during person's life or within 5 years after person's death.
+    if (item.title == 'death') {
+      return item.date.year && person.death.date.year
+        && item.date.year - person.death.date.year < 5;
+    }
+    // include other child events if they are during person's life.
+    return beforePersonsDeath;
+  }
+
+  return false;
 }
 
 function showPersonTimelineItem(item) {
