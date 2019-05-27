@@ -259,9 +259,22 @@ function viewSourcesDraft() {
 }
 
 function viewSourcesIndexOnly() {
-  const list = DATABASE.sources.filter(source => {
-    return source.type == 'index';
+  const listBirth = DATABASE.sources.filter(source => {
+    return source.type == 'index' && source.group.match('Birth Index');
   });
+
+  const listDeath = DATABASE.sources.filter(source => {
+    return source.type == 'index' && source.group.match('Death Index');
+  });
+
+  const listOther = DATABASE.sources.filter(source => {
+    return source.type == 'index' && !source.group.match('Birth Index')
+      && !source.group.match('Death Index');
+  });
+
+  listBirth.trueSort((a, b) => a.group < b.group);
+  listDeath.trueSort((a, b) => a.group < b.group);
+  listOther.trueSort((a, b) => a.group < b.group);
 
   rend(
     '<p style="padding: 10px 0;">' +
@@ -271,7 +284,12 @@ function viewSourcesIndexOnly() {
     '</p>'
   );
 
-  showSourceList(list, true, true, true);
+  rend('<h2>Birth Index</h2>');
+  showSourceList(listBirth, true, true, true);
+  rend('<h2>Death Index</h2>');
+  showSourceList(listDeath, true, true, true);
+  rend('<h2>Other</h2>');
+  showSourceList(listOther, true, true, true);
 }
 
 function viewSourcesOther() {
