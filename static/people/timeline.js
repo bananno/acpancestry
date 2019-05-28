@@ -4,11 +4,8 @@ function showPersonTimeline(person) {
     return;
   }
 
-  rend('<h2>Timeline</h2>');
-
-  const items = getPersonTimelineItems(person);
-
   rend(
+    '<h2>Timeline</h2>' +
     '<div class="timeline-key">' +
       '<div class="timeline-life">life events</div>' +
       '<div class="timeline-source">sources</div>' +
@@ -16,196 +13,208 @@ function showPersonTimeline(person) {
     '</div>'
   );
 
-  items.forEach(showPersonTimelineItem);
+  new PersonTimeline(person, true);
 }
 
-function getPersonTimelineItems(person) {
-  const list = [];
+class PersonTimeline {
+  constructor(person, createNow) {
+    this.person = person;
 
-  DATABASE.events.forEach(item => {
-    if (item.people.indexOf(person) >= 0) {
-      let newItem = {...item};
-      newItem.event = true;
-      list.push(newItem);
+    if (createNow) {
+      this.createEventList();
+      this.sortList();
+      this.renderTimeline();
+    } else {
+      this.list = [];
     }
-  });
+  }
 
-  DATABASE.sources.forEach(item => {
-    if (item.people.indexOf(person) >= 0) {
-      let newItem = {...item};
-      newItem.source = true;
-      list.push(newItem);
-    }
-  });
+  createEventList() {
+    this.list = [];
 
-  ['parent', 'sibling', 'spouse', 'child'].forEach(relationship => {
-    const relationshipPlural = relationship == 'child' ? 'children' : relationship + 's';
-    person[relationshipPlural].forEach(relative => {
-      addFamilyEvents(relative, relationship);
-    });
-  });
-
-  function addFamilyEvents(relative, relationship) {
     DATABASE.events.forEach(item => {
-      if (includeRelativeItem(relative, relationship, item)) {
+      if (item.people.indexOf(this.person) >= 0) {
+        let newItem = {...item};
+        newItem.event = true;
+        this.list.push(newItem);
+      }
+    });
+
+    DATABASE.sources.forEach(item => {
+      if (item.people.indexOf(this.person) >= 0) {
+        let newItem = {...item};
+        newItem.source = true;
+        this.list.push(newItem);
+      }
+    });
+
+    ['parent', 'sibling', 'spouse', 'child'].forEach(relationship => {
+      this.person[pluralize(relationship)].forEach(relative => {
+        this.addFamilyEventsToList(relative, relationship);
+      });
+    });
+  }
+
+  addFamilyEventsToList(relative, relationship) {
+    DATABASE.events.forEach(item => {
+      if (this.shouldIncludeFamilyEvent(relative, relationship, item)) {
         let newItem = {...item};
         newItem.relationship = relationship;
         newItem.event = true;
-        list.push(newItem);
+        this.list.push(newItem);
       }
     });
   }
 
-  function includeRelativeItem(relative, relationship, item) {
-    return shouldIncludeTimelineFamilyItem(person, list, relative, relationship, item);
-  }
-
-  const dateParts = ['year', 'month', 'day'];
-
-  list.trueSort((a, b) => {
-    // if there is no date on either item, the cemetery should be rated higher.
-    if (!a.date.year && !b.date.year) {
-      return a.type == 'grave';
+  shouldIncludeFamilyEvent(relative, relationship, item) {
+    if (item.people.indexOf(relative) < 0) {
+      return false;
     }
 
-    return isDateBeforeDate(a.date, b.date);
-  });
+    // Avoid duplicate timeline entries. Skip if the event has been added for the main person or
+    // for another family member.
+    if (this.list.filter(it => it._id == item._id).length) {
+      return false;
+    }
 
-  return list;
-}
+    const afterPersonsBirth = this.person.birth
+      && (isDateBeforeDate(this.person.birth.date, item.date)
+        || areDatesEqual(this.person.birth.date, item.date));
 
-function shouldIncludeTimelineFamilyItem(person, list, relative, relationship, item) {
-  if (item.people.indexOf(relative) < 0) {
+    const beforePersonsDeath = this.person.death
+      && (isDateBeforeDate(item.date, this.person.death.date)
+        || areDatesEqual(item.date, this.person.death.date));
+
+    const duringPersonsLife = afterPersonsBirth && beforePersonsDeath;
+
+    // include parent's death if it happens before person's death.
+    if (relationship == 'parent') {
+      return item.title == 'death' && beforePersonsDeath;
+    }
+
+    // include siblings's birth or death if it happens during person's life.
+    if (relationship == 'sibling') {
+      return (item.title == 'birth' || item.title == 'death') && duringPersonsLife;
+    }
+
+    // always include spouse's birth & death; exclude other spouse events.
+    if (relationship == 'spouse') {
+      return item.title == 'birth' || item.title == 'death';
+    }
+
+    if (relationship == 'child') {
+      // always include child's birth.
+      if (item.title == 'birth') {
+        return true;
+      }
+      // include child's death if it is during person's life or within 5 years after person's death.
+      if (item.title == 'death') {
+        return item.date.year && person.death.date.year
+          && item.date.year - person.death.date.year < 5;
+      }
+      // include other child events if they are during person's life.
+      return beforePersonsDeath;
+    }
+
     return false;
   }
 
-  // Avoid duplicate timeline entries. Skip if the event has been added for the main person or
-  // for another family member.
-  if (list.filter(it => it._id == item._id).length) {
-    return false;
+  sortList() {
+    this.list.trueSort((a, b) => {
+      // if there is no date on either item, the cemetery should be rated higher.
+      if (!a.date.year && !b.date.year) {
+        return a.type == 'grave';
+      }
+      return isDateBeforeDate(a.date, b.date);
+    });
   }
 
-  const afterPersonsBirth = person.birth && (isDateBeforeDate(person.birth.date, item.date)
-    || areDatesEqual(person.birth.date, item.date));
-
-  const beforePersonsDeath = person.death && (isDateBeforeDate(item.date, person.death.date)
-    || areDatesEqual(item.date, person.death.date));
-
-  const duringPersonsLife = afterPersonsBirth && beforePersonsDeath;
-
-  // include parent's death if it happens before person's death.
-  if (relationship == 'parent') {
-    return item.title == 'death' && beforePersonsDeath;
+  renderTimeline() {
+    this.list.forEach(this.renderItem);
   }
 
-  // include siblings's birth or death if it happens during person's life.
-  if (relationship == 'sibling') {
-    return (item.title == 'birth' || item.title == 'death') && duringPersonsLife;
-  }
+  renderItem(item) {
+    const $div = $('<div class="timeline-item">');
+    rend($div);
 
-  // always include spouse's birth & death; exclude other spouse events.
-  if (relationship == 'spouse') {
-    return item.title == 'birth' || item.title == 'death';
-  }
+    const $col1 = $('<div class="column column1">').appendTo($div);
+    const $col2 = $('<div class="column column2">').appendTo($div);
 
-  if (relationship == 'child') {
-    // always include child's birth.
-    if (item.title == 'birth') {
-      return true;
-    }
-    // include child's death if it is during person's life or within 5 years after person's death.
-    if (item.title == 'death') {
-      return item.date.year && person.death.date.year
-        && item.date.year - person.death.date.year < 5;
-    }
-    // include other child events if they are during person's life.
-    return beforePersonsDeath;
-  }
+    let showPeopleList = true;
 
-  return false;
-}
-
-function showPersonTimelineItem(item) {
-  const $div = $('<div class="timeline-item">');
-  rend($div);
-
-  const $col1 = $('<div class="column column1">').appendTo($div);
-  const $col2 = $('<div class="column column2">').appendTo($div);
-
-  let showPeopleList = true;
-
-  if (item.relationship) {
-    $div.addClass('timeline-family');
-  } else if (item.event) {
-    $div.addClass('timeline-life');
-    if (item.people.length == 1) {
-      showPeopleList = false;
-    }
-  } else {
-    $div.addClass('timeline-source');
-  }
-
-  if (item.date.format) {
-    $col1.append('<p><b>' + item.date.format + '</b></p>');
-  } else if ($('.timeline-no-date').length == 0 && item.type != 'grave') {
-    $div.before('<div class="timeline-no-date">No date:</div>')
-  }
-
-  if (item.location.format) {
-    $col1.append('<p>' + item.location.format + '</p>');
-  }
-
-  if (item.location.notes) {
-    $col1.append('<p><i>(' + item.location.notes + ')</i></p>');
-  }
-
-  if (item.source) {
-    if (item.type == 'index') {
-      $col2.append('<p><b>source</b></p>');
-    } else if (item.type == 'grave') {
-      $col2.append('<p><b>cemetery</b></p>');
-    } else if (item.type == 'newspaper') {
-      $col2.append('<p><b>newspaper article</b></p>');
-    } else {
-      $col2.append('<p><b>' + item.type + '</b></p>');
-    }
-
-    $col2.append(
-      '<p style="margin-top: 5px;">' +
-        linkToSource(item, item.group + (item.type == 'grave' ? '' : ' - ' + item.title)) +
-      '</p>'
-    );
-
-    if (item.images.length) {
-      $col1.append(makeImage(item.images[0], 100, 100));
-    }
-  } else {
     if (item.relationship) {
-      $col2.append('<p><b>' + item.title + ' of ' + item.relationship + '</b></p>');
+      $div.addClass('timeline-family');
+    } else if (item.event) {
+      $div.addClass('timeline-life');
+      if (item.people.length == 1) {
+        showPeopleList = false;
+      }
     } else {
-      $col2.append('<p><b>' + item.title + '</b></p>');
+      $div.addClass('timeline-source');
     }
-  }
 
-  if (showPeopleList) {
-    $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
-  }
+    if (item.date.format) {
+      $col1.append('<p><b>' + item.date.format + '</b></p>');
+    } else if ($('.timeline-no-date').length == 0 && item.type != 'grave') {
+      $div.before('<div class="timeline-no-date">No date:</div>')
+    }
 
-  if (item.source) {
-    if (item.summary) {
+    if (item.location.format) {
+      $col1.append('<p>' + item.location.format + '</p>');
+    }
+
+    if (item.location.notes) {
+      $col1.append('<p><i>(' + item.location.notes + ')</i></p>');
+    }
+
+    if (item.source) {
+      if (item.type == 'index') {
+        $col2.append('<p><b>source</b></p>');
+      } else if (item.type == 'grave') {
+        $col2.append('<p><b>cemetery</b></p>');
+      } else if (item.type == 'newspaper') {
+        $col2.append('<p><b>newspaper article</b></p>');
+      } else {
+        $col2.append('<p><b>' + item.type + '</b></p>');
+      }
+
       $col2.append(
         '<p style="margin-top: 5px;">' +
-          item.summary.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
+          linkToSource(item, item.group + (item.type == 'grave' ? '' : ' - ' + item.title)) +
         '</p>'
       );
+
+      if (item.images.length) {
+        $col1.append(makeImage(item.images[0], 100, 100));
+      }
+    } else {
+      if (item.relationship) {
+        $col2.append('<p><b>' + item.title + ' of ' + item.relationship + '</b></p>');
+      } else {
+        $col2.append('<p><b>' + item.title + '</b></p>');
+      }
     }
-  } else {
-    if (item.notes) {
-      $col2.append(
-        '<p style="margin-top: 5px;">' +
-          item.notes.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
-        '</p>'
-      );
+
+    if (showPeopleList) {
+      $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
+    }
+
+    if (item.source) {
+      if (item.summary) {
+        $col2.append(
+          '<p style="margin-top: 5px;">' +
+            item.summary.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
+          '</p>'
+        );
+      }
+    } else {
+      if (item.notes) {
+        $col2.append(
+          '<p style="margin-top: 5px;">' +
+            item.notes.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
+          '</p>'
+        );
+      }
     }
   }
 }

@@ -247,3 +247,10 @@ function isDateBeforeDate(date1, date2) {
 
   return false;
 }
+
+function pluralize(word) {
+  return {
+    child: 'children',
+    Child: 'Children',
+  }[word] || word + 's';
+}
