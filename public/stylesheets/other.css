@@ -118,7 +118,11 @@
 
 /* TESTS */
 
-.unit-test.test-passing-false {
+.unit-tests {
+  margin-left: 30px;
+}
+
+.unit-tests.test-passing-false {
   color: red;
 }
 

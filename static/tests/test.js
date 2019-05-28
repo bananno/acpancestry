@@ -20,6 +20,7 @@ class RunTests {
 
     const methods = {
       setTitle: this.displayOnPage ? this.setTitle : (() => {}),
+      setTitle2: this.displayOnPage ? this.setTitle2 : (() => {}),
       stubDatabase: this.stubDatabase.bind(this),
       assertEqual: this.assertEqual.bind(this),
     };
@@ -60,7 +61,11 @@ class RunTests {
   }
 
   setTitle(str) {
-    rend('<h2> ' + str + '</h2>');
+    rend('<h2>' + str + '</h2>');
+  }
+
+  setTitle2(str) {
+    rend('<p><b>' + str + '</b></h2>');
   }
 
   assertEqual(subtitle, expectedValue, actualValue) {
@@ -73,7 +78,8 @@ class RunTests {
     }
 
     if (this.displayOnPage) {
-      rend('<p class="unit-test test-passing-' + pass + '"> ' + subtitle + '</p>');
+      rend('<ul><li class="unit-tests test-passing-' + pass + '">'
+        + subtitle + '</li></ul>');
     }
   }
 }
