@@ -156,4 +156,34 @@ test(t => {
     false,
     shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'child', testEvent),
   );
+
+  testEvent.title = 'other event';
+  testEvent.date.year = 1950;
+  t.assertEqual('include other child events if during person\'s life',
+    true,
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'child', testEvent),
+  );
+
+  testEvent.title = 'other event';
+  testEvent.date.year = 1981;
+  t.assertEqual('exclude other child events if after person\'s death',
+    false,
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'child', testEvent),
+  );
+
+  t.setTitle2('Other');
+
+  testEvent.title = 'other event';
+  testEvent.date.year = 1950;
+  t.assertEqual('include family events that are not yet in the timeline list',
+    true,
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'child', testEvent),
+  );
+
+  testEvent.title = 'other event';
+  testEvent.date.year = 1950;
+  t.assertEqual('exclude family events that are already added to the list',
+    false,
+    shouldIncludeTimelineFamilyItem(testPerson1, [testEvent], testPerson2, 'child', testEvent),
+  );
 });
