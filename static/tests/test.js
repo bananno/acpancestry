@@ -31,11 +31,14 @@ class RunTests {
 
     this.restoreVariables();
 
+    let percentage = 100;
+
     if (this.testsFailing) {
       console.warn(this.testsFailing + ' test' + (this.testsFailing > 1 ? 's' : '') + ' failing');
+      percentage = Math.round(this.testsPassing / (this.testsFailing + this.testsPassing) * 100);
     }
 
-    console.log(this.testsPassing + ' tests passing.');
+    console.log(this.testsPassing + ' tests passing (' + percentage + '%)');
   }
 
   clearDatabase() {

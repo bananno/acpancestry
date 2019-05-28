@@ -1,58 +1,79 @@
 
 test(t => {
-  const personA = { name: 'Person A', customId: 'PersonA', _id: '000A' };
-  const personB = { name: 'Person B', customId: 'PersonB', _id: '000B' };
-  const personC = { name: 'Person C', customId: 'PersonC', _id: '000C' };
-
-  const testPerson = {
-    name: 'Test Person',
-    customId: 'TestPerson',
-    _id: '0000',
-    children: [personA, personB, personC],
+  const testPerson1 = {
+    name: 'Test Person 1',
+    customId: 'TestPerson1',
+    _id: '0001',
+    birth: { date: { year: 1900, month: 1, day: 1 }},
+    death: { date: { year: 1980, month: 1, day: 1 }},
   };
 
-  const event1 = {};
+  const testPerson2 = {
+    name: 'Test Person 2',
+    customId: 'TestPerson2',
+    _id: '0002',
+  };
+
+  const testEvent = {
+    people: [testPerson2],
+    date: { year: 1920, month: 1, day: 1 },
+  };
 
   t.stubDatabase();
 
   t.setTitle('Person timeline family events');
 
+  // shouldIncludeTimelineFamilyItem arguments: person, list, relative, relationship, item
+
+  // CHILD EVENTS
+
+  testEvent.title = 'birth';
   t.assertEqual('Person timeline includes child birth.',
     true,
-    includeTimelineEvent(testPerson, event1),
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'child', testEvent),
   );
 
+  testEvent.title = 'death';
+  testEvent.date.year = 1950;
   t.assertEqual('Person timeline includes child death if during person\'s life.',
     true,
-    includeTimelineEvent(testPerson, event1),
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'child', testEvent),
   );
 
+  testEvent.title = 'death';
+  testEvent.date.year = 1984;
   t.assertEqual('Person timeline includes child death if within 5 years of person\'s life.',
     true,
-    includeTimelineEvent(testPerson, event1),
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'child', testEvent),
   );
 
+  testEvent.title = 'death';
+  testEvent.date.year = 1986;
   t.assertEqual('Person timeline excludes child death if more than 5 years after person\'s death.',
-    true,
-    includeTimelineEvent(testPerson, event1),
+    false,
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'child', testEvent),
   );
 
+  // SPOUSE EVENTS
+
+  testEvent.title = 'birth';
+  testEvent.date.year = 1890;
   t.assertEqual('Person timeline includes spouse birth.',
     true,
-    includeTimelineEvent(testPerson, event1),
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'spouse', testEvent),
   );
 
+  testEvent.title = 'death';
+  testEvent.date.year = 1990;
   t.assertEqual('Person timeline includes spouse death.',
     true,
-    includeTimelineEvent(testPerson, event1),
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'spouse', testEvent),
   );
 
+  testEvent.title = 'other event';
+  testEvent.date.year = 1920;
   t.assertEqual('Person timeline excludes other spouse events.',
     false,
-    includeTimelineEvent(testPerson, event1),
+    shouldIncludeTimelineFamilyItem(testPerson1, [], testPerson2, 'spouse', testEvent),
   );
 });
-
-function includeTimelineEvent() {
-  return true;
-}
