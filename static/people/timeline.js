@@ -62,13 +62,13 @@ function getPersonTimelineItems(person) {
 
   const dateParts = ['year', 'month', 'day'];
 
-  list.sort((secondItem, firstItem) => {
+  list.trueSort((a, b) => {
     // if there is no date on either item, the cemetery should be rated higher.
-    if (!firstItem.date.year && !secondItem.date.year) {
-      return secondItem.type == 'grave' ? -1 : 1;
+    if (!a.date.year && !b.date.year) {
+      return a.type == 'grave';
     }
 
-    return isDateBeforeDate(secondItem.date, firstItem.date) ? -1 : 1;
+    return isDateBeforeDate(a.date, b.date);
   });
 
   return list;
