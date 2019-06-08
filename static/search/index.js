@@ -18,6 +18,7 @@ function viewSearch() {
   viewSearchCemeteriesOrNewspapers('Newspapers', 'Newspaper Articles', 'newspaper', keywords,
     'article');
   viewSearchCemeteriesOrNewspapers('Cemeteries', 'Graves', 'grave', keywords, 'grave');
+  viewSearchBooks(keywords);
   viewSearchOtherSources(keywords);
   viewSearchEvents(keywords);
 
