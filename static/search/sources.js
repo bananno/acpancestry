@@ -22,8 +22,8 @@ function viewSearchDocuments(keywords) {
 function viewSearchOtherSources(keywords) {
   const otherSourceList = DATABASE.sources.filter(source => {
     let searchString = source.group + source.title + source.content;
-    return source.type != 'document' && source.type != 'newspaper'
-      && source.type != 'grave' && doesStrMatchKeywords(searchString, keywords);
+    return !['document', 'newspaper', 'book', 'grave'].includes(source.type)
+      && doesStrMatchKeywords(searchString, keywords);
   });
 
   if (otherSourceList.length) {
