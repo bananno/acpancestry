@@ -20,6 +20,8 @@ function processDatabase() {
   DATABASE.sources = DATABASE.sources.map(getProcessedSource);
 
   DATABASE.citations = DATABASE.citations.map(getProcessedCitation);
+
+  findSourceGroups();
 }
 
 function getProcessedPerson(person) {
@@ -100,4 +102,26 @@ function getProcessedCitation(citation) {
 
 function removeNullValues(array) {
   return array.filter(value => value != null);
+}
+
+function findSourceGroups() {
+  // For each source group, there might be a designated "SOURCE GROUP" source that holds
+  // general information about the group.
+
+  DATABASE.sources.forEach(source => {
+    source.isGroupMain = source.title.toLowerCase() == 'source group';
+  });
+
+  DATABASE.sourceGroups = DATABASE.sources.filter(source => source.isGroupMain);
+  DATABASE.sources = DATABASE.sources.filter(source => !source.isGroupMain);
+
+  DATABASE.sourceGroups.forEach(sourceGroupMain => {
+    sourceGroupMain.sourceList = DATABASE.sources.filter(source => {
+      if (source.type == sourceGroupMain.type && source.title == sourceGroupMain.title) {
+        source.sourceGroup = sourceGroupMain;
+        return true;
+      }
+      return false;
+    });
+  });
 }
