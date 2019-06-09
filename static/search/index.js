@@ -13,13 +13,13 @@ function viewSearch() {
   rend('<h1>Search Results for "' + keywords.join(' ') + '"</h1>');
   rend('<p style="padding-top:10px;" id="number-of-search-results"></p>');
 
-  viewSearchPeople(keywords);
+  new SearchResultsPeople(keywords);
   new SearchResultsDocuments(keywords);
   new SearchResultsCemeteries(keywords);
   new SearchResultsNewspapers(keywords);
   new SearchResultsBooks(keywords);
   new SearchResultsOtherSources(keywords);
-  viewSearchEvents(keywords);
+  new SearchResultsEvents(keywords);
 
   const totalResults = $('.search-result-item').length;
 
@@ -65,15 +65,23 @@ class SearchResults {
   }
 }
 
-function viewSearchPeople(keywords) {
-  const peopleList = DATABASE.people.filter(person => {
-    return doesStrMatchKeywords(person.name, keywords);
-  });
-
-  if (peopleList.length == 0) {
-    return;
+class SearchResultsPeople extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
   }
 
-  rend('<h2>People</h2>');
-  rend($makePeopleList(peopleList, 'photo', keywords));
+  getResults() {
+    this.resultsList = DATABASE.people.filter(person => {
+      return this.isMatch(person.name);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('People');
+    rend($makePeopleList(this.resultsList, 'photo', this.keywords));
+  }
 }
