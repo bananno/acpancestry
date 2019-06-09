@@ -63,41 +63,65 @@ class SearchResultsBooks extends SearchResults {
     this.title('Books');
 
     let previousBookGroup = null;
+    let justPrintedGroup = false;
 
     this.resultsList.forEach((source, i) => {
+      if (previousBookGroup == source.group && source.sourceGroup) {
+        if (justPrintedGroup) {
+          rend('<p style="padding: 5px;">Matching chapters/entries:</p>');
+          justPrintedGroup = false;
+        }
 
-      let linkText;
+        rend(
+          '<ul style="margin-left: 30px;">' +
+            '<li style="margin: 5px;">' +
+              linkToSource(source, this.highlight(source.title)) +
+            '</li>' +
+          '</ul>'
+        );
 
-      if (previousBookGroup != source.group) {
-        linkText = source.group + ' - ' + source.title;
-        previousBookGroup = source.group;
-      } else {
-        linkText = ' ------- ' + source.title;
+        return;
       }
 
-      linkText = this.highlight(linkText, this.keywords);
+      // Could be a new group section or could be the next item in a group that has no
+      // designated "source group".
+      if (i > 0 && previousBookGroup != source.group) {
+        rend('<hr style="margin: 10px 0">');
+      }
 
+      previousBookGroup = source.group;
+      justPrintedGroup = true;
+
+      if (source.isGroupMain) {
+        rend(
+          '<p style="padding: 5px" class="search-result-item">' +
+            linkToSourceGroup(source, this.highlight(source.group)) +
+          '</p>'
+        );
+
+        if (source.summary) {
+          rend(
+            '<p style="padding: 2px;" class="search-result-item">' +
+              '<i>' + source.summary + '</i>' +
+            '</p>'
+          );
+        }
+
+        return;
+      }
+
+      let linkText = source.group;
+
+      if (source.title != 'null') {
+        linkText += ' - ' + source.title;
+      }
+
+      // Stand-alone sources are not chapters under a group.
       rend(
-        '<p style="padding: 5px;" class="search-result-item">' +
-          linkToSource(source, linkText) +
+        '<p style="padding: 5px" class="search-result-item">' +
+          linkToSource(source, this.highlight(linkText)) +
         '</p>'
       );
-
-      if (source.isGroupMain && source.summary) {
-        rend(
-          '<p style="padding: 2px;" class="search-result-item">' +
-            '<i>' + source.summary + '</i>' +
-          '</p>'
-        );
-      }
-
-      if (source.sourceGroup && source.sourceGroup.summary) {
-        rend(
-          '<p style="padding: 2px;" class="search-result-item">' +
-            '<i>' + source.sourceGroup.summary + '</i>' +
-          '</p>'
-        );
-      }
     });
   }
 }
