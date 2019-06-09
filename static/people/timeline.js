@@ -109,7 +109,7 @@ class PersonTimeline {
       }
       // include child's death if it is during person's life or within 5 years after person's death.
       if (item.title == 'death') {
-        return item.date.year && this.person.death.date.year
+        return item.date.year && this.person.death && this.person.death.date.year
           && item.date.year - this.person.death.date.year < 5;
       }
       // include other child events if they are during person's life.
