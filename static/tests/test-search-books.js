@@ -13,7 +13,6 @@ test(t => {
     type: 'book',
     group: 'History Book',
     title: 'John Smith biography',
-    sourceGroup: sourceGroup1,
   };
 
   const sourceBook2 = {
@@ -21,13 +20,9 @@ test(t => {
     type: 'book',
     group: 'History Book',
     title: 'Jane Doe biography',
-    sourceGroup: sourceGroup1,
   };
 
-  sourceGroup1.sourceList = [sourceBook1, sourceBook2];
-
-  DATABASE.sourceGroups = [sourceGroup1];
-  DATABASE.sources = [sourceBook1, sourceBook2];
+  DATABASE.sources = [sourceGroup1, sourceBook1, sourceBook2];
 
   t.stubDatabase();
 

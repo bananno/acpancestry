@@ -59,7 +59,10 @@ class RunTests {
   }
 
   stubDatabase() {
-    // process the fake database. add when needed
+    DATABASE.sources.forEach(source => {
+      source.people = source.people || [];
+    });
+    processDatabase();
   }
 
   setTitle(str) {
