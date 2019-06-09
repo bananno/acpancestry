@@ -45,6 +45,7 @@ class RunTests {
   clearDatabase() {
     DATABASE.people = [];
     DATABASE.sources = [];
+    DATABASE.sourceGroups = [];
     DATABASE.events = [];
     DATABASE.citations = [];
     DATABASE.personRef = {};
@@ -58,6 +59,7 @@ class RunTests {
   }
 
   stubDatabase() {
+    // process the fake database. add when needed
   }
 
   setTitle(str) {
