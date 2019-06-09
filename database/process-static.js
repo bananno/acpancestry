@@ -117,7 +117,7 @@ function findSourceGroups() {
 
   DATABASE.sourceGroups.forEach(sourceGroupMain => {
     sourceGroupMain.sourceList = DATABASE.sources.filter(source => {
-      if (source.type == sourceGroupMain.type && source.title == sourceGroupMain.title) {
+      if (source.type == sourceGroupMain.type && source.group == sourceGroupMain.group) {
         source.sourceGroup = sourceGroupMain;
         return true;
       }
