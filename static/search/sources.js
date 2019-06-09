@@ -2,6 +2,7 @@
 class SearchResultsDocuments extends SearchResults {
   constructor(keywords, isTest) {
     super(keywords, isTest);
+    this.execute();
   }
 
   getResults() {
@@ -14,7 +15,7 @@ class SearchResultsDocuments extends SearchResults {
   }
 
   renderResults() {
-    rend('<h2>Documents</h2>');
+    this.title('Documents');
     this.resultsList.forEach(source => {
       let linkText = source.group + ' - ' + source.title;
       linkText = this.highlight(linkText, this.keywords);
@@ -27,9 +28,101 @@ class SearchResultsDocuments extends SearchResults {
   }
 }
 
+class SearchResultsCemeteriesOrNewspapers extends SearchResults {
+  constructor(keywords, isTest, sourceType, groupTitle, entryTitle, entrySingular) {
+    super(keywords, isTest);
+    this.sourceType = sourceType;
+    this.groupTitle = groupTitle;
+    this.entryTitle = entryTitle;
+    this.entrySingular = entrySingular;
+    this.groupList = [];
+    this.groupEntryCount = {};
+    this.individualList = [];
+    this.getResults();
+    this.renderGroupResults();
+    this.renderIndividualResults();
+  }
+
+  getResults() {
+    DATABASE.sources.forEach(source => {
+      if (source.type != this.sourceType) {
+        return;
+      }
+
+      if (this.isMatch(source.group)) {
+        if (this.groupEntryCount[source.group]) {
+          this.groupEntryCount[source.group] += 1;
+        } else {
+          this.groupEntryCount[source.group] = 1;
+          this.groupList.push(source);
+        }
+      }
+
+      let searchString = source.title + source.content;
+
+      if (this.isMatch(searchString)) {
+        this.individualList.push(source);
+      }
+    });
+  }
+
+  renderGroupResults() {
+    if (this.groupList.length == 0) {
+      return;
+    }
+
+    this.title(this.groupTitle);
+
+    this.groupList.forEach(source => {
+      rend(
+        '<p style="padding: 5px 10px" class="search-result-item">' +
+          linkToSourceGroup(source, source.group) + '<br>' +
+          source.location.format + '<br>' +
+          this.groupEntryCount[source.group] + ' ' + this.entrySingular +
+          (this.groupEntryCount[source.group] == 1 ? '' : 's') +
+        '</p>'
+      );
+    });
+  }
+
+  renderIndividualResults() {
+    if (this.individualList.length == 0 ) {
+      return;
+    }
+
+    this.title(this.entryTitle);
+
+    this.individualList.forEach(source => {
+      rend(
+        '<p style="padding: 5px 10px" class="search-result-item">' +
+          linkToSource(source, this.highlight(source.title)) + '<br>' +
+          source.group + '<br>' +
+          (source.date.format ? source.date.format + '<br>' : '') +
+          (source.location.format ? source.location.format + '<br>' : '') +
+        '</p>'
+      );
+
+      rend(formatTranscription(this.highlight(source.content)));
+    });
+  }
+}
+
+class SearchResultsCemeteries extends SearchResultsCemeteriesOrNewspapers {
+  constructor(keywords, isTest) {
+    super(keywords, isTest, 'newspaper', 'Newspapers', 'Newspaper Articles', 'article');
+  }
+}
+
+class SearchResultsNewspapers extends SearchResultsCemeteriesOrNewspapers {
+  constructor(keywords, isTest) {
+    super(keywords, isTest, 'grave', 'Cemeteries', 'Graves', 'grave');
+  }
+}
+
 class SearchResultsOtherSources extends SearchResults {
   constructor(keywords, isTest) {
     super(keywords, isTest);
+    this.execute();
   }
 
   getResults() {
@@ -45,7 +138,7 @@ class SearchResultsOtherSources extends SearchResults {
   }
 
   renderResults() {
-    rend('<h2>Other Sources</h2>');
+    this.title('Other Sources');
     this.resultsList.forEach(source => {
       let linkText = source.group + ' - ' + source.title;
       linkText = this.highlight(linkText);
@@ -56,63 +149,4 @@ class SearchResultsOtherSources extends SearchResults {
       );
     });
   }
-}
-
-function viewSearchCemeteriesOrNewspapers(groupTitle, title, sourceType, keywords, entryName) {
-  const groupList = [];
-  const groupEntryCount = {};
-  const individualList = [];
-
-  DATABASE.sources.forEach(source => {
-    if (source.type != sourceType) {
-      return;
-    }
-
-    if (doesStrMatchKeywords(source.group, keywords)) {
-      if (groupEntryCount[source.group]) {
-        groupEntryCount[source.group] += 1;
-      } else {
-        groupEntryCount[source.group] = 1;
-        groupList.push(source);
-      }
-    }
-
-    let searchString = source.title + source.content;
-
-    if (doesStrMatchKeywords(searchString, keywords)) {
-      individualList.push(source);
-    }
-  });
-
-  if (groupList.length) {
-    rend('<h2>' + groupTitle + '</h2>');
-  }
-
-  groupList.forEach(source => {
-    rend(
-      '<p style="padding: 5px 10px" class="search-result-item">' +
-        linkToSourceGroup(source, source.group) + '<br>' +
-        source.location.format + '<br>' +
-        groupEntryCount[source.group] + ' ' + entryName +
-        (groupEntryCount[source.group] == 1 ? '' : 's') +
-      '</p>'
-    );
-  });
-
-  if (individualList.length) {
-    rend('<h2>' + title + '</h2>');
-  }
-
-  individualList.forEach(source => {
-    rend(
-      '<p style="padding: 5px 10px" class="search-result-item">' +
-        linkToSource(source, highlightKeywords(source.title, keywords)) + '<br>' +
-        source.group + '<br>' +
-        (source.date.format ? source.date.format + '<br>' : '') +
-        (source.location.format ? source.location.format + '<br>' : '') +
-      '</p>'
-    );
-
-    rend(formatTranscription(highlightKeywords(source.content, keywords)));
-  });
 }

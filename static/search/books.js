@@ -2,6 +2,7 @@
 class SearchResultsBooks extends SearchResults {
   constructor(keywords, isTest) {
     super(keywords, isTest);
+    this.execute();
   }
 
   getResults() {
@@ -70,7 +71,7 @@ class SearchResultsBooks extends SearchResults {
   }
 
   renderResults() {
-    rend('<h2>Books</h2>');
+    this.title('Books');
 
     let previousBookGroup = null;
 

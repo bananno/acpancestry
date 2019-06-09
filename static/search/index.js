@@ -15,9 +15,8 @@ function viewSearch() {
 
   viewSearchPeople(keywords);
   new SearchResultsDocuments(keywords);
-  viewSearchCemeteriesOrNewspapers('Newspapers', 'Newspaper Articles', 'newspaper', keywords,
-    'article');
-  viewSearchCemeteriesOrNewspapers('Cemeteries', 'Graves', 'grave', keywords, 'grave');
+  new SearchResultsCemeteries(keywords);
+  new SearchResultsNewspapers(keywords);
   new SearchResultsBooks(keywords);
   new SearchResultsOtherSources(keywords);
   viewSearchEvents(keywords);
@@ -33,7 +32,9 @@ class SearchResults {
     this.keywords = keywords;
     this.isTest = isTest;
     this.resultsList = [];
+  }
 
+  execute() {
     this.getResults();
 
     if (this.resultsList.length == 0) {
@@ -57,6 +58,10 @@ class SearchResults {
 
   highlight(text) {
     return highlightKeywords(text, this.keywords);
+  }
+
+  title(text) {
+    rend('<h2>' + text + '</h2>');
   }
 }
 
