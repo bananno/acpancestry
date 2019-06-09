@@ -25,7 +25,7 @@ class SearchResultsBooks extends SearchResults {
 
       // The group is included if any match was found - whether it's the group, the sub-source,
       // or if combined properties are required for a match.
-      if (matchGroup || matchTotal) {
+      if (source.sourceGroup && (matchGroup || matchTotal)) {
         this.add(source.sourceGroup);
       }
 
