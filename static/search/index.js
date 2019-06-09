@@ -18,7 +18,7 @@ function viewSearch() {
   viewSearchCemeteriesOrNewspapers('Newspapers', 'Newspaper Articles', 'newspaper', keywords,
     'article');
   viewSearchCemeteriesOrNewspapers('Cemeteries', 'Graves', 'grave', keywords, 'grave');
-  viewSearchBooks(keywords);
+  new SearchResultsBooks(keywords);
   viewSearchOtherSources(keywords);
   viewSearchEvents(keywords);
 
@@ -26,6 +26,25 @@ function viewSearch() {
 
   $('#number-of-search-results').append(totalResults == 1 ? '1 result' : totalResults +
     ' results');
+}
+
+class SearchResults {
+  constructor(keywords) {
+    this.keywords = keywords;
+    this.resultsList = [];
+  }
+
+  isMatch(text) {
+    return doesStrMatchKeywords(text, this.keywords);
+  }
+
+  add(obj) {
+    this.resultsList.push(obj);
+  }
+
+  highlight(text) {
+    return highlightKeywords(text, this.keywords);
+  }
 }
 
 function viewSearchPeople(keywords) {
