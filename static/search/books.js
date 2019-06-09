@@ -21,44 +21,23 @@ class SearchResultsBooks extends SearchResults {
 
       const matchSource = this.isMatch(searchStringSource);
       const matchGroup = this.isMatch(searchStringGroup);
+      const matchTotal = this.isMatch(searchStringSource + ',' + searchStringGroup);
 
-      // NOT the sum of two booleans: keywords could be spread between the two search strings.
-      const matchTotal = this.isMatch(searchStringSource + searchStringGroup);
-
-      if (!matchSource && matchGroup) {
-        // If the group matches but not the source itself, there is no need to show the specific
-        // source in the results.
+      // The group is included if any match was found - whether it's the group, the sub-source,
+      // or if combined properties are required for a match.
+      if (matchGroup || matchTotal) {
         this.add(source.sourceGroup);
-      } else if (matchSource || matchTotal) {
+      }
+
+      // The sub-source is included if it matches on its own OR if the combination is required
+      // for a match. The sub-source is excluded if the keywords were only found in the group
+      // properties.
+      if (matchSource || (matchTotal && !matchGroup)) {
         this.add(source);
       }
     });
 
-    // Remove duplicate source groups.
-    // Example 1: a source group was added twice AND one of its entries was added. Only the entry
-    //    should remain.
-    // Example 2: three entries were added from one source group. No change.
-    // Example 3: a source group was added twice and none of its entries were added. Remove the
-    //    duplicate source group and keep the other one.
-
-    const alreadyHaveSourceGroup = {};
-
-    this.resultsList.filter(source => !source.isGroupMain).forEach(source => {
-      if (source.sourceGroup) {
-        alreadyHaveSourceGroup[source.sourceGroup._id] = true;
-      }
-    });
-
-    this.resultsList = this.resultsList.filter(source => {
-      if (!source.isGroupMain) {
-        return true;
-      }
-      if (alreadyHaveSourceGroup[source._id]) {
-        return false;
-      }
-      alreadyHaveSourceGroup[source._id] = true;
-      return true;
-    });
+    this.resultsList = removeDuplicatesById(this.resultsList);
   }
 
   sortResults() {

@@ -254,3 +254,15 @@ function pluralize(word) {
     Child: 'Children',
   }[word] || word + 's';
 }
+
+function removeDuplicatesById(list) {
+  const foundId = {};
+
+  return list.filter(obj => {
+    if (foundId[obj._id]) {
+      return false;
+    }
+    foundId[obj._id] = true;
+    return true;
+  });
+}
