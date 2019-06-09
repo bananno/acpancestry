@@ -37,6 +37,16 @@ class SearchResultsBooks extends SearchResults {
       }
     });
 
+    // Add any source groups that don't contain sub-sources.
+    DATABASE.sourceGroups.filter(source => source.sourceList.length == 0).forEach(source => {
+      let searchString = ['group', 'notes', 'summary', 'content']
+        .map(attr => source[attr] || '').join(',');
+
+      if (this.isMatch(searchString)) {
+        this.add(source);
+      }
+    });
+
     this.resultsList = removeDuplicatesById(this.resultsList);
   }
 

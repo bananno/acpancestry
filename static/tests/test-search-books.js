@@ -22,7 +22,14 @@ test(t => {
     title: 'Jane Doe biography',
   };
 
-  DATABASE.sources = [sourceBook1, sourceBook2, sourceBook3];
+  const sourceBook4 = {
+    _id: '0004',
+    type: 'book',
+    group: 'Some Other Book',
+    title: 'SOURCE GROUP',
+  };
+
+  DATABASE.sources = [sourceBook1, sourceBook2, sourceBook3, sourceBook4];
 
   t.stubDatabase();
 
@@ -57,11 +64,15 @@ test(t => {
     search.resultsList,
   );
 
-  console.log(search.resultsList)
-
   search = new SearchResultsBooks(['biography'], true);
   t.assertEqual('sub-sources are ordered alphabetically by title',
     [sourceBook1, sourceBook3, sourceBook2],
+    search.resultsList,
+  );
+
+  search = new SearchResultsBooks(['other'], true);
+  t.assertEqual('source groups are included even if they contain no sub-sources',
+    [sourceBook4],
     search.resultsList,
   );
 });
