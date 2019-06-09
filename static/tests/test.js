@@ -17,6 +17,7 @@ class RunTests {
     this.testsPassing = 0;
     this.testsFailing = 0;
     this.displayOnPage = PATH == 'test';
+    this.currentTitle = null;
 
     const methods = {
       setTitle: this.displayOnPage ? this.setTitle : (() => {}),
@@ -66,7 +67,10 @@ class RunTests {
   }
 
   setTitle(str) {
-    rend('<h2>' + str + '</h2>');
+    if (str != this.currentTitle) {
+      rend('<h2>' + str + '</h2>');
+      this.currentTitle = str;
+    }
   }
 
   setTitle2(str) {
@@ -89,6 +93,21 @@ class RunTests {
   }
 }
 
-function areValuesEqual(val1, valu2) {
-  return val1 === valu2;
+function areValuesEqual(val1, val2) {
+  if (val1 === val2) {
+    return true;
+  }
+
+  if (typeof val1 !== 'object' || typeof val2 !== 'object'
+      || Object.keys(val1).length != Object.keys(val2).length) {
+    return false;
+  }
+
+  for (let key in val1) {
+    if (!areValuesEqual(val1[key], val2[key])) {
+      return false;
+    }
+  }
+
+  return true;
 }
