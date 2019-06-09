@@ -13,19 +13,19 @@ function showPersonTimeline(person) {
     '</div>'
   );
 
-  new PersonTimeline(person, true);
+  new PersonTimeline(person);
 }
 
 class PersonTimeline {
-  constructor(person, createNow) {
+  constructor(person, isTest) {
     this.person = person;
 
-    if (createNow) {
+    if (isTest) {
+      this.list = [];
+    } else {
       this.createEventList();
       this.sortList();
       this.renderTimeline();
-    } else {
-      this.list = [];
     }
   }
 
