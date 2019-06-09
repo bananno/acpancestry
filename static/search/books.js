@@ -1,19 +1,7 @@
 
 class SearchResultsBooks extends SearchResults {
   constructor(keywords, isTest) {
-    super(keywords);
-
-    this.getResults();
-
-    if (this.resultsList.length == 0) {
-      return;
-    }
-
-    this.sortResults();
-
-    if (!isTest) {
-      this.renderResults();
-    }
+    super(keywords, isTest);
   }
 
   getResults() {

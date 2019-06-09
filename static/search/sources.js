@@ -1,15 +1,23 @@
 
-function viewSearchDocuments(keywords) {
-  const documentList = DATABASE.sources.filter(source => {
-    let searchString = source.title + source.content;
-    return source.type == 'document' && doesStrMatchKeywords(searchString, keywords);
-  });
+class SearchResultsDocuments extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+  }
 
-  if (documentList.length) {
+  getResults() {
+    this.resultsList = DATABASE.sources.filter(source => {
+      return source.type == 'document' && this.isMatch(source.title + source.content);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
     rend('<h2>Documents</h2>');
-    documentList.forEach(source => {
+    this.resultsList.forEach(source => {
       let linkText = source.group + ' - ' + source.title;
-      linkText = highlightKeywords(linkText, keywords);
+      linkText = this.highlight(linkText, this.keywords);
       rend(
         '<p style="padding: 5px;" class="search-result-item">' +
           linkToSource(source, linkText) +
