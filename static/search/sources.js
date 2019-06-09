@@ -74,9 +74,10 @@ class SearchResultsCemeteriesOrNewspapers extends SearchResults {
     this.title(this.groupTitle);
 
     this.groupList.forEach(source => {
+      let linkText = this.highlight(source.group);
       rend(
         '<p style="padding: 5px 10px" class="search-result-item">' +
-          linkToSourceGroup(source, source.group) + '<br>' +
+          linkToSourceGroup(source, linkText) + '<br>' +
           source.location.format + '<br>' +
           this.groupEntryCount[source.group] + ' ' + this.entrySingular +
           (this.groupEntryCount[source.group] == 1 ? '' : 's') +
