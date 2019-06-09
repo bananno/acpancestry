@@ -5,8 +5,6 @@ class SearchResultsBooks extends SearchResults {
   }
 
   getResults() {
-    this.resultsList = [];
-
     DATABASE.sources.filter(source => source.type == 'book').forEach(source => {
       let searchStringSource = ['title', 'notes', 'summary', 'content']
         .map(attr => source[attr] || '').join(',');

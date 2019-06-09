@@ -19,7 +19,7 @@ function viewSearch() {
     'article');
   viewSearchCemeteriesOrNewspapers('Cemeteries', 'Graves', 'grave', keywords, 'grave');
   new SearchResultsBooks(keywords);
-  viewSearchOtherSources(keywords);
+  new SearchResultsOtherSources(keywords);
   viewSearchEvents(keywords);
 
   const totalResults = $('.search-result-item').length;

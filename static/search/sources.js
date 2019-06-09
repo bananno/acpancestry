@@ -27,18 +27,28 @@ class SearchResultsDocuments extends SearchResults {
   }
 }
 
-function viewSearchOtherSources(keywords) {
-  const otherSourceList = DATABASE.sources.filter(source => {
-    let searchString = source.group + source.title + source.content;
-    return !['document', 'newspaper', 'book', 'grave'].includes(source.type)
-      && doesStrMatchKeywords(searchString, keywords);
-  });
+class SearchResultsOtherSources extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+  }
 
-  if (otherSourceList.length) {
+  getResults() {
+    this.resultsList = DATABASE.sources.filter(source => {
+      let searchString = ['group', 'title', 'content', 'notes', 'summary']
+        .map(attr => source[attr] || '').join(',');
+      return !['document', 'newspaper', 'book', 'grave'].includes(source.type)
+        && this.isMatch(searchString);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
     rend('<h2>Other Sources</h2>');
-    otherSourceList.forEach(source => {
+    this.resultsList.forEach(source => {
       let linkText = source.group + ' - ' + source.title;
-      linkText = highlightKeywords(linkText, keywords);
+      linkText = this.highlight(linkText);
       rend(
         '<p style="padding: 5px;" class="search-result-item">' +
           linkToSource(source, linkText) +
