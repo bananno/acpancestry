@@ -36,8 +36,9 @@ function $makePeopleList(people, format, keywords) {
   return $list;
 }
 
-function localLink(target, text) {
-  return '<a href="' + ORIGIN + '?' + target + '">' + text + '</a>';
+function localLink(target, text, newTab) {
+  return '<a href="' + ORIGIN + '?' + target + '"' + (newTab ? ' target="_blank"' : '') + '>'
+    + text + '</a>';
 }
 
 function linkToPerson(person, text, keywords) {

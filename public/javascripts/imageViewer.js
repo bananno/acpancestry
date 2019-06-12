@@ -1,8 +1,11 @@
 
-function makeImage(url, maxHeight, maxWidth) {
+function makeImage(source, imageNumber, maxHeight, maxWidth) {
+  const imageAddress = source.images[imageNumber];
+  const linkAddress = 'image/' + source._id + '/' + imageNumber;
+
   const $imageViewer = $(
     '<div class="image-viewer">' +
-      '<a href="' + url + '" target=_"blank"><img src="' + url + '">click to enlarge</a>' +
+      localLink(linkAddress, '<img src="' + imageAddress + '">click to enlarge', true) +
     '</div>'
   );
 
@@ -17,4 +20,28 @@ function makeImage(url, maxHeight, maxWidth) {
   }
 
   return $imageViewer;
+}
+
+function viewImage() {
+  const [sourceId, imageNumber] = PATH.replace('image/', '').split('/');
+
+  $('body').html('');
+
+  $('body').css({
+    'background': 'none',
+    'background-color': 'black',
+    'margin': '10px',
+  });
+
+  const $image = $('<img>')
+    .prop('src', DATABASE.sourceRef[sourceId].images[imageNumber])
+    .addClass('full-screen-image pre-zoom')
+    .appendTo('body')
+    .click(() => {
+      if ($image.hasClass('pre-zoom')) {
+        $image.removeClass('pre-zoom');
+      } else {
+        $image.addClass('pre-zoom');
+      }
+    });
 }

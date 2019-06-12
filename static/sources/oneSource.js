@@ -25,7 +25,16 @@ function viewOneSource() {
 function viewSourceGrave(source) {
   setPageTitle(source.group);
   rend('<h1>' + source.group + '</h1>');
+  rend('<p>' + formatLocation(source.location) + '</p>');
+  rend('<p><br></p>');
   rend('<h1>' + source.title + '</h1>');
+
+  if (source.images.length) {
+    rend('<h2>Images</h2>');
+    source.images.forEach((imageUrl, i) => {
+      rend(makeImage(source, i, 200));
+    });
+  }
 }
 
 function viewSourceOther(source) {
@@ -45,8 +54,8 @@ function viewSourceOther(source) {
         'relevent portion. See the "links" section below for the full image.</p>');
     }
 
-    source.images.forEach(imageUrl => {
-      rend(makeImage(imageUrl));
+    source.images.forEach((imageUrl, i) => {
+      rend(makeImage(source, i));
     });
   }
 

@@ -121,8 +121,8 @@ function viewListOfPhotographs() {
 
   photos.forEach(source => {
     rend('<h2>' + source.title + '</h2>');
-    source.images.forEach(img => {
-      rend(makeImage(img, 200).css('margin-right', '5px'));
+    source.images.forEach((img, i) => {
+      rend(makeImage(source, i, 200).css('margin-right', '5px'));
     });
 
     if (source.content) {

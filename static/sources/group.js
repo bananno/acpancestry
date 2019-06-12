@@ -48,8 +48,8 @@ function viewSourceGroupCemeteryOrNewspaper(rootSource, group, showDate) {
       rend('<p style="margin-left: 10px; margin-bottom: 10px;">' + source.date.format + '</p>');
     }
 
-    source.images.forEach(imageUrl => {
-      rend(makeImage(imageUrl, 100, 100).css('margin', '0 5px'));
+    source.images.forEach((imageUrl, i) => {
+      rend(makeImage(source, i, 100, 100).css('margin', '0 5px'));
     });
 
     rend($makePeopleList(source.people, 'photo'));

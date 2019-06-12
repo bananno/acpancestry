@@ -32,6 +32,10 @@ function loadContent() {
     return viewTests();
   }
 
+  if (PATH.match('image/')) {
+    return viewImage();
+  }
+
   return pageNotFound();
 }
 

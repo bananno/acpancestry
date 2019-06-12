@@ -185,7 +185,7 @@ class PersonTimeline {
       );
 
       if (item.images.length) {
-        $col1.append(makeImage(item.images[0], 100, 100));
+        $col1.append(makeImage(item, 0, 100, 100));
       }
     } else {
       if (item.relationship) {
