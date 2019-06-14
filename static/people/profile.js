@@ -37,7 +37,10 @@ function showPersonHeader(person) {
     '<div class="person-header">' +
       '<img src="' + person.profileImage + '">' +
       '<div class="person-header-content">' +
-        '<h1>' + fixSpecialCharacters(person.name) + '</h1>' +
+        '<h1>' +
+          fixSpecialCharacters(person.name) +
+          (person.star ? '&#160;<img src="public/images/leaf.png" style="height:40px">' : '') +
+        '</h1>' +
         personShowHeaderEvent(person, 'B', person.birth) +
         personShowHeaderEvent(person, 'D', person.death) +
       '</div>' +
