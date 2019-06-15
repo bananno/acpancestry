@@ -117,7 +117,7 @@ function personTree(person, safety) {
       '<tr>' +
         '<td colspan="2">' +
           '<div class="treecell">' +
-            linkToPerson(person) +
+            linkToPerson(person, true) +
           '</div>' +
         '</td>' +
       '</tr>' +

@@ -19,8 +19,8 @@ function $makePeopleList(people, format, keywords) {
       if (keywords) {
         $item.addClass('search-result-item');
       }
-      $item.append(linkToPerson(person, '<img src="' + person.profileImage + '">'));
-      $item.append(linkToPerson(person, null, keywords));
+      $item.append(linkToPerson(person, false, '<img src="' + person.profileImage + '">'));
+      $item.append(linkToPerson(person, true, null, keywords));
     });
 
     return $list;
@@ -30,7 +30,7 @@ function $makePeopleList(people, format, keywords) {
 
   people.forEach(person => {
     const $item = $('<li>').appendTo($list);
-    $item.append(linkToPerson(person, null, keywords));
+    $item.append(linkToPerson(person, true, null, keywords));
   });
 
   return $list;
@@ -41,12 +41,13 @@ function localLink(target, text, newTab) {
     + text + '</a>';
 }
 
-function linkToPerson(person, text, keywords) {
+function linkToPerson(person, leaf, text, keywords) {
   text = text || fixSpecialCharacters(person.name);
   if (keywords) {
     text = highlightKeywords(text, keywords);
   }
-  return localLink('person/' + person.customId, text);
+  return localLink('person/' + person.customId, text
+    + (leaf && person.star ? '&#160;<span class="person-leaf"></span>' : ''));
 }
 
 function linkToSource(source, text) {

@@ -273,3 +273,12 @@ table.event-list th {
 .header-trail a {
   text-decoration: underline;
 }
+
+.person-leaf {
+  display: inline-block;
+  background-image: url(../images/leaf.png);
+  background-size: 20px;
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 23px;
+}
