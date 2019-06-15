@@ -81,6 +81,11 @@ function showPersonFamily(person) {
 
     const $box = $('<div class="person-family">');
     $box.append(`<h3>${relationship}:</h3>`);
+    if (relationship == 'siblings' || relationship == 'children') {
+      person[relationship].trueSort((a, b) => {
+        return a.birthSort < b.birthSort;
+      });
+    }
     $box.append($makePeopleList(person[relationship], 'photo'));
     rend($box);
   });

@@ -17,6 +17,14 @@ function processDatabase() {
 
   DATABASE.events = DATABASE.events.map(getProcessedEvent);
 
+  DATABASE.people.forEach(person => {
+    if (person.birth) {
+      person.birthSort = person.birth.date.sort;
+    } else {
+      person.birthSort = 'XXXX-XX-XX';
+    }
+  });
+
   DATABASE.sources = DATABASE.sources.map(getProcessedSource);
 
   DATABASE.citations = DATABASE.citations.map(getProcessedCitation);
@@ -70,6 +78,7 @@ function getProcessedEvent(event) {
 
   event.date = event.date || {};
   event.date.format = formatDate(event.date);
+  event.date.sort = getSortDate(event.date);
   event.location = event.location || {};
   event.location.format = formatLocation(event.location);
 
@@ -85,11 +94,20 @@ function getProcessedSource(source) {
 
   source.date = source.date || {};
   source.date.format = formatDate(source.date);
+  source.date.sort = getSortDate(source.date);
   source.location = source.location || {};
   source.location.format = formatLocation(source.location);
   source.citations = [];
 
   return source;
+}
+
+function getSortDate(dateObj) {
+  return [
+    dateObj.year || 'XXXX',
+    dateObj.month == null ? 'XX' : dateObj.month < 10 ? '0' + dateObj.month : dateObj.month,
+    dateObj.day == null ? 'XX' : dateObj.day < 10 ? '0' + dateObj.day : dateObj.day,
+  ].join('-');
 }
 
 function getProcessedCitation(citation) {
