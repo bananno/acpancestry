@@ -36,6 +36,10 @@ function loadContent() {
     return viewImage();
   }
 
+  if (PATH.match('topic/')) {
+    return viewTopic();
+  }
+
   return pageNotFound();
 }
 

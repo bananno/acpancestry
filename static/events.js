@@ -18,3 +18,18 @@ function viewEvents() {
     addTd($row, event.notes);
   });
 }
+
+function eventBlock(event) {
+  const $div = $('<div style="margin-bottom:20px">');
+
+  $div.append('<div><b>' + event.title + '</b></div>');
+  $div.append('<div>' + event.people.map(person => person.name).join(', ') + '</div>');
+  $div.append('<div>' + event.date.format + '</div>');
+  $div.append('<div>' + event.location.format + '</div>');
+
+  if (event.notes) {
+    $div.append('<div>' + event.notes + '</div>');
+  }
+
+  return $div;
+}

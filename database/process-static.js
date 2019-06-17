@@ -41,6 +41,7 @@ function getProcessedPerson(person) {
     person[relationship] = removeNullValues(person[relationship]);
   });
 
+  person.tags = person.tags || {};
   person.siblings = [];
   person.links = person.links || [];
   person.citations = [];
