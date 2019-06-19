@@ -130,30 +130,32 @@ class PersonTimeline {
   }
 
   renderTimeline() {
-    this.list.forEach(this.renderItem);
+    this.list.forEach(item => {
+      new PersonTimelineItem(item);
+    });
+  }
+}
+
+class PersonTimelineItem {
+  constructor(item, isTest) {
+    this.item = item;
+
+    if (!isTest) {
+      this.renderItem(item);
+    }
   }
 
   renderItem(item) {
     const $div = $('<div class="timeline-item">');
     rend($div);
 
+    $div.addClass(this.getItemClass());
+
     const $col1 = $('<div class="column column1">').appendTo($div);
     const $col2 = $('<div class="column column2">').appendTo($div);
 
-    let showPeopleList = true;
-    let showNotesAbovePeopleList = false;
-
-    if (item.relationship) {
-      $div.addClass('timeline-family');
-    } else if (item.event) {
-      $div.addClass('timeline-life');
-      if (item.people.length == 1) {
-        showPeopleList = false;
-      }
-      showNotesAbovePeopleList = true;
-    } else {
-      $div.addClass('timeline-source');
-    }
+    this.$col1 = $col1;
+    this.$col2 = $col2;
 
     if (item.date.format) {
       $col1.append('<p><b>' + item.date.format + '</b></p>');
@@ -169,15 +171,15 @@ class PersonTimeline {
       $col1.append('<p><i>(' + item.location.notes + ')</i></p>');
     }
 
+    $col2.append('<p><b>' + this.getItemTitle() + '</b></p>');
+
+    if (this.shouldDisplayPeopleAboveText()) {
+      this.renderItemPeople();
+    }
+
     if (item.source) {
-      if (item.type == 'index') {
-        $col2.append('<p><b>source</b></p>');
-      } else if (item.type == 'grave') {
-        $col2.append('<p><b>cemetery</b></p>');
-      } else if (item.type == 'newspaper') {
-        $col2.append('<p><b>newspaper article</b></p>');
-      } else {
-        $col2.append('<p><b>' + item.type + '</b></p>');
+      if (item.images.length) {
+        $col1.append(makeImage(item, 0, 100, 100));
       }
 
       $col2.append(
@@ -185,52 +187,82 @@ class PersonTimeline {
           linkToSource(item, item.group + (item.type == 'grave' ? '' : ' - ' + item.title)) +
         '</p>'
       );
-
-      if (item.images.length) {
-        $col1.append(makeImage(item, 0, 100, 100));
-      }
-
-      if (item.sourceGroup && item.sourceGroup.summary) {
-        $col2.append(
-          '<p style="margin-top: 5px;">' +
-            item.sourceGroup.summary.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
-          '</p>'
-        );
-      }
-
-      if (item.summary) {
-        $col2.append(
-          '<p style="margin-top: 5px;">' +
-            item.summary.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
-          '</p>'
-        );
-      }
-
-      if (showPeopleList) {
-        $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
-      }
-    } else {
-      if (item.relationship) {
-        $col2.append('<p><b>' + item.title + ' of ' + item.relationship + '</b></p>');
-      } else {
-        $col2.append('<p><b>' + item.title + '</b></p>');
-      }
-
-      if (!showNotesAbovePeopleList && showPeopleList) {
-        $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
-      }
-
-      if (item.notes) {
-        $col2.append(
-          '<p style="margin-top: 5px;">' +
-            item.notes.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
-          '</p>'
-        );
-      }
-
-      if (showNotesAbovePeopleList && showPeopleList) {
-        $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
-      }
     }
+
+    this.getItemText().forEach(text => {
+      $col2.append('<p style="margin-top: 5px;">' + text + '</p>');
+    });
+
+    if (this.shouldDisplayPeopleBelowText()) {
+      this.renderItemPeople();
+    }
+  }
+
+  getItemClass() {
+    if (this.item.source) {
+      return 'timeline-source';
+    }
+    if (this.item.relationship) {
+      return 'timeline-family';
+    }
+    return 'timeline-life';
+  }
+
+  getItemTitle() {
+    if (this.item.event) {
+      if (this.item.relationship) {
+        return this.item.title + ' of ' + this.item.relationship;
+      }
+      return this.item.title;
+    }
+
+    if (this.item.type == 'index') {
+      return 'source';
+    }
+    if (this.item.type == 'grave') {
+      return 'cemetery';
+    }
+    if (this.item.type == 'newspaper') {
+      return 'newspaper';
+    }
+    return this.item.type;
+  }
+
+  shouldDisplayPeopleAboveText() {
+    return this.item.event && this.item.relationship;
+  }
+
+  shouldDisplayPeopleBelowText() {
+    return this.item.source || this.item.personal;
+  }
+
+  shouldShowPeople() {
+    if (!this.item.relationship && this.item.event && this.item.people.length == 1) {
+      return false;
+    }
+    return true;
+  }
+
+  renderItemPeople() {
+    if (this.shouldShowPeople()) {
+      this.$col2.append($makePeopleList(this.item.people, 'photo').css('margin-left', '-5px'));
+    }
+  }
+
+  getItemText() {
+    if (this.item.event) {
+      if (this.item.notes) {
+        return this.item.notes.split('\n');
+      }
+      return [];
+    }
+    let arr = [];
+    if (this.item.sourceGroup && this.item.sourceGroup.summary) {
+      arr = this.item.sourceGroup.summary.split('\n');
+    }
+    if (this.item.summary) {
+      arr = [...arr, this.item.summary.split('\n')];
+    }
+    return arr;
   }
 }
