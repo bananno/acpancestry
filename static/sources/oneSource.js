@@ -19,9 +19,7 @@ function viewOneSource() {
   rend($makePeopleList(source.people, 'photo'));
 
   viewSourceNotes(source);
-
-  rend('<h2>Links</h2>');
-  rend(source.links.map(getFancyLink));
+  viewSourceLinks(source);
 }
 
 function viewSourceGrave(source) {
@@ -82,5 +80,12 @@ function viewSourceNotes(source) {
   if (source.notes) {
     rend('<h2>Notes</h2>');
     rend('<ul class="bullet"><li>' + source.notes.split('\n').join('</li><li>') + '</li></ul>');
+  }
+}
+
+function viewSourceLinks(source) {
+  if (source.links.length) {
+    rend('<h2>Links</h2>');
+    rend(source.links.map(getFancyLink));
   }
 }

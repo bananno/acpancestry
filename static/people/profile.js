@@ -1,6 +1,13 @@
 
 function viewPerson() {
-  const personId = PATH.replace('person/', '');
+  let personId = PATH.replace('person/', '');
+  let subPath;
+
+  if (personId.match('/')) {
+    subPath = personId.slice(personId.indexOf('/') + 1);
+    personId = personId.slice(0, personId.indexOf('/'));
+  }
+
   const person = DATABASE.personRef[personId];
 
   if (person == null) {
@@ -10,6 +17,22 @@ function viewPerson() {
   }
 
   showPersonHeader(person);
+
+  if (subPath) {
+    rend(
+      '<p style="margin-left: 10px; margin-top: 10px;">' +
+        linkToPerson(person, false, '&#10229; back to profile') +
+      '</p>'
+    );
+
+    if (subPath.match('source')) {
+      const sourceId = subPath.replace('source/', '');
+      return viewPersonSource(person, sourceId);
+    }
+
+    return pageNotFound();
+  }
+
   showPersonBiographies(person);
   showPersonFamily(person);
 
@@ -92,7 +115,9 @@ function showPersonBiographies(person) {
         '</p>' +
         '<p style="margin-top: 8px">' +
           source.content.slice(0, 500) +
-          '... <i>' + localLink('source/' + source._id, 'continue reading') + '</i>' +
+          '... <i>' +
+          localLink('person/' + person.customId + '/source/' + source._id, 'continue reading') +
+          '</i>' +
         '</p>' +
       '</div>'
     );
@@ -156,4 +181,40 @@ function personTree(person, safety) {
       '</tr>' +
     '</table>'
   );
+}
+
+function viewPersonSource(person, sourceId) {
+  const source = DATABASE.sourceRef[sourceId];
+
+  if (source == null) {
+    rend(`<h2>Source not found: ${sourceId}</h2>`);
+    return;
+  }
+
+  rend('<h2>Biography</h2>');
+  rend(formatTranscription(source.content));
+
+  rend('<h2>About this source</h2>');
+  rend('<p style="margin-left: 10px;">' + source.type + '</p>');
+  rend('<p style="margin-left: 10px;">' + source.group + '</p>');
+  rend('<p style="margin-left: 10px;">' + source.title + '</p>');
+  rend('<p style="margin-left: 10px;">' + formatDate(source.date) + '</p>');
+  rend('<p style="margin-left: 10px;">' + formatLocation(source.location) + '</p>');
+
+  if (source.images.length) {
+    rend('<h2>Images</h2>');
+    source.images.forEach((imageUrl, i) => {
+      rend(makeImage(source, i, 200));
+    });
+  }
+
+  viewSourceSummary(source);
+  viewSourceNotes(source);
+
+  if (source.people.length > 1) {
+    rend('<h2>Other people in this source</h2>');
+    rend($makePeopleList(source.people.filter(p => p != person), 'photo'));
+  }
+
+  viewSourceLinks(source);
 }
