@@ -18,6 +18,8 @@ function viewOneSource() {
   rend('<h2>People</h2>');
   rend($makePeopleList(source.people, 'photo'));
 
+  viewSourceNotes(source);
+
   rend('<h2>Links</h2>');
   rend(source.links.map(getFancyLink));
 }
@@ -28,6 +30,8 @@ function viewSourceGrave(source) {
   rend('<p>' + formatLocation(source.location) + '</p>');
   rend('<p><br></p>');
   rend('<h1>' + source.title + '</h1>');
+
+  viewSourceSummary(source);
 
   if (source.images.length) {
     rend('<h2>Images</h2>');
@@ -46,6 +50,8 @@ function viewSourceOther(source) {
   rend('<p>' + formatDate(source.date) + '</p>');
   rend('<p>' + formatLocation(source.location) + '</p>');
 
+  viewSourceSummary(source);
+
   if (source.images.length) {
     rend('<h2>Images</h2>');
 
@@ -63,7 +69,16 @@ function viewSourceOther(source) {
     rend('<h2>Transcription</h2>');
     rend(formatTranscription(source.content));
   }
+}
 
+function viewSourceSummary(source) {
+  if (source.summary) {
+    rend('<h2>Summary</h2>');
+    rend(source.summary.split('\n').map(text => '<p>' + text + '</p>').join(''));
+  }
+}
+
+function viewSourceNotes(source) {
   if (source.notes) {
     rend('<h2>Notes</h2>');
     rend('<ul class="bullet"><li>' + source.notes.split('\n').join('</li><li>') + '</li></ul>');
