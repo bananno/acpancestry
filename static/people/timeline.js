@@ -200,6 +200,13 @@ class PersonTimeline {
     }
 
     if (item.source) {
+      if (item.sourceGroup && item.sourceGroup.summary) {
+        $col2.append(
+          '<p style="margin-top: 5px;">' +
+            item.sourceGroup.summary.replace(/\n/g, '</p><p style="margin-top: 5px;">') +
+          '</p>'
+        );
+      }
       if (item.summary) {
         $col2.append(
           '<p style="margin-top: 5px;">' +
