@@ -23,13 +23,14 @@ table {
   border-collapse: collapse;
 }
 
-a {
+a, .fake-link {
   color: #00B7FF;
   text-decoration: none;
 }
 
-a:hover {
+a:hover, .fake-link:hover {
   text-decoration: underline;
+  cursor: pointer;
 }
 
 ul.bullet {

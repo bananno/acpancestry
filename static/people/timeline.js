@@ -240,8 +240,23 @@ class PersonTimelineItem {
   }
 
   renderItemPeople() {
-    if (this.shouldShowPeople()) {
-      this.$col2.append($makePeopleList(this.item.people, 'photo').css('margin-left', '-5px'));
+    if (!this.shouldShowPeople()) {
+      return;
+    }
+
+    const $list = $makePeopleList(this.item.people, 'photo').css('margin-left', '-5px');
+
+    this.$col2.append($list);
+
+    if (this.item.people.length > 5) {
+      $list.hide();
+      const $show = $('<div class="fake-link" style="margin-top: 5px">')
+      $show.text('show all ' + this.item.people.length + ' tagged people');
+      this.$col2.append($show);
+      $show.click(() => {
+        $show.remove();
+        $list.show();
+      });
     }
   }
 
