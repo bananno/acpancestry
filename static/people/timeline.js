@@ -141,6 +141,7 @@ class PersonTimeline {
     const $col2 = $('<div class="column column2">').appendTo($div);
 
     let showPeopleList = true;
+    let showNotesAboutPeopleList = item.source == true;
 
     if (item.relationship) {
       $div.addClass('timeline-family');
@@ -195,7 +196,7 @@ class PersonTimeline {
       }
     }
 
-    if (showPeopleList) {
+    if (!showNotesAboutPeopleList && showPeopleList) {
       $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
     }
 
@@ -222,6 +223,10 @@ class PersonTimeline {
           '</p>'
         );
       }
+    }
+
+    if (showNotesAboutPeopleList && showPeopleList) {
+      $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
     }
   }
 }
