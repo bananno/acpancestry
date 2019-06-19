@@ -212,3 +212,50 @@ test(t => {
     timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
   );
 });
+
+test(t => {
+  const testItemSource = {
+    source: true,
+    relationship: false,
+    personal: false,
+  };
+
+  const testItemPersonalEvent = {
+    source: false,
+    relationship: false,
+    personal: true,
+  };
+
+  const testItemFamilyEvent = {
+    source: false,
+    relationship: 'parent',
+    personal: false,
+  };
+
+  let timelineItem;
+
+  t.stubDatabase();
+
+  t.setTitle('Person timeline family events');
+
+  t.setTitle2('item class');
+
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('should be "timeline-source" for all sources',
+    'timeline-source',
+    timelineItem.getItemClass(),
+  );
+
+  timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
+  t.assertEqual('should be "timeline-life" for personal life events',
+    'timeline-life',
+    timelineItem.getItemClass(),
+  );
+
+  timelineItem = new PersonTimelineItem(testItemFamilyEvent, true);
+  t.assertEqual('should be "timeline-family" for family events',
+    'timeline-family',
+    timelineItem.getItemClass(),
+  );
+
+});
