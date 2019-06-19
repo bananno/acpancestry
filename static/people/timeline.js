@@ -251,11 +251,17 @@ class PersonTimelineItem {
     if (this.item.people.length > 5) {
       $list.hide();
       const $show = $('<div class="fake-link" style="margin-top: 5px">')
-      $show.text('show all ' + this.item.people.length + ' tagged people');
-      this.$col2.append($show);
+      let showText = 'show all ' + this.item.people.length + ' tagged people';
+      $show.text(showText);
+      $list.before($show);
       $show.click(() => {
-        $show.remove();
-        $list.show();
+        if ($list.is(':visible')) {
+          $list.slideUp();
+          $show.text(showText);
+        } else {
+          $list.slideDown();
+          $show.text('hide list');
+        }
       });
     }
   }
