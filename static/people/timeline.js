@@ -141,7 +141,7 @@ class PersonTimeline {
     const $col2 = $('<div class="column column2">').appendTo($div);
 
     let showPeopleList = true;
-    let showNotesAboutPeopleList = item.source == true;
+    let showNotesAbovePeopleList = false;
 
     if (item.relationship) {
       $div.addClass('timeline-family');
@@ -150,6 +150,7 @@ class PersonTimeline {
       if (item.people.length == 1) {
         showPeopleList = false;
       }
+      showNotesAbovePeopleList = true;
     } else {
       $div.addClass('timeline-source');
     }
@@ -188,19 +189,7 @@ class PersonTimeline {
       if (item.images.length) {
         $col1.append(makeImage(item, 0, 100, 100));
       }
-    } else {
-      if (item.relationship) {
-        $col2.append('<p><b>' + item.title + ' of ' + item.relationship + '</b></p>');
-      } else {
-        $col2.append('<p><b>' + item.title + '</b></p>');
-      }
-    }
 
-    if (!showNotesAboutPeopleList && showPeopleList) {
-      $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
-    }
-
-    if (item.source) {
       if (item.sourceGroup && item.sourceGroup.summary) {
         $col2.append(
           '<p style="margin-top: 5px;">' +
@@ -208,6 +197,7 @@ class PersonTimeline {
           '</p>'
         );
       }
+
       if (item.summary) {
         $col2.append(
           '<p style="margin-top: 5px;">' +
@@ -215,7 +205,21 @@ class PersonTimeline {
           '</p>'
         );
       }
+
+      if (showPeopleList) {
+        $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
+      }
     } else {
+      if (item.relationship) {
+        $col2.append('<p><b>' + item.title + ' of ' + item.relationship + '</b></p>');
+      } else {
+        $col2.append('<p><b>' + item.title + '</b></p>');
+      }
+
+      if (!showNotesAbovePeopleList && showPeopleList) {
+        $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
+      }
+
       if (item.notes) {
         $col2.append(
           '<p style="margin-top: 5px;">' +
@@ -223,10 +227,10 @@ class PersonTimeline {
           '</p>'
         );
       }
-    }
 
-    if (showNotesAboutPeopleList && showPeopleList) {
-      $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
+      if (showNotesAbovePeopleList && showPeopleList) {
+        $col2.append($makePeopleList(item.people, 'photo').css('margin-left', '-5px'));
+      }
     }
   }
 }
