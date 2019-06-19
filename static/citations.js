@@ -21,7 +21,7 @@ const citationItemOrder = [
 function $makeCitationList(citations) {
   citations = sortCitations(citations);
 
-  const $table = $('<table class="citation-list">');
+  const $table = $('<table class="citation-list cover-background">');
 
   $table.append('<tr><th colspan="2">item</th><th>information</th><th>source</th></tr>');
 

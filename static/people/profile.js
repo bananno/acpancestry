@@ -85,7 +85,8 @@ function showPersonBiographies(person) {
 
   bios.forEach((source, i) => {
     rend(
-      '<div style="margin-left: 12px;' + (i > 0 ? 'margin-top:15px' : '') + '">' +
+      '<div class="cover-background" ' +
+          'style="margin-left: 12px;' + (i > 0 ? 'margin-top:15px' : '') + '">' +
         '<p>' +
           '<b>' + source.group + '</b>' +
         '</p>' +

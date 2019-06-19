@@ -7,6 +7,9 @@
 
 body {
   width: 100%;
+}
+
+body, .cover-background {
   background-color: #f0f0f0;
 }
 
