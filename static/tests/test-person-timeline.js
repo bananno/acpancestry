@@ -216,27 +216,32 @@ test(t => {
 test(t => {
   const testItemSource = {
     source: true,
-    relationship: false,
+    event: false,
+    relationship: null,
     personal: false,
   };
 
   const testItemPersonalEvent = {
     source: false,
-    relationship: false,
+    event: true,
+    relationship: null,
     personal: true,
+    title: 'some event',
   };
 
   const testItemFamilyEvent = {
     source: false,
+    event: true,
     relationship: 'parent',
     personal: false,
+    title: 'death',
   };
 
   let timelineItem;
 
   t.stubDatabase();
 
-  t.setTitle('Person timeline family events');
+  t.setTitle('person timeline items');
 
   t.setTitle2('item class');
 
@@ -258,4 +263,38 @@ test(t => {
     timelineItem.getItemClass(),
   );
 
+  t.setTitle2('item title');
+
+  testItemSource.type = 'index';
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('should be equal to "source" for index-type sources',
+    'source',
+    timelineItem.getItemTitle(),
+  );
+
+  testItemSource.type = 'grave';
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('should be equal to "cemetery" for grave-type sources',
+    'cemetery',
+    timelineItem.getItemTitle(),
+  );
+
+  testItemSource.type = 'newspaper';
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('should be equal to "newspaper article" for newspaper-type sources',
+    'newspaper article',
+    timelineItem.getItemTitle(),
+  );
+
+  timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
+  t.assertEqual('should be equal to the event title for personal events',
+    'some event',
+    timelineItem.getItemTitle(),
+  );
+
+  timelineItem = new PersonTimelineItem(testItemFamilyEvent, true);
+  t.assertEqual('should be "(title) of (relationship)" for family events',
+    'death of parent',
+    timelineItem.getItemTitle(),
+  );
 });

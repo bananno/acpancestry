@@ -223,7 +223,7 @@ class PersonTimelineItem {
       return 'cemetery';
     }
     if (this.item.type == 'newspaper') {
-      return 'newspaper';
+      return 'newspaper article';
     }
     return this.item.type;
   }
