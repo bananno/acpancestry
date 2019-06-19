@@ -193,7 +193,7 @@ class PersonTimelineItem {
       $col2.append('<p style="margin-top: 5px;">' + text + '</p>');
     });
 
-    if (this.shouldDisplayPeopleBelowText()) {
+    if (!this.shouldDisplayPeopleAboveText()) {
       this.renderItemPeople();
     }
   }
@@ -229,11 +229,7 @@ class PersonTimelineItem {
   }
 
   shouldDisplayPeopleAboveText() {
-    return this.item.event && this.item.relationship;
-  }
-
-  shouldDisplayPeopleBelowText() {
-    return this.item.source || this.item.personal;
+    return this.item.event && this.item.relationship ? true : false;
   }
 
   shouldShowPeople() {
@@ -261,7 +257,7 @@ class PersonTimelineItem {
       arr = this.item.sourceGroup.summary.split('\n');
     }
     if (this.item.summary) {
-      arr = [...arr, this.item.summary.split('\n')];
+      arr = [...arr, ...this.item.summary.split('\n')];
     }
     return arr;
   }

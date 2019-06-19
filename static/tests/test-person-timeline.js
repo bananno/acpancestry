@@ -23,7 +23,7 @@ test(t => {
 
   t.stubDatabase();
 
-  t.setTitle('Person timeline family events');
+  t.setTitle('person timeline family events');
 
   // timeline.shouldIncludeFamilyEvent arguments: relative, relationship, item
 
@@ -286,6 +286,13 @@ test(t => {
     timelineItem.getItemTitle(),
   );
 
+  testItemSource.type = 'other source type';
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('should be equal to source type for all other sources',
+    'other source type',
+    timelineItem.getItemTitle(),
+  );
+
   timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
   t.assertEqual('should be equal to the event title for personal events',
     'some event',
@@ -296,5 +303,116 @@ test(t => {
   t.assertEqual('should be "(title) of (relationship)" for family events',
     'death of parent',
     timelineItem.getItemTitle(),
+  );
+
+  t.setTitle2('item text');
+
+  testItemSource.summary = 'info1\ninfo2';
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('item text is an array for sources with a summary',
+    ['info1', 'info2'],
+    timelineItem.getItemText(),
+  );
+
+  testItemSource.summary = '';
+  testItemSource.sourceGroup = {};
+  testItemSource.sourceGroup.summary = 'info3\ninfo4';
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('item text is an array for sources with a source group summary',
+    ['info3', 'info4'],
+    timelineItem.getItemText(),
+  );
+
+  testItemSource.summary = 'info1\ninfo2';
+  testItemSource.sourceGroup = {};
+  testItemSource.sourceGroup.summary = 'info3\ninfo4';
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('item text is a combined array for sources with a summary and a group summary',
+    ['info3', 'info4', 'info1', 'info2'],
+    timelineItem.getItemText(),
+  );
+
+  testItemSource.summary = '';
+  testItemSource.sourceGroup = {};
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('item text is an empty array for sources without any summary',
+    [],
+    timelineItem.getItemText(),
+  );
+
+  testItemPersonalEvent.notes = 'notes1\nnotes2';
+  timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
+  t.assertEqual('item text is an array for personal events with notes',
+    ['notes1', 'notes2'],
+    timelineItem.getItemText(),
+  );
+
+  testItemFamilyEvent.notes = 'notes3\nnotes4';
+  timelineItem = new PersonTimelineItem(testItemFamilyEvent, true);
+  t.assertEqual('item text is an array for family events with notes',
+    ['notes3', 'notes4'],
+    timelineItem.getItemText(),
+  );
+
+  testItemPersonalEvent.notes = '';
+  timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
+  t.assertEqual('item text is an empty array for personal events with no notes',
+    [],
+    timelineItem.getItemText(),
+  );
+
+  testItemFamilyEvent.notes = '';
+  timelineItem = new PersonTimelineItem(testItemFamilyEvent, true);
+  t.assertEqual('item text is an empty array for family events with no notes',
+    [],
+    timelineItem.getItemText(),
+  );
+
+  t.setTitle2('people list');
+
+  testItemSource.people = [];
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('always show people list for sources',
+    true,
+    timelineItem.shouldShowPeople(),
+  );
+
+  testItemFamilyEvent.people = [];
+  timelineItem = new PersonTimelineItem(testItemFamilyEvent, true);
+  t.assertEqual('always show people list for family events',
+    true,
+    timelineItem.shouldShowPeople(),
+  );
+
+  testItemPersonalEvent.people = [{ name: 'test person 1'}, { name: 'test person 2'}];
+  timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
+  t.assertEqual('show people list for personal events if there are multiple people in the list',
+    true,
+    timelineItem.shouldShowPeople(),
+  );
+
+  testItemPersonalEvent.people = [{ name: 'test person 1'}];
+  timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
+  t.assertEqual('do not show people list for personal events with only 1 person',
+    false,
+    timelineItem.shouldShowPeople(),
+  );
+
+  timelineItem = new PersonTimelineItem(testItemFamilyEvent, true);
+  t.assertEqual('show people above item text for family events',
+    true,
+    timelineItem.shouldDisplayPeopleAboveText(),
+  );
+
+  timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
+  t.assertEqual('show people below item text for personal events',
+    false,
+    timelineItem.shouldDisplayPeopleAboveText(),
+  );
+
+  timelineItem = new PersonTimelineItem(testItemSource, true);
+  t.assertEqual('show people below item text for sources',
+    false,
+    timelineItem.shouldDisplayPeopleAboveText(),
   );
 });
