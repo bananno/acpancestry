@@ -10,6 +10,7 @@ function viewPerson() {
   }
 
   showPersonHeader(person);
+  showPersonBiographies(person);
   showPersonFamily(person);
 
   rend('<h2>Tree</h2>');
@@ -69,6 +70,32 @@ function personShowHeaderEvent(person, abbr, event) {
       ) : '') +
     '</div>'
   );
+}
+
+function showPersonBiographies(person) {
+  const bios = DATABASE.sources.filter(source => {
+    return source.people[0] == person && source.tags.biography;
+  });
+
+  if (bios.length == 0) {
+    return;
+  }
+
+  rend('<h2>Biography</h2>');
+
+  bios.forEach((source, i) => {
+    rend(
+      '<div style="margin-left: 12px;' + (i > 0 ? 'margin-top:15px' : '') + '">' +
+        '<p>' +
+          '<b>' + source.group + '</b>' +
+        '</p>' +
+        '<p style="margin-top: 8px">' +
+          source.content.slice(0, 500) +
+          '... <i>' + localLink('source/' + source._id, 'continue reading') + '</i>' +
+        '</p>' +
+      '</div>'
+    );
+  });
 }
 
 function showPersonFamily(person) {

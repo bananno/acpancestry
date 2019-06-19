@@ -99,6 +99,7 @@ function getProcessedSource(source) {
   source.location = source.location || {};
   source.location.format = formatLocation(source.location);
   source.citations = [];
+  source.tags = source.tags || {};
 
   return source;
 }
