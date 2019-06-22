@@ -174,7 +174,7 @@ function getFancyLink(link) {
   return (
     '<div class="fancy-link">' +
       '<a href="' + linkUrl  + '" target="_blank">' +
-        '<img src="public/images/' + imageName + '">' + linkText +
+        '<img src="images/' + imageName + '">' + linkText +
       '</a>' +
     '</div>'
   );

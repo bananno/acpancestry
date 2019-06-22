@@ -45,7 +45,7 @@ function getProcessedPerson(person) {
   person.siblings = [];
   person.links = person.links || [];
   person.citations = [];
-  person.profileImage = person.profileImage || 'public/images/generic-profile-picture.png';
+  person.profileImage = person.profileImage || 'images/generic-profile-picture.png';
 
   return person;
 }
