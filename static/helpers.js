@@ -1,8 +1,8 @@
 function setPageTitle(title) {
   if (title && title.length) {
-    document.title = title + ' | Lundberg Ancestry';
+    document.title = title + ' | ' + SITE_TITLE;
   } else {
-    document.title = 'Lundberg Ancestry';
+    document.title = SITE_TITLE;
   }
 }
 

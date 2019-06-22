@@ -2,6 +2,7 @@
 const [ORIGIN, PATH, ENV] = getFilePaths();
 
 $(document).ready(() => {
+  setPageTitle();
   processDatabase();
   createHeaderLinks();
   loadContent();
@@ -26,7 +27,7 @@ function getFilePaths() {
 }
 
 function createHeaderLinks() {
-  $('#page-header h1').append('<a href="' + ORIGIN + '">Lundberg Ancestry</a>');
+  $('#page-header h1').append('<a href="' + ORIGIN + '">' + SITE_TITLE + '</a>');
   const $list = $('#main-navigation ul');
 
   $list.append('<li><a href="' + ORIGIN + '">Home</a></li>');

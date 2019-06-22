@@ -45,7 +45,7 @@ function loadContent() {
 
 function viewMain() {
   setPageTitle();
-  rend('<h1>Lundberg Ancestry</h1>');
+  rend('<h1>' + SITE_TITLE + '</h1>');
 }
 
 function viewPeople() {
