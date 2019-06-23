@@ -60,9 +60,20 @@ class RunTests {
   }
 
   stubDatabase() {
+    DATABASE.people.forEach(person => {
+      ['parents', 'spouses', 'children'].forEach(relationship => {
+        person[relationship] = person[relationship] || [];
+      });
+    });
+
     DATABASE.sources.forEach(source => {
       source.people = source.people || [];
     });
+
+    DATABASE.events.forEach(event => {
+      event.people = event.people || [];
+    });
+
     processDatabase();
   }
 

@@ -53,6 +53,10 @@ class PersonTimeline {
         this.addFamilyEventsToList(relative, relationship);
       });
     });
+
+    if (!this.person.death || !this.person.death.date) {
+      this.addEmptyDeathEvent();
+    }
   }
 
   addFamilyEventsToList(relative, relationship) {
@@ -125,6 +129,32 @@ class PersonTimeline {
     }
 
     return false;
+  }
+
+  addEmptyDeathEvent() {
+    if (this.person.death) {
+      const item = this.list.filter(item => item._id == this.person.death._id)[0];
+      item.mod = 'added-death-date';
+      item.date = {
+        year: 3000,
+        sort: '3000-00-00',
+        format: 'date unknown',
+      };
+      return;
+    }
+
+    this.list.push({
+      title: 'death',
+      people: [this.person],
+      date: {
+        year: 3000,
+        sort: '3000-00-00',
+        format: 'date unknown',
+      },
+      location: {},
+      event: true,
+      _id: 'added-death-event',
+    });
   }
 
   sortList() {
