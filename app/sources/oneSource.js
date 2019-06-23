@@ -53,9 +53,9 @@ function viewSourceOther(source) {
   if (source.images.length) {
     rend('<h2>Images</h2>');
 
-    if (source.group.match('Census USA')) {
-      rend('<p style="margin-bottom:10px">The image might be cropped to show the most ' +
-        'relevent portion. See the "links" section below for the full image.</p>');
+    if (source.tags.cropped) {
+      rend('<p style="margin-bottom:10px">The image is cropped to show the most relevent ' +
+        'portion. See the "links" section below to see the full image.</p>');
     }
 
     source.images.forEach((imageUrl, i) => {
