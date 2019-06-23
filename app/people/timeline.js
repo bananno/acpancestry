@@ -81,8 +81,10 @@ class PersonTimeline {
       && (isDateBeforeDate(this.person.birth.date, item.date)
         || areDatesEqual(this.person.birth.date, item.date));
 
-    const beforePersonsDeath = this.person.death
-      && (isDateBeforeDate(item.date, this.person.death.date)
+    // If death date is not available for this person, all events are considered to be "after"
+    // their death.
+    const beforePersonsDeath = !this.person.death
+      || (isDateBeforeDate(item.date, this.person.death.date)
         || areDatesEqual(item.date, this.person.death.date));
 
     const duringPersonsLife = afterPersonsBirth && beforePersonsDeath;
@@ -107,10 +109,16 @@ class PersonTimeline {
       if (item.title == 'birth') {
         return true;
       }
-      // include child's death if it is during person's life or within 5 years after person's death.
+      // include child's death if it is during person's life or within 5 years after person's
+      // death, OR if the person's death date is not available.
       if (item.title == 'death') {
-        return item.date.year && this.person.death && this.person.death.date.year
-          && item.date.year - this.person.death.date.year < 5;
+        if (!item.date.year) {
+          return false;
+        }
+        if (!this.person.death) {
+          return true;
+        }
+        return this.person.death.date.year && item.date.year - this.person.death.date.year < 5;
       }
       // include other child events if they are during person's life.
       return beforePersonsDeath;

@@ -19,7 +19,7 @@ test(t => {
     date: { year: 1920, month: 1, day: 1 },
   };
 
-  let timeline;
+  let timeline, tempSaveValue;
 
   t.stubDatabase();
 
@@ -27,7 +27,7 @@ test(t => {
 
   // timeline.shouldIncludeFamilyEvent arguments: relative, relationship, item
 
-  t.setTitle2('Parents');
+  t.setTitle2('parents');
 
   testEvent.title = 'birth';
   timeline = new PersonTimeline(testPerson1, true);
@@ -54,13 +54,24 @@ test(t => {
 
   testEvent.title = 'death';
   testEvent.date.year = 1981;
+  tempSaveValue = testPerson1.death;
+  testPerson1.death = null;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertEqual('include parent death if person\'s death date is null',
+    true,
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
+  );
+  testPerson1.death = tempSaveValue;
+
+  testEvent.title = 'death';
+  testEvent.date.year = 1981;
   timeline = new PersonTimeline(testPerson1, true);
   t.assertEqual('exclude parent death if after person\'s death',
     false,
     timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
   );
 
-  t.setTitle2('Siblings');
+  t.setTitle2('siblings');
 
   testEvent.title = 'birth';
   testEvent.date.year = 1910;
@@ -77,6 +88,28 @@ test(t => {
     true,
     timeline.shouldIncludeFamilyEvent(testPerson2, 'sibling', testEvent),
   );
+
+  testEvent.title = 'birth';
+  testEvent.date.year = 1910;
+  tempSaveValue = testPerson1.death;
+  testPerson1.death = null;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertEqual('include sibling birth if after person\'s birth but death date is null',
+    true,
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'sibling', testEvent),
+  );
+  testPerson1.death = tempSaveValue;
+
+  testEvent.title = 'death';
+  testEvent.date.year = 1910;
+  tempSaveValue = testPerson1.death;
+  testPerson1.death = null;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertEqual('include sibling death if after person\'s birth but death date is null',
+    true,
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'sibling', testEvent),
+  );
+  testPerson1.death = tempSaveValue;
 
   testEvent.title = 'other event';
   testEvent.date.year = 1910;
@@ -118,7 +151,7 @@ test(t => {
     timeline.shouldIncludeFamilyEvent(testPerson2, 'sibling', testEvent),
   );
 
-  t.setTitle2('Spouses');
+  t.setTitle2('spouses');
 
   testEvent.title = 'birth';
   testEvent.date.year = 1890;
@@ -144,10 +177,10 @@ test(t => {
     timeline.shouldIncludeFamilyEvent(testPerson2, 'spouse', testEvent),
   );
 
-  t.setTitle2('Children');
-  timeline = new PersonTimeline(testPerson1, true);
+  t.setTitle2('children');
 
   testEvent.title = 'birth';
+  timeline = new PersonTimeline(testPerson1, true);
   t.assertEqual('include child birth',
     true,
     timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
@@ -168,6 +201,17 @@ test(t => {
     true,
     timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
   );
+
+  testEvent.title = 'death';
+  testEvent.date.year = 1984;
+  tempSaveValue = testPerson1.death;
+  testPerson1.death = null;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertEqual('include child death if after person\'s birth but death date is null',
+    true,
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
+  );
+  testPerson1.death = tempSaveValue;
 
   testEvent.title = 'death';
   testEvent.date.year = 1986;
@@ -193,7 +237,7 @@ test(t => {
     timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
   );
 
-  t.setTitle2('Other');
+  t.setTitle2('other');
 
   testEvent.title = 'other event';
   testEvent.date.year = 1950;
