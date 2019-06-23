@@ -46,6 +46,16 @@ function loadContent() {
 function viewMain() {
   setPageTitle();
   rend('<h1>' + SITE_TITLE + '</h1>');
+  rend('<h2>featured</h2>');
+  rend($makePeopleList(DATABASE.people.filter(person => person.tags.featured), 'photo'));
+  rend('<h2>topics</h2>');
+  rend(`
+    <ul class="bullet">
+    ${['military', 'immigration', 'disease'].map(topic => {
+      return '<li>' + localLink('topic/' + topic, topic) + '</li>';
+    }).join('')}
+    </ul>
+  `);
 }
 
 function viewPeople() {
