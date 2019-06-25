@@ -25,6 +25,8 @@ function makeImage(source, imageNumber, maxHeight, maxWidth) {
 function viewImage() {
   const [sourceId, imageNumber] = PATH.replace('image/', '').split('/');
 
+  setPageTitle('Image');
+
   $('body').html('');
 
   $('body').css({
