@@ -101,6 +101,10 @@ function getProcessedSource(source) {
   source.citations = [];
   source.tags = source.tags || {};
 
+  if (source.group.match('Census USA')) {
+    source.title += ' household';
+  }
+
   return source;
 }
 
