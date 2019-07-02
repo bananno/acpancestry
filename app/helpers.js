@@ -1,5 +1,5 @@
 function setPageTitle(title) {
-  if (title && title.length) {
+  if (title && ('' + title).length) {
     document.title = title + ' | ' + SITE_TITLE;
   } else {
     document.title = SITE_TITLE;
@@ -10,12 +10,30 @@ function rend(content) {
   $('#page-content').append(content);
 }
 
+function h1(content) {
+  rend($('<h1>').append(content));
+}
+
+function h2(content) {
+  rend($('<h2>').append(content));
+}
+
+function bulletList(array, skipRender) {
+  const $list = $('<ul class="bullet">');
+  array.forEach(content => $list.append($('<li>').append(content)));
+  if (!skipRender) {
+    rend($list);
+  }
+  return $list;
+}
+
 function $makePeopleList(people, format, keywords) {
   if (format == 'photo') {
     const $list = $('<div class="people-list">');
 
     people.forEach(person => {
       const $item = $('<div>').appendTo($list);
+      $item.attr('data-person', person._id);
       if (keywords) {
         $item.addClass('search-result-item');
       }
@@ -30,6 +48,7 @@ function $makePeopleList(people, format, keywords) {
 
   people.forEach(person => {
     const $item = $('<li>').appendTo($list);
+    $item.attr('data-person', person._id);
     $item.append(linkToPerson(person, true, null, keywords));
   });
 

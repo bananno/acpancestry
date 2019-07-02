@@ -40,22 +40,27 @@ function loadContent() {
     return viewTopic();
   }
 
+  if (PATH.match('year/')) {
+    return viewYear();
+  }
+
   return pageNotFound();
 }
 
 function viewMain() {
   setPageTitle();
-  rend('<h1>' + SITE_TITLE + '</h1>');
-  rend('<h2>featured</h2>');
+  h1(SITE_TITLE);
+
+  h2('featured');
   rend($makePeopleList(DATABASE.people.filter(person => person.tags.featured), 'photo'));
-  rend('<h2>topics</h2>');
-  rend(`
-    <ul class="bullet">
-    ${['military', 'immigration', 'disease'].map(topic => {
-      return '<li>' + localLink('topic/' + topic, topic) + '</li>';
-    }).join('')}
-    </ul>
-  `);
+
+  h2('topics');
+  bulletList(['military', 'immigration', 'disease'].map(topic => {
+    return localLink('topic/' + topic, topic);
+  }));
+
+  h2('browse');
+  bulletList([localLink('year/1904', 'browse by year')]);
 }
 
 function viewPeople() {
