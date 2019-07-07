@@ -17,18 +17,55 @@ function viewTopic() {
 
 function viewTopicMilitary() {
   const veterans = DATABASE.people.filter(person => person.tags.veteran);
+  const americanRevolution = veterans.filter(person => person.tags.war == 'American Revolution');
+  const civilWar = veterans.filter(person => person.tags.war == 'CSA');
+  const wwii = veterans.filter(person => person.tags.war == 'WWII');
+  const wwi = veterans.filter(person => person.tags.war == 'WWI');
+  const otherVeterans = veterans.filter(person => {
+    return !['American Revolution', 'CSA', 'WWI', 'WWII'].includes(person.tags.war);
+  });
   const diedAtWar = DATABASE.people.filter(person => person.tags['died at war']);
+
   const events = DATABASE.events.filter(event => {
-    return event.title.match('military') || event.title == 'enlistment';
+    return event.tags.military
+      || event.title.match('military')
+      || event.title == 'enlistment'
+      || event.title.match('Battle')
+      || (event.notes || '').match('battle');
+  });
+
+  diedAtWar.forEach(person => {
+    if (person.death) {
+      events.push(person.death);
+    }
   });
 
   setPageTitle('Military');
-  rend('<h1>Military</h1>');
-  rend('<h2>Veterans</h2>');
-  rend($makePeopleList(veterans, 'photo'));
-  rend('<h2>People who died at war</h2>');
+  h1('Military');
+
+  h2('American Revolution veterans');
+  rend($makePeopleList(americanRevolution, 'photo'));
+
+  h2('Civil War veterans');
+  rend($makePeopleList(civilWar, 'photo'));
+
+  h2('World War II veterans');
+  rend($makePeopleList(wwii, 'photo'));
+
+  if (wwi.length) {
+    h2('World War I veterans');
+    rend($makePeopleList(wwi, 'photo'));
+  }
+
+  if (otherVeterans.length) {
+    h2('Other wars');
+    rend($makePeopleList(otherVeterans, 'photo'));
+  }
+
+  h2('People who died at war');
   rend($makePeopleList(diedAtWar, 'photo'));
-  rend('<h2>Events</h2>');
+
+  h2('Events');
   events.forEach(event => {
     rend(eventBlock(event));
   });
@@ -37,10 +74,22 @@ function viewTopicMilitary() {
 function viewTopicImmigration() {
   const people = DATABASE.people.filter(person => person.tags.immigrant);
 
+  const events = DATABASE.events.filter(event => {
+    return event.title == 'immigration' || event.tags.immigration;
+  });
+
+  events.trueSort((a, b) => a.date.sort < b.date.sort);
+
   setPageTitle('Immigration');
-  rend('<h1>Immigration</h1>');
-  rend('<h2>People who immigrated</h2>');
+  h1('Immigration');
+
+  h2('People who immigrated');
   rend($makePeopleList(people, 'photo'));
+
+  h2('Events');
+  events.forEach(event => {
+    rend(eventBlock(event));
+  });
 }
 
 function viewTopicDisease() {
@@ -59,11 +108,12 @@ function viewTopicDisease() {
   events.trueSort((a, b) => a.date.sort < b.date.sort);
 
   setPageTitle('Disease');
-  rend('<h1>Disease</h1>');
-  rend('<h2>People that died of disease</h2>');
-  rend($makePeopleList(people, 'photo'));
-  rend('<h2>Events</h2>');
+  h1('Disease');
 
+  h2('People that died of disease');
+  rend($makePeopleList(people, 'photo'));
+
+  h2('Events');
   events.forEach(event => {
     rend(eventBlock(event));
   });
