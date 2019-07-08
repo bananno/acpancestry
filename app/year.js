@@ -19,8 +19,14 @@ function viewYear() {
       && person.death && person.death.date && person.death.date.year > year;
   });
 
+  const events = DATABASE.events.filter(event => {
+    return event.date && event.date.year == year
+      && event.title != 'birth' && event.title != 'death';
+  });
+
   bornThisYear.trueSort((a, b) => a.birthSort < b.birthSort);
   aliveThisYear.trueSort((a, b) => a.birthSort < b.birthSort);
+  events.trueSort((a, b) => a.date.sort < b.date.sort);
 
   setPageTitle(year);
   h1(year);
@@ -34,6 +40,11 @@ function viewYear() {
   );
 
   let $list;
+
+  h2('Events');
+  events.forEach(event => {
+    rend(eventBlock(event).css('margin-left', '10px'));
+  });
 
   h2('Born this year');
   $list = $makePeopleList(bornThisYear, 'photo');
