@@ -54,6 +54,14 @@ function viewMain() {
   h2('featured');
   rend($makePeopleList(DATABASE.people.filter(person => person.tags.featured), 'photo'));
 
+  DATABASE.sources.filter(s => s.tags.featured).forEach(source => {
+    rend(
+      '<p style="margin: 10px">' +
+        linkToSource(source, source.group + ' - ' + source.title) +
+      '</p>'
+    );
+  });
+
   h2('photos');
   DATABASE.sources.filter(s => s.type == 'photo').forEach(source => {
     if (source.images.length) {
