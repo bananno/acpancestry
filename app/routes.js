@@ -54,6 +54,17 @@ function viewMain() {
   h2('featured');
   rend($makePeopleList(DATABASE.people.filter(person => person.tags.featured), 'photo'));
 
+  h2('photos');
+  DATABASE.sources.filter(s => s.type == 'photo').forEach(source => {
+    if (source.images.length) {
+      rend(
+        localLink('source/' + source._id, '<img src="' + source.images[0] +
+        '" style="height: 100px; max-width: 300px; margin: 5px;" title="' +
+        source.title + '">')
+      );
+    }
+  });
+
   h2('topics');
   bulletList(['military', 'immigration', 'disease'].map(topic => {
     return localLink('topic/' + topic, topic);
