@@ -62,6 +62,10 @@ function viewMain() {
     );
   });
 
+  [
+    ['USA/MN/Pipestone%20County/Ruthton', 'Ruthton, Minnesota'],
+  ].forEach(([path, name]) => rend($makeIconLink('places/' + path, name, 'images/map-icon.svg')));
+
   h2('photos');
   DATABASE.sources.filter(s => s.type == 'photo').forEach(source => {
     if (source.images.length) {

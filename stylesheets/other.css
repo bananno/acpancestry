@@ -116,6 +116,32 @@
   }
 }
 
+/* ICON LINKS */
+
+.icon-link {
+  height: 30px;
+  line-height: 30px;
+  margin: 5px;
+  font-size: 16px;
+}
+
+.icon-link img {
+  max-height: 30px;
+  max-width: 30px;
+  border-radius: 30px;
+  vertical-align: top;
+  margin-right: 10px;
+  border: 1px solid gray;
+}
+
+ul.people-list {
+  list-style: none;
+}
+
+ul.people-list li {
+  margin: 5px;
+}
+
 /* TESTS */
 
 .unit-tests {
@@ -183,30 +209,6 @@
 
 .person-family li {
   padding-bottom: 5px;
-}
-
-ul.people-list {
-  list-style: none;
-}
-
-ul.people-list li {
-  margin: 5px;
-}
-
-.people-list div {
-  height: 30px;
-  line-height: 30px;
-  margin: 5px;
-  font-size: 16px;
-}
-
-.people-list img {
-  max-height: 30px;
-  max-width: 30px;
-  border-radius: 30px;
-  vertical-align: top;
-  margin-right: 10px;
-  border: 1px solid gray;
 }
 
 table.event-list th,

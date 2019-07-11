@@ -32,7 +32,7 @@ function $makePeopleList(people, format, keywords) {
     const $list = $('<div class="people-list">');
 
     people.forEach(person => {
-      const $item = $('<div>').appendTo($list);
+      const $item = $('<div class="icon-link">').appendTo($list);
       $item.attr('data-person', person._id);
       if (keywords) {
         $item.addClass('search-result-item');
@@ -53,6 +53,12 @@ function $makePeopleList(people, format, keywords) {
   });
 
   return $list;
+}
+
+function $makeIconLink(path, text, image) {
+  return $('<div class="icon-link">')
+    .append(localLink(path, '<img src="' + image + '">'))
+    .append(localLink(path, text));
 }
 
 function localLink(target, text, newTab) {
