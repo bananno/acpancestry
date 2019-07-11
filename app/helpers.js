@@ -214,8 +214,8 @@ function formatTranscription(content) {
   let $div = $('<div class="transcription">').appendTo($mainDiv);
 
   content.forEach(str => {
-    if (str.slice(0, 7) == '[below:') {
-      str = str.replace('[below: ', '');
+    if (str.slice(0, 7).toLowerCase() == '[below:') {
+      str = str.slice(7).trim();
       str = str.replace(']', ':');
       $mainDiv.append('<p style="padding: 5px;">' + str + '</p>');
       wasTable = false;
