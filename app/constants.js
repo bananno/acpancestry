@@ -1,3 +1,4 @@
+
 const SITE_TITLE = 'Lundberg Ancestry';
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -15,3 +16,5 @@ const USA_STATES = {
     SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
     VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
 };
+
+const PLACE_PARTS = ['country', 'region1', 'region2', 'city'];
