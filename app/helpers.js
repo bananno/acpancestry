@@ -193,6 +193,9 @@ function getFancyLink(link) {
     } else if (linkText == 'FindAGrave') {
       imageName = 'logo-findagrave.png';
       linkText = '';
+    } else if (linkText == 'WikiTree') {
+      imageName = 'logo-wikitree.png';
+      linkText = '';
     }
   }
 
