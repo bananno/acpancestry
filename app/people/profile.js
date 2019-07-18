@@ -127,7 +127,48 @@ function showPersonBiographies(person) {
 function showPersonFamily(person) {
   rend('<h2>Family</h2>');
 
-  ['parents', 'siblings', 'spouses', 'children'].forEach(relationship => {
+  const isRelative = {};
+  const siblings = [...person.siblings];
+
+  person.parents.forEach(rel => isRelative[rel._id] = true);
+  person.children.forEach(rel => isRelative[rel._id] = true);
+
+  ['step-parents', 'step-siblings', 'half-siblings', 'siblings', 'step-children']
+    .forEach(rel => person[rel] = []);
+
+  siblings.forEach(sibling => {
+    if (person.parents.length == 2 && sibling.parents.length == 2
+        && person.parents[0] == sibling.parents[0] && person.parents[1] == sibling.parents[1]) {
+      person.siblings.push(sibling);
+    } else {
+      person['half-siblings'].push(sibling);
+    }
+    isRelative[sibling._id] = true;
+  });
+
+  person.parents.forEach(parent => {
+    parent.spouses.forEach(parent => {
+      if (!isRelative[parent._id]) {
+        person['step-parents'].push(parent);
+        parent.children.forEach(sibling => {
+          if (!isRelative[sibling._id]) {
+            person['step-siblings'].push(sibling);
+          }
+        });
+      }
+    })
+  });
+
+  person.spouses.forEach(spouse => {
+    spouse.children.forEach(child => {
+      if (!isRelative[child._id]) {
+        person['step-children'].push(child);
+      }
+    });
+  });
+
+  ['parents', 'step-parents', 'siblings', 'step-siblings', 'half-siblings', 'spouses',
+    'children', 'step-children'].forEach(relationship => {
     if (person[relationship].length == 0) {
       return;
     }
