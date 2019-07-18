@@ -19,6 +19,11 @@ class RunTests {
     this.displayOnPage = PATH == 'test';
     this.currentTitle = null;
 
+    if (this.displayOnPage) {
+      h2('Check pages');
+      rend('<p>' + localLink('about/person-profile', 'About person profile') + '</p>');
+    }
+
     const methods = {
       setTitle: this.displayOnPage ? this.setTitle : (() => {}),
       setTitle2: this.displayOnPage ? this.setTitle2 : (() => {}),

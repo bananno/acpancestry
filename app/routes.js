@@ -44,6 +44,10 @@ function loadContent() {
     return viewYear();
   }
 
+  if (PATH.match('about/')) {
+    return viewAbout();
+  }
+
   return pageNotFound();
 }
 

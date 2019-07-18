@@ -13,6 +13,8 @@ function viewTopic() {
   if (topic == 'disease') {
     return viewTopicDisease();
   }
+
+  return pageNotFound();
 }
 
 function viewTopicMilitary() {
