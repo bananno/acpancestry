@@ -29,6 +29,7 @@ function viewTopicMilitary() {
   const diedAtWar = DATABASE.people.filter(person => person.tags['died at war']);
 
   const militaryTimeline = new Timeline();
+  const addedAlready = {};
 
   DATABASE.events.filter(event => {
     return event.tags.military
@@ -37,20 +38,30 @@ function viewTopicMilitary() {
       || event.title.match('Battle')
       || (event.notes || '').match('battle');
   }).forEach(event => {
+    addedAlready[event._id] = true;
     militaryTimeline.insertItem({
       ...event,
       event: true
     });
   });
 
+  DATABASE.sources.filter(source => source.tags.military).forEach(source => {
+    militaryTimeline.insertItem({
+      ...source,
+      source: true
+    });
+  });
+
   diedAtWar.forEach(person => {
-    if (person.death) {
+    if (person.death && !addedAlready[person.death._id]) {
       militaryTimeline.insertItem({
         ...person.death,
         event: true
       });
     }
   });
+
+  militaryTimeline.sortList();
 
   setPageTitle('Military');
   h1('Military');

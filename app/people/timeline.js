@@ -41,7 +41,7 @@ class PersonTimeline extends Timeline {
       if (item.people.indexOf(this.person) >= 0) {
         this.insertItem({
           ...item,
-          event: true
+          source: true
         });
       }
     });
