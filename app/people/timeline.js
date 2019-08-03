@@ -16,13 +16,11 @@ function showPersonTimeline(person) {
   new PersonTimeline(person);
 }
 
-class PersonTimeline {
+class PersonTimeline extends Timeline {
   constructor(person, isTest) {
-    this.person = person;
+    super(person, isTest);
 
-    if (isTest) {
-      this.list = [];
-    } else {
+    if (!isTest) {
       this.createEventList();
       this.sortList();
       this.renderTimeline();
@@ -30,21 +28,21 @@ class PersonTimeline {
   }
 
   createEventList() {
-    this.list = [];
-
     DATABASE.events.forEach(item => {
       if (item.people.indexOf(this.person) >= 0) {
-        let newItem = {...item};
-        newItem.event = true;
-        this.list.push(newItem);
+        this.insertItem({
+          ...item,
+          event: true
+        });
       }
     });
 
     DATABASE.sources.forEach(item => {
       if (item.people.indexOf(this.person) >= 0) {
-        let newItem = {...item};
-        newItem.source = true;
-        this.list.push(newItem);
+        this.insertItem({
+          ...item,
+          event: true
+        });
       }
     });
 
@@ -62,10 +60,11 @@ class PersonTimeline {
   addFamilyEventsToList(relative, relationship) {
     DATABASE.events.forEach(item => {
       if (this.shouldIncludeFamilyEvent(relative, relationship, item)) {
-        let newItem = {...item};
-        newItem.relationship = relationship;
-        newItem.event = true;
-        this.list.push(newItem);
+        this.insertItem({
+          ...item,
+          relationship: relationship,
+          event: true
+        });
       }
     });
   }
@@ -143,7 +142,7 @@ class PersonTimeline {
       return;
     }
 
-    this.list.push({
+    this.insertItem({
       title: 'death',
       people: [this.person],
       date: {
@@ -156,168 +155,10 @@ class PersonTimeline {
       _id: 'added-death-event',
     });
   }
-
-  sortList() {
-    this.list.trueSort((a, b) => {
-      // if there is no date on either item, the cemetery should be rated higher.
-      if (!a.date.year && !b.date.year) {
-        return a.type == 'grave';
-      }
-      return isDateBeforeDate(a.date, b.date);
-    });
-  }
-
-  renderTimeline() {
-    this.list.forEach(item => {
-      new PersonTimelineItem(item);
-    });
-  }
 }
 
-class PersonTimelineItem {
+class PersonTimelineItem extends TimelineItem {
   constructor(item, isTest) {
-    this.item = item;
-
-    if (!isTest) {
-      this.renderItem(item);
-    }
-  }
-
-  renderItem(item) {
-    const $div = $('<div class="timeline-item">');
-    rend($div);
-
-    $div.addClass(this.getItemClass());
-
-    const $col1 = $('<div class="column column1">').appendTo($div);
-    const $col2 = $('<div class="column column2">').appendTo($div);
-
-    this.$col1 = $col1;
-    this.$col2 = $col2;
-
-    if (item.date.format) {
-      $col1.append('<p><b>' + item.date.format + '</b></p>');
-    } else if ($('.timeline-no-date').length == 0 && item.type != 'grave') {
-      $div.before('<div class="timeline-no-date">No date:</div>')
-    }
-
-    if (item.location.format) {
-      $col1.append('<p>' + item.location.format + '</p>');
-    }
-
-    if (item.location.notes) {
-      $col1.append('<p><i>(' + item.location.notes + ')</i></p>');
-    }
-
-    $col2.append('<p><b>' + this.getItemTitle() + '</b></p>');
-
-    if (this.shouldDisplayPeopleAboveText()) {
-      this.renderItemPeople();
-    }
-
-    if (item.source) {
-      if (item.images.length) {
-        $col1.append(makeImage(item, 0, 100, 100));
-      }
-
-      $col2.append(
-        '<p style="margin-top: 5px;">' +
-          linkToSource(item, item.group + (item.type == 'grave' ? '' : ' - ' + item.title)) +
-        '</p>'
-      );
-    }
-
-    this.getItemText().forEach(text => {
-      $col2.append('<p style="margin-top: 5px;">' + text + '</p>');
-    });
-
-    if (!this.shouldDisplayPeopleAboveText()) {
-      this.renderItemPeople();
-    }
-  }
-
-  getItemClass() {
-    if (this.item.source) {
-      return 'timeline-source';
-    }
-    if (this.item.relationship) {
-      return 'timeline-family';
-    }
-    return 'timeline-life';
-  }
-
-  getItemTitle() {
-    if (this.item.event) {
-      if (this.item.relationship) {
-        return this.item.title + ' of ' + this.item.relationship;
-      }
-      return this.item.title;
-    }
-
-    if (this.item.type == 'index') {
-      return 'source';
-    }
-    if (this.item.type == 'grave') {
-      return 'cemetery';
-    }
-    if (this.item.type == 'newspaper') {
-      return 'newspaper article';
-    }
-    return this.item.type;
-  }
-
-  shouldDisplayPeopleAboveText() {
-    return this.item.event && this.item.relationship ? true : false;
-  }
-
-  shouldShowPeople() {
-    if (!this.item.relationship && this.item.event && this.item.people.length == 1) {
-      return false;
-    }
-    return true;
-  }
-
-  renderItemPeople() {
-    if (!this.shouldShowPeople()) {
-      return;
-    }
-
-    const $list = $makePeopleList(this.item.people, 'photo').css('margin-left', '-5px');
-
-    this.$col2.append($list);
-
-    if (this.item.people.length > 5) {
-      $list.hide();
-      const $show = $('<div class="fake-link" style="margin-top: 5px">')
-      let showText = 'show all ' + this.item.people.length + ' tagged people';
-      $show.text(showText);
-      $list.before($show);
-      $show.click(() => {
-        if ($list.is(':visible')) {
-          $list.slideUp();
-          $show.text(showText);
-        } else {
-          $list.slideDown();
-          $show.text('hide list');
-        }
-      });
-    }
-  }
-
-  getItemText() {
-    if (this.item.event) {
-      if (this.item.notes) {
-        return this.item.notes.split('\n');
-      }
-      return [];
-    }
-    let arr = [];
-    if (this.item.sourceGroup && this.item.sourceGroup.summary) {
-      arr = this.item.sourceGroup.summary.split('\n');
-    }
-    if (this.item.summary) {
-      arr = [...arr, ...this.item.summary.split('\n')];
-    }
-    return arr;
+    super(item, true, isTest);
   }
 }
