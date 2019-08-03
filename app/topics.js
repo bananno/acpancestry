@@ -28,17 +28,27 @@ function viewTopicMilitary() {
   });
   const diedAtWar = DATABASE.people.filter(person => person.tags['died at war']);
 
-  const events = DATABASE.events.filter(event => {
+  const militaryTimeline = new Timeline();
+
+  DATABASE.events.filter(event => {
     return event.tags.military
       || event.title.match('military')
       || event.title == 'enlistment'
       || event.title.match('Battle')
       || (event.notes || '').match('battle');
+  }).forEach(event => {
+    militaryTimeline.insertItem({
+      ...event,
+      event: true
+    });
   });
 
   diedAtWar.forEach(person => {
     if (person.death) {
-      events.push(person.death);
+      militaryTimeline.insertItem({
+        ...person.death,
+        event: true
+      });
     }
   });
 
@@ -67,10 +77,8 @@ function viewTopicMilitary() {
   h2('People who died at war');
   rend($makePeopleList(diedAtWar, 'photo'));
 
-  h2('Events');
-  events.forEach(event => {
-    rend(eventBlock(event));
-  });
+  h2('Timeline');
+  militaryTimeline.renderTimeline();
 }
 
 function viewTopicImmigration() {
