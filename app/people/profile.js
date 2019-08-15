@@ -35,6 +35,7 @@ function viewPerson() {
 
   showPersonBiographies(person);
   showPersonFamily(person);
+  showPersonDescendants(person);
 
   rend('<h2>Tree</h2>');
   rend('<div class="person-tree">' + personTree(person) + '</div>');
@@ -181,6 +182,44 @@ function showPersonFamily(person) {
       });
     }
     $box.append($makePeopleList(person[relationship], 'photo'));
+    rend($box);
+  });
+}
+
+function showPersonDescendants(person) {
+  const addDesc = (person, gen) => {
+    descendants[gen] = descendants[gen] || [];
+    descendants[gen].push(person);
+    person.children.forEach(child => addDesc(child, gen + 1));
+  };
+
+  const descendants = [];
+  addDesc(person, 0);
+
+  if (descendants.length < 3) {
+    return;
+  }
+
+  h2('Descendants');
+
+  descendants.slice(2).forEach((list, gen) => {
+    let relationship = (() => {
+      if (gen == 0) {
+        return 'grandchildren';
+      }
+      if (gen == 1) {
+        return 'great-grandchildren';
+      }
+      return gen + '-great-grandchildren';
+    })();
+
+    if (list.length == 1) {
+      relationship = relationship.replace('ren', '');
+    }
+
+    const $box = $('<div class="person-family descendants">');
+    $box.append(`<h3>${relationship}:</h3>`);
+    $box.append($makePeopleList(list, 'photo'));
     rend($box);
   });
 }
