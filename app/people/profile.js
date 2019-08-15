@@ -185,7 +185,7 @@ function showPersonFamily(person) {
   });
 }
 
-function personTree(person, safety) {
+function personTree(person, safety, n) {
   let treeStyle = '';
 
   if (safety == undefined) {
@@ -200,17 +200,17 @@ function personTree(person, safety) {
   }
 
   if (person == null) {
-    return '';
+    return '<div class="treecell unknown">' + ['father', 'mother'][n] + ' unknown</div>';
   }
 
   return (
     '<table' + treeStyle + '>' +
       '<tr>' +
         '<td valign="bottom">' +
-          personTree(person.parents[0], safety + 1) +
+          personTree(person.parents[0], safety + 1, 0) +
         '</td>' +
         '<td valign="bottom">' +
-          personTree(person.parents[1], safety + 1) +
+          personTree(person.parents[1], safety + 1, 1) +
         '</td>' +
       '</tr>' +
       '<tr>' +

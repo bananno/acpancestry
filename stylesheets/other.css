@@ -187,6 +187,10 @@ ul.people-list li {
   background-color: #fcfcfc;
 }
 
+.person-tree .treecell.unknown {
+  opacity: 0.3;
+}
+
 .person-tree a {
   text-decoration: none;
 }
