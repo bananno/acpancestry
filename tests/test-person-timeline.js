@@ -282,6 +282,16 @@ test(t => {
     timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
   );
 
+  testEvent.title = 'historical event';
+  testEvent.date.year = 1950;
+  testEvent.tags = { historical: true };
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertEqual('exclude historical child events even if during person\'s life',
+    false,
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
+  );
+  testEvent.tags = {};
+
   testEvent.title = 'other event';
   testEvent.date.year = 1950;
   timeline = new PersonTimeline(testPerson1, true);

@@ -123,6 +123,10 @@ class PersonTimeline extends Timeline {
         }
         return this.person.death.date.year && item.date.year - this.person.death.date.year < 5;
       }
+      // ignore historical events attached to the child.
+      if (item.tags && item.tags.historical) {
+        return false;
+      }
       // include other child events if they are during person's life.
       return beforePersonsDeath;
     }
