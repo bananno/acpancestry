@@ -93,7 +93,21 @@ function viewTopicMilitary() {
 }
 
 function viewTopicImmigration() {
+  const countries = [];
+  const peopleByCountry = {};
+
   const people = DATABASE.people.filter(person => person.tags.immigrant);
+
+  people.forEach(person => {
+    let country = person.tags.country || 'Other';
+    if (!countries.includes(country)) {
+      countries.push(country);
+      peopleByCountry[country] = [];
+    }
+    peopleByCountry[country].push(person);
+  });
+
+  countries.trueSort((a, b) => a < b && a != 'Other');
 
   const events = DATABASE.events.filter(event => {
     return event.title == 'immigration' || event.tags.immigration;
@@ -104,8 +118,10 @@ function viewTopicImmigration() {
   setPageTitle('Immigration');
   h1('Immigration');
 
-  h2('People who immigrated');
-  rend($makePeopleList(people, 'photo'));
+  countries.forEach(country => {
+    h2(country);
+    rend($makePeopleList(peopleByCountry[country], 'photo'));
+  });
 
   h2('Events');
   events.forEach(event => {
