@@ -95,6 +95,7 @@ function viewTopicMilitary() {
 function viewTopicImmigration() {
   const countries = [];
   const peopleByCountry = {};
+  const immigrationTimeline = new Timeline();
 
   const people = DATABASE.people.filter(person => person.tags.immigrant);
 
@@ -110,11 +111,23 @@ function viewTopicImmigration() {
 
   countries.trueSort((a, b) => a < b && a != 'Other');
 
-  const events = DATABASE.events.filter(event => {
-    return event.title == 'immigration' || event.tags.immigration;
+  DATABASE.sources.filter(source => source.tags.immigration).forEach(source => {
+    immigrationTimeline.insertItem({
+      ...source,
+      source: true
+    });
   });
 
-  events.trueSort((a, b) => a.date.sort < b.date.sort);
+  DATABASE.events.filter(event => {
+    return event.title == 'immigration' || event.tags.immigration;
+  }).forEach(event => {
+    immigrationTimeline.insertItem({
+      ...event,
+      event: true
+    });
+  });
+
+  immigrationTimeline.sortList();
 
   setPageTitle('Immigration');
   h1('Immigration');
@@ -124,10 +137,8 @@ function viewTopicImmigration() {
     rend($makePeopleList(peopleByCountry[country], 'photo'));
   });
 
-  h2('Events');
-  events.forEach(event => {
-    rend(eventBlock(event));
-  });
+  h2('Timeline');
+  immigrationTimeline.renderTimeline();
 }
 
 function viewTopicDisease() {
