@@ -99,12 +99,13 @@ function viewTopicImmigration() {
   const people = DATABASE.people.filter(person => person.tags.immigrant);
 
   people.forEach(person => {
-    let country = person.tags.country || 'Other';
-    if (!countries.includes(country)) {
-      countries.push(country);
-      peopleByCountry[country] = [];
-    }
-    peopleByCountry[country].push(person);
+    (person.tags.country || 'Other').split(',').forEach(country => {
+      if (!countries.includes(country)) {
+        countries.push(country);
+        peopleByCountry[country] = [];
+      }
+      peopleByCountry[country].push(person);
+    });
   });
 
   countries.trueSort((a, b) => a < b && a != 'Other');
