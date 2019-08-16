@@ -1,9 +1,39 @@
 class Timeline {
-  constructor(person, isTest) {
+  constructor(person, isTest, specs) {
     this.person = person;
     this.isPerson = person != undefined;
     this.isTest = isTest === true;
     this.list = [];
+
+    if (specs) {
+      this.buildTimeline(specs);
+    }
+  }
+
+  buildTimeline(specs) {
+    if (specs.sourceFilter) {
+      DATABASE.sources.filter(specs.sourceFilter).forEach(source => {
+        this.insertItem({ ...source, source: true });
+      });
+    }
+
+    if (specs.eventFilter) {
+      DATABASE.events.filter(specs.eventFilter).forEach(event => {
+        this.insertItem({ ...event, event: true });
+      });
+    }
+
+    if (specs.sort) {
+      this.sortList();
+    }
+
+    if (specs.sortFunction) {
+      this.sortList(specs.sortFunction);
+    }
+
+    if (specs.render) {
+      this.renderTimeline();
+    }
   }
 
   insertItem(item) {

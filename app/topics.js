@@ -95,7 +95,6 @@ function viewTopicMilitary() {
 function viewTopicImmigration() {
   const countries = [];
   const peopleByCountry = {};
-  const immigrationTimeline = new Timeline();
 
   const people = DATABASE.people.filter(person => person.tags.immigrant);
 
@@ -111,24 +110,6 @@ function viewTopicImmigration() {
 
   countries.trueSort((a, b) => a < b && a != 'Other');
 
-  DATABASE.sources.filter(source => source.tags.immigration).forEach(source => {
-    immigrationTimeline.insertItem({
-      ...source,
-      source: true
-    });
-  });
-
-  DATABASE.events.filter(event => {
-    return event.title == 'immigration' || event.tags.immigration;
-  }).forEach(event => {
-    immigrationTimeline.insertItem({
-      ...event,
-      event: true
-    });
-  });
-
-  immigrationTimeline.sortList();
-
   setPageTitle('Immigration');
   h1('Immigration');
 
@@ -138,7 +119,13 @@ function viewTopicImmigration() {
   });
 
   h2('Timeline');
-  immigrationTimeline.renderTimeline();
+
+  new Timeline(null, null, {
+    sourceFilter: source => source.tags.immigration,
+    eventFilter: event => event.title == 'immigration' || event.tags.immigration,
+    sort: true,
+    render: true
+  });
 }
 
 function viewTopicDisease() {
