@@ -82,8 +82,8 @@ function viewMain() {
   });
 
   h2('topics');
-  bulletList(['military', 'immigration', 'disease'].map(topic => {
-    return localLink('topic/' + topic, topic);
+  bulletList(['military', 'immigration', 'disease', 'brick walls'].map(topic => {
+    return localLink('topic/' + topic.replace(/ /g, ''), topic);
   }));
 
   h2('browse');

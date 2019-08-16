@@ -14,6 +14,10 @@ function viewTopic() {
     return viewTopicDisease();
   }
 
+  if (topic == 'brickwalls') {
+    return viewTopicBrickwalls();
+  }
+
   return pageNotFound();
 }
 
@@ -78,4 +82,18 @@ function viewTopicDisease() {
   events.forEach(event => {
     rend(eventBlock(event));
   });
+}
+
+function viewTopicBrickwalls() {
+  const current = DATABASE.people.filter(person => person.tags['brick wall']);
+  const broken = DATABASE.people.filter(person => person.tags['broken brick wall']);
+
+  setPageTitle('Brick Walls');
+  h1('Brick Walls');
+
+  h2('Current brick walls');
+  rend($makePeopleList(current, 'photo'));
+
+  h2('Broken brick walls');
+  rend($makePeopleList(broken, 'photo'));
 }
