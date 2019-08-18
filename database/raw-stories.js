@@ -1,0 +1,5 @@
+DATABASE.stories = [
+  {"_id":"5d58ddcd8a5ebab1c5fe5d39","type":"cemetery","title":"Clifton Family Cemetery","date":{"year":null,"month":0,"day":0,"display":""},"location":{"country":"United States","region1":"GA","region2":"Toombs County","city":"","notes":""},"people":[],"links":["https://www.findagrave.com/cemetery/33308 FindAGrave"],"images":[],"notes":"","tags":{}},
+  {"_id":"5d58e21a2f60bdb37bca5ee2","type":"cemetery","title":"Bohemian Cemetery (Richardson County)","date":{"year":null,"month":0,"day":0,"display":""},"location":{"country":"United States","region1":"NE","region2":"Richardson County","city":"","notes":""},"people":[],"links":["https://www.findagrave.com/cemetery/100417 FindAGrave"],"images":[],"notes":"","tags":{}},
+  {"_id":"5d58e2612f60bdb37bca5ee3","type":"cemetery","title":"Bohemian Cemetery (Table Rock)","date":{"year":null,"month":0,"day":0,"display":""},"location":{"country":"United States","region1":"NE","region2":"Pawnee County","city":"Table Rock","notes":""},"people":[],"links":["https://www.findagrave.com/cemetery/100412 FindAGrave"],"images":[],"notes":"","tags":{}},
+];

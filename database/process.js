@@ -1,11 +1,16 @@
 
 function processDatabase() {
   DATABASE.personRef = {};
+  DATABASE.storyRef = {};
   DATABASE.sourceRef = {};
 
   DATABASE.people.forEach(person => {
     DATABASE.personRef[person._id] = person;
     DATABASE.personRef[person.customId] = person;
+  });
+
+  DATABASE.stories.forEach(story => {
+    DATABASE.storyRef[story._id] = story;
   });
 
   DATABASE.sources.forEach(source => {
@@ -24,6 +29,8 @@ function processDatabase() {
       person.birthSort = 'XXXX-XX-XX';
     }
   });
+
+  DATABASE.stories = DATABASE.stories.map(getProcessedStory);
 
   DATABASE.sources = DATABASE.sources.map(getProcessedSource);
 
@@ -88,6 +95,21 @@ function getProcessedEvent(event) {
   return event;
 }
 
+function getProcessedStory(story) {
+  story.people = story.people.map(person => {
+    return DATABASE.personRef[person];
+  });
+  story.people = removeNullValues(story.people);
+  story.date = story.date || {};
+  story.date.format = formatDate(story.date);
+  story.date.sort = getSortDate(story.date);
+  story.location = story.location || {};
+  story.location.format = formatLocation(story.location);
+  story.tags = story.tags || {};
+  story.entries = [];
+  return story;
+}
+
 function getProcessedSource(source) {
   source.people = source.people.map(person => {
     return DATABASE.personRef[person];
@@ -105,6 +127,13 @@ function getProcessedSource(source) {
 
   if (source.group.match('Census USA')) {
     source.title += ' household';
+  }
+
+  if (source.story) {
+    source.story = DATABASE.storyRef[source.story];
+    if (source.story) {
+      source.story.entries.push(source);
+    }
   }
 
   return source;
