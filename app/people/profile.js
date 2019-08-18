@@ -47,6 +47,7 @@ function viewPerson() {
     });
   }
 
+  showPersonResearchNotes(person);
   showPersonTimeline(person);
 
   if (person.citations.length) {
@@ -297,4 +298,21 @@ function viewPersonSource(person, sourceId) {
   }
 
   viewSourceLinks(source);
+}
+
+function showPersonResearchNotes(person) {
+  const notations = DATABASE.notations.filter(note => note.tags['research notes']);
+
+  if (notations.length == 0) {
+    return;
+  }
+
+  h2('Research Notes');
+
+  notations.forEach((notation, i) => {
+    if (i > 0) {
+      rend('<hr>');
+    }
+    rend($notationBlock(notation));
+  });
 }

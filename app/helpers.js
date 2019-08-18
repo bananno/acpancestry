@@ -297,10 +297,12 @@ function removeDuplicatesById(list) {
   });
 }
 
-function $notationBlock(notation) {
+function $notationBlock(notation, alwaysShowPeople) {
   const $div = $('<div class="notation-block">');
   $div.append('<p style="margin-bottom: 10px"><b>' + notation.title + '</b></p>');
   $div.append('<p>' + notation.text + '</p>');
-  $div.append($makePeopleList(notation.people, 'photo'));
+  if (notation.people.length > 1 || alwaysShowPeople) {
+    $div.append($makePeopleList(notation.people, 'photo'));
+  }
   return $div;
 }
