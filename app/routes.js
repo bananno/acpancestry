@@ -48,6 +48,10 @@ function loadContent() {
     return viewAbout();
   }
 
+  if (PATH.match('cemeter') || PATH.match('newspaper')) {
+    return viewCemeteriesOrNewspapers();
+  }
+
   return pageNotFound();
 }
 
