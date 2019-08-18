@@ -288,3 +288,7 @@ table.event-list th {
   height: 20px;
   width: 23px;
 }
+
+.notation-block {
+  padding: 10px;
+}

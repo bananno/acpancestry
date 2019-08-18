@@ -29,6 +29,8 @@ function processDatabase() {
 
   DATABASE.citations = DATABASE.citations.map(getProcessedCitation);
 
+  DATABASE.notations = DATABASE.notations.map(getProcessedNotation);
+
   findSourceGroups();
 }
 
@@ -122,6 +124,13 @@ function getProcessedCitation(citation) {
   citation.person.citations.push(citation);
   citation.source.citations.push(citation);
   return citation;
+}
+
+function getProcessedNotation(notation) {
+  notation.people = notation.people.map(person => {
+    return DATABASE.personRef[person];
+  });
+  return notation;
 }
 
 function removeNullValues(array) {

@@ -85,15 +85,26 @@ function viewTopicDisease() {
 }
 
 function viewTopicBrickwalls() {
-  const current = DATABASE.people.filter(person => person.tags['brick wall']);
-  const broken = DATABASE.people.filter(person => person.tags['broken brick wall']);
-
   setPageTitle('Brick Walls');
   h1('Brick Walls');
-
   h2('Current brick walls');
-  rend($makePeopleList(current, 'photo'));
-
+  viewTopicBrickwallHelper('brick wall');
   h2('Broken brick walls');
-  rend($makePeopleList(broken, 'photo'));
+  viewTopicBrickwallHelper('broken brick wall');
+}
+
+function viewTopicBrickwallHelper(tagName) {
+  const people = DATABASE.people.filter(person => person.tags[tagName]);
+  const notations = DATABASE.notations.filter(note => note.tags[tagName]);
+
+  rend($makePeopleList(people, 'photo'));
+
+  notations.forEach((notation, i) => {
+    if (i > 0) {
+      rend('<hr>');
+    } else if (people.length > 0) {
+      rend('<hr style="margin-top: 10px">');
+    }
+    rend($notationBlock(notation));
+  });
 }
