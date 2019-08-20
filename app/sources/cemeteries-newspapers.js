@@ -37,7 +37,7 @@ function viewCemeteriesNewspapersIndex(title, storyType, entryName) {
       }
 
       rend(
-        '<p style="padding-top: 15px">' +
+        '<p style="padding: 15px 0 0 5px;">' +
           localLink(storyType + '/' + story._id, story.title) +
           '<br>' + story.location.format +
           '<br>' + numEntries + ' ' + pluralize(entryName, numEntries) +
@@ -56,8 +56,6 @@ function getStoriesByPlace(storyType) {
     let placeName = 'Other';
     if (story.location.country == 'United States' && story.location.region1) {
       placeName = USA_STATES[story.location.region1];
-    } else {
-      storiesByPlace.Other.push(story);
     }
     if (storiesByPlace[placeName] == undefined) {
       placeList.push(placeName);

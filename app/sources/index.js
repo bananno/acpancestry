@@ -17,7 +17,7 @@ const sourceCategories = [
     route: () => { viewListOfNewspapersOrCemeteries('newspaper', 'article'); },
   },
   {
-    path: 'cemeteries',
+    fullPath: 'cemeteries',
     title: 'Cemeteries',
     route: () => { viewListOfNewspapersOrCemeteries('grave', 'grave'); },
   },
@@ -89,9 +89,11 @@ function viewSourcesIndex() {
   rend('<h1>Sources</h1>');
 
   sourceCategories.forEach(category => {
+    const path = category.fullPath || ('sources/' + category.path);
+    const text = category.pathText || category.title;
     rend(
       '<p style="margin-top: 8px; font-size: 18px;">' +
-        localLink('sources/' + category.path, category.pathText || category.title) +
+        localLink(path, text) +
       '</p>'
     );
   });
