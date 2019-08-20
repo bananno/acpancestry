@@ -175,6 +175,17 @@ function $headerRow(array) {
     '</th></tr>';
 }
 
+function headerTrail(...args) {
+  rend(
+    '<p class="header-trail">' +
+      args.map(linkInfo => {
+        let [path, text] = [].concat(linkInfo);
+        return localLink(path, text || path);
+      }).join(' &#8594; ') +
+    '</p>'
+  );
+}
+
 function getFancyLink(link) {
   let linkUrl = link;
   let linkText = link;

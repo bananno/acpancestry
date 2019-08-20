@@ -202,7 +202,7 @@ class TimelineItem {
 
       $col2.append(
         '<p style="margin-top: 5px;">' +
-          linkToSource(item, item.group + (item.type == 'grave' ? '' : ' - ' + item.title)) +
+          linkToSource(item, item.type == 'grave' ? item.story.title : item.fullTitle) +
         '</p>'
       );
     }

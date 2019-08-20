@@ -23,11 +23,16 @@ function viewOneSource() {
 }
 
 function viewSourceGrave(source) {
-  setPageTitle(source.group);
-  rend('<h1>' + source.group + '</h1>');
-  rend('<p>' + formatLocation(source.location) + '</p>');
+  const story = source.story;
+
+  setPageTitle(story.title);
+
+  headerTrail('sources', 'cemeteries',
+    ['cemetery/' + story._id, story.title]);
+
+  rend('<p>' + story.location.format + '</p>');
   rend('<p><br></p>');
-  rend('<h1>' + source.title + '</h1>');
+  h1(source.title);
 
   viewSourceSummary(source);
 
