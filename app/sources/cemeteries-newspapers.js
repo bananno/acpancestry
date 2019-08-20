@@ -83,14 +83,36 @@ function viewCemeteryOrNewspaper(storyType) {
     return pageNotFound();
   }
 
+  if (storyType == 'newspaper') {
+    story.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
+  }
+
+  rend(
+    '<p class="header-trail">' +
+      localLink('sources', 'sources') +
+      ' &#8594; ' +
+      localLink(pluralize(storyType), pluralize(storyType)) +
+    '</p>'
+  );
+
   setPageTitle(story.title);
   h1(story.title);
 
   rend('<p style="padding-top: 10px;">' + story.location.format + '</p>');
 
-  if (storyType == 'newspaper') {
-    story.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
+  story.images.forEach((imageUrl, i) => {
+    rend(makeImage(story, i, 100, 100).css('margin', '10px 5px 0 5px'));
+  });
+
+  rend($makePeopleList(story.people, 'photo'));
+
+  if (story.notes) {
+    rend('<p>' + story.notes + '</p>');
   }
+
+  story.links.forEach(linkUrl => {
+    rend($(getFancyLink(linkUrl)).css('margin-left', '10px'));
+  });
 
   story.entries.forEach(showCemeteryNewspaperSource);
 }
