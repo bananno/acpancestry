@@ -1,3 +1,4 @@
 DATABASE.notations = [
   {"_id":"5d577f904fcf9275ca79dca1","title":"Who was Edward Clifton?","people":["5d583a6378e05e7dde0e3f68"],"text":"I was puzzled by the presence of 9-year-old \"Edward Clifton\" in the William & Susan Clifton household in 1870. There is no mention of an Edward in any of the biographies that list all of the Clifton siblings, and Susan would have been at least 50 when he was born. Research eventually revealed that he was actually their orphaned grandson, William Edward Rambo.","tags":{"broken brick wall":true}},
+  {"_id":"5d58d2df0edfb7abc4b7ba62","title":"Where did Bengta Petersen come from?","people":["5bd201312d746f23c44e5167"],"text":"There are no sources for Bengta's birth or her life before Denmark. She was born in Sweden and so were her parents. She moved to Denmark at some point, where her husband and all of her children were born.","tags":{"research notes":true,"brick wall":true}},
 ];
