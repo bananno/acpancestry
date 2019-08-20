@@ -301,7 +301,9 @@ function viewPersonSource(person, sourceId) {
 }
 
 function showPersonResearchNotes(person) {
-  const notations = DATABASE.notations.filter(note => note.tags['research notes']);
+  const notations = DATABASE.notations.filter(note => {
+    return note.people.includes(person) && note.tags['research notes'];
+  });
 
   if (notations.length == 0) {
     return;
