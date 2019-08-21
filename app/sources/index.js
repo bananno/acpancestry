@@ -12,14 +12,12 @@ const sourceCategories = [
     route: viewListOfPhotographs,
   },
   {
-    path: 'newspapers',
+    fullPath: 'newspapers',
     title: 'Newspapers',
-    route: () => { viewListOfNewspapersOrCemeteries('newspaper', 'article'); },
   },
   {
     fullPath: 'cemeteries',
     title: 'Cemeteries',
-    route: () => { viewListOfNewspapersOrCemeteries('grave', 'grave'); },
   },
   {
     path: 'censusUSA',

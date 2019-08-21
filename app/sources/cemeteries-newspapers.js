@@ -39,7 +39,7 @@ function viewCemeteriesNewspapersIndex(title, storyType, entryName) {
       rend(
         '<p style="padding: 15px 0 0 5px;">' +
           localLink(storyType + '/' + story._id, story.title) +
-          '<br>' + story.location.format +
+          (story.location.format ? '<br>' : '') + story.location.format +
           '<br>' + numEntries + ' ' + pluralize(entryName, numEntries) +
         '</p>'
       );

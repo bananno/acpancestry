@@ -39,13 +39,21 @@ function viewSourceGrave(source) {
   if (source.images.length) {
     rend('<h2>Images</h2>');
     source.images.forEach((imageUrl, i) => {
-      rend(makeImage(source, i, 200));
+      rend(makeImage(source, i, 200).css('margin-right', '5px'));
     });
   }
 }
 
 function viewSourceOther(source) {
+  const story = source.story;
+
   setPageTitle('Source');
+
+  if (source.type == 'newspaper') {
+    headerTrail('sources', 'newspapers',
+      story ? ['newspaper/' + story._id, story.title] : null);
+  }
+
   rend('<h1>Source</h1>');
   rend('<p>' + source.type + '</p>');
   rend('<p>' + source.group + '</p>');
@@ -64,7 +72,7 @@ function viewSourceOther(source) {
     }
 
     source.images.forEach((imageUrl, i) => {
-      rend(makeImage(source, i));
+      rend(makeImage(source, i).css('margin-right', '5px'));
     });
   }
 

@@ -62,6 +62,24 @@ function viewMain() {
   h2('featured');
   rend($makePeopleList(DATABASE.people.filter(person => person.tags.featured), 'photo'));
 
+  [
+    ['USA/MN/Pipestone%20County/Ruthton', 'Ruthton, Minnesota'],
+  ].forEach(([path, name]) => rend($makeIconLink('places/' + path, name, 'images/map-icon.svg')));
+
+  DATABASE.stories.filter(s => s.tags.featured).forEach(story => {
+    let path, icon;
+    if (story.type == 'cemetery') {
+      path = story.type + '/' + story._id;
+      image = 'images/map-icon.svg';
+    } else if (story.type == 'newspaper') {
+      path = story.type + '/' + story._id;
+      image = 'images/newspaper-icon.jpg';
+    } else {
+      return;
+    }
+    rend($makeIconLink(path, story.title, image));
+  });
+
   DATABASE.sources.filter(s => s.tags.featured).forEach(source => {
     rend(
       '<p style="margin: 10px">' +
@@ -69,10 +87,6 @@ function viewMain() {
       '</p>'
     );
   });
-
-  [
-    ['USA/MN/Pipestone%20County/Ruthton', 'Ruthton, Minnesota'],
-  ].forEach(([path, name]) => rend($makeIconLink('places/' + path, name, 'images/map-icon.svg')));
 
   h2('photos');
   DATABASE.sources.filter(s => s.type == 'photo').forEach(source => {
