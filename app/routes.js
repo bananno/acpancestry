@@ -48,8 +48,16 @@ function loadContent() {
     return viewAbout();
   }
 
+  if (PATH == 'artifacts') {
+    return viewArtifacts();
+  }
+
   if (PATH.match('cemeter') || PATH.match('newspaper')) {
     return viewCemeteriesOrNewspapers();
+  }
+
+  if (PATH.match('book')) {
+    return viewBook();
   }
 
   return pageNotFound();
@@ -100,9 +108,13 @@ function viewMain() {
   });
 
   h2('topics');
-  bulletList(['military', 'immigration', 'disease', 'brick walls'].map(topic => {
-    return localLink('topic/' + topic.replace(/ /g, ''), topic);
-  }));
+  bulletList([
+    ['artifacts', 'artifacts and family heirlooms'],
+    ['topic/brickwalls', 'brick walls and mysteries'],
+    ['topic/military', 'military'],
+    ['topic/immigration', 'immigration'],
+    ['topic/disease', 'disease'],
+  ].map(([path, text]) => localLink(path, text)));
 
   h2('browse');
   bulletList([localLink('year/1904', 'browse by year')]);

@@ -86,10 +86,10 @@ function viewTopicDisease() {
 
 function viewTopicBrickwalls() {
   setPageTitle('Brick Walls');
-  h1('Brick Walls');
-  h2('Current brick walls');
+  h1('Brick Walls & Mysteries');
+  h2('Current questions');
   viewTopicBrickwallHelper('brick wall');
-  h2('Broken brick walls');
+  h2('Solved');
   viewTopicBrickwallHelper('broken brick wall');
 }
 

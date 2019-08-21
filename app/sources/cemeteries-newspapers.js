@@ -22,6 +22,7 @@ function viewCemeteriesOrNewspapers() {
 function viewCemeteriesNewspapersIndex(title, storyType, entryName) {
   const [placeList, storiesByPlace] = getStoriesByPlace(storyType);
 
+  headerTrail('sources');
   setPageTitle(title);
   h1(title);
 
@@ -85,14 +86,7 @@ function viewCemeteryOrNewspaper(storyType) {
     story.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
   }
 
-  rend(
-    '<p class="header-trail">' +
-      localLink('sources', 'sources') +
-      ' &#8594; ' +
-      localLink(pluralize(storyType), pluralize(storyType)) +
-    '</p>'
-  );
-
+  headerTrail('sources', pluralize(storyType));
   setPageTitle(story.title);
   h1(story.title);
 

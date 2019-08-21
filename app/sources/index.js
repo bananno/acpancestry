@@ -20,6 +20,10 @@ const sourceCategories = [
     title: 'Cemeteries',
   },
   {
+    fullPath: 'books',
+    title: 'Books',
+  },
+  {
     path: 'censusUSA',
     title: 'US Federal Census',
     route: viewSourcesCensusUSA,

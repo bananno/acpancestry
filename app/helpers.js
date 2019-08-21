@@ -1,3 +1,5 @@
+const RIGHT_ARROW = '&#8594;';
+
 function setPageTitle(title) {
   if (title && ('' + title).length) {
     document.title = title + ' | ' + SITE_TITLE;
@@ -181,7 +183,7 @@ function headerTrail(...args) {
       args.map(linkInfo => {
         let [path, text] = [].concat(linkInfo);
         return localLink(path, text || path);
-      }).join(' &#8594; ') +
+      }).join(' ' + RIGHT_ARROW + ' ') +
     '</p>'
   );
 }
