@@ -29,7 +29,6 @@ function $makeCitationList(citations) {
 
   citations.forEach(citation => {
     let [item1, item2] = [citation.item, ''];
-    let citationSourceText = citation.source.group + ' - ' + citation.source.title;
 
     if (item1.match(' - ')) {
       item2 = item1.slice(item1.indexOf(' - ') + 3);
@@ -48,7 +47,7 @@ function $makeCitationList(citations) {
         '</td>' +
         '<td>' + citation.information + '</td>' +
         '<td>' +
-          linkToSource(citation.source, citationSourceText) +
+          linkToSource(citation.source, citation.source.fullTitle) +
         '</td>' +
       '</tr>'
     );
