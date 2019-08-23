@@ -58,7 +58,15 @@ function viewPerson() {
 }
 
 function showPersonHeader(person) {
-  setPageTitle(removeSpecialCharacters(person.name));
+  let pageTitle = removeSpecialCharacters(person.name);
+
+  if (person.birth || person.death) {
+    pageTitle += ' (' +
+      ((person.birth ? person.birth.date.year : ' ') || ' ') + '-' +
+      ((person.death ? person.death.date.year : ' ') || ' ') + ')';
+  }
+
+  setPageTitle(pageTitle);
 
   rend(
     '<div class="person-header">' +
