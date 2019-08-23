@@ -33,6 +33,7 @@ function viewPerson() {
     return pageNotFound();
   }
 
+  showPersonProfileSummary(person);
   showPersonBiographies(person);
   showPersonFamily(person);
   showPersonDescendants(person);
@@ -95,6 +96,17 @@ function personShowHeaderEvent(person, abbr, event) {
       ) : '') +
     '</div>'
   );
+}
+
+function showPersonProfileSummary(person) {
+  DATABASE.notations.filter(notation => {
+    return notation.title == 'profile summary'
+      && notation.people.includes(person);
+  }).forEach(notation => {
+    notation.text.split('\n').forEach(s => {
+      rend('<p style="margin-top: 20px;">' + s + '</p>');
+    });
+  });
 }
 
 function showPersonBiographies(person) {
