@@ -52,6 +52,10 @@ function loadContent() {
     return viewArtifacts();
   }
 
+  if (PATH == 'landmarks') {
+    return viewLandmarks();
+  }
+
   if (PATH.match('cemeter') || PATH.match('newspaper')) {
     return viewCemeteriesOrNewspapers();
   }
@@ -109,6 +113,7 @@ function viewMain() {
 
   h2('topics');
   bulletList([
+    ['landmarks', 'landmarks and buildings'],
     ['artifacts', 'artifacts and family heirlooms'],
     ['topic/brickwalls', 'brick walls and mysteries'],
     ['topic/military', 'military'],

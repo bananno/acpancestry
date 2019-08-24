@@ -25,3 +25,22 @@ function viewArtifacts() {
     }
   });
 }
+
+function viewLandmarks() {
+  setPageTitle('Landmarks');
+  h1('Landmarks and buildings');
+
+  const stories = DATABASE.stories.filter(story => {
+    return story.type == 'landmark';
+  });
+
+  stories.forEach(story => {
+    h2(story.title);
+
+    if (story.summary) {
+      rend('<p style="margin-left: 10px">' + story.summary + '</p>');
+    }
+
+    rend($makePeopleList(story.people, 'photo'));
+  });
+}
