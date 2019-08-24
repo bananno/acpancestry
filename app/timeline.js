@@ -175,18 +175,27 @@ class TimelineItem {
     this.$col1 = $col1;
     this.$col2 = $col2;
 
-    if (item.date.format) {
-      $col1.append('<p><b>' + item.date.format + '</b></p>');
+    const dateStr = item.date.format
+      || (item.story ? item.story.date.format : '');
+
+    const locationStr = item.location.format
+      || (item.story ? item.story.location.format : '');
+
+    const locationNotes = item.location.notes
+      || (item.story ? item.story.location.notes : '');
+
+    if (dateStr) {
+      $col1.append('<p><b>' + dateStr + '</b></p>');
     } else if ($('.timeline-no-date').length == 0 && item.type != 'grave') {
       $div.before('<div class="timeline-no-date">No date:</div>')
     }
 
-    if (item.location.format) {
-      $col1.append('<p>' + item.location.format + '</p>');
+    if (locationStr) {
+      $col1.append('<p>' + locationStr + '</p>');
     }
 
-    if (item.location.notes) {
-      $col1.append('<p><i>(' + item.location.notes + ')</i></p>');
+    if (locationNotes) {
+      $col1.append('<p><i>(' + locationNotes + ')</i></p>');
     }
 
     $col2.append('<p><b>' + this.getItemTitle() + '</b></p>');
