@@ -49,6 +49,7 @@ function viewPerson() {
   }
 
   showPersonResearchNotes(person);
+  showPersonArtifacts(person);
   showPersonTimeline(person);
 
   if (person.citations.length) {
@@ -336,5 +337,25 @@ function showPersonResearchNotes(person) {
       rend('<hr>');
     }
     rend($notationBlock(notation));
+  });
+}
+
+function showPersonArtifacts(person) {
+  const stories = DATABASE.stories.filter(story => {
+    return story.people.includes(person) && story.type == 'artifact';
+  });
+
+  if (stories.length == 0) {
+    return;
+  }
+
+  h2('Artifacts');
+
+  stories.forEach((story, i) => {
+    artifactBlock(story, {
+      firstItem: i == 0,
+      largeHeader: false,
+      people: story.people.filter(p => p != person),
+    });
   });
 }

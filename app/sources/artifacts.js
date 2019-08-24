@@ -7,22 +7,10 @@ function viewArtifacts() {
     return story.type == 'artifact' || story.tags.artifact;
   });
 
-  artifacts.forEach(story => {
-    h2(story.title);
-
-    if (story.summary) {
-      rend('<p style="margin-left: 10px">' + story.summary + '</p>');
-    }
-
-    rend($makePeopleList(story.people, 'photo'));
-
-    if (story.type == 'book') {
-      rend(
-        '<p style="margin: 10px">' +
-          localLink('book/' + story._id, 'read book ' + RIGHT_ARROW) +
-        '</p>'
-      );
-    }
+  artifacts.forEach((story, i) => {
+    artifactBlock(story, {
+      largeHeader: true,
+    });
   });
 }
 
@@ -43,4 +31,38 @@ function viewLandmarks() {
 
     rend($makePeopleList(story.people, 'photo'));
   });
+}
+
+function artifactBlock(story, specs) {
+  const $box = $('<div>');
+
+  if (specs.largeHeader) {
+    $box.append('<h2>' + story.title + '</h2>');
+  } else {
+    $box.css('margin-left', '15px');
+    $box.append('<p><b>' + story.title + '</b></p>');
+    if (!specs.firstItem) {
+      $box.css('margin-top', '20px');
+    }
+  }
+
+  if (story.summary) {
+    if (specs.largeHeader) {
+      $box.append('<p style="margin-left: 10px">' + story.summary + '</p>');
+    } else {
+      $box.append('<p style="margin-top: 5px">' + story.summary + '</p>');
+    }
+  }
+
+  $box.append($makePeopleList(specs.people || story.people, 'photo'));
+
+  if (story.type == 'book') {
+    $box.append(
+      '<p style="margin: 10px">' +
+        localLink('book/' + story._id, 'read book ' + RIGHT_ARROW) +
+      '</p>'
+    );
+  }
+
+  rend($box);
 }
