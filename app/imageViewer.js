@@ -1,7 +1,7 @@
 
-function makeImage(source, imageNumber, maxHeight, maxWidth) {
-  const imageAddress = source.images[imageNumber];
-  const linkAddress = 'image/' + source._id + '/' + imageNumber;
+function makeImage(sourceOrStory, imageNumber, maxHeight, maxWidth) {
+  const imageAddress = sourceOrStory.images[imageNumber];
+  const linkAddress = 'image/' + sourceOrStory._id + '/' + imageNumber;
 
   const $imageViewer = $(
     '<div class="image-viewer">' +
@@ -35,8 +35,11 @@ function viewImage() {
     'margin': '10px',
   });
 
+  const sourceOrStory = DATABASE.sourceRef[sourceId]
+    || DATABASE.storyRef[sourceId];
+
   const $image = $('<img>')
-    .prop('src', DATABASE.sourceRef[sourceId].images[imageNumber])
+    .prop('src', sourceOrStory.images[imageNumber])
     .addClass('full-screen-image pre-zoom')
     .appendTo('body')
     .click(() => {
