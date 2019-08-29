@@ -20,6 +20,10 @@ function viewOneSource() {
 
   viewSourceNotes(source);
   viewSourceLinks(source);
+
+  if (['newspaper', 'grave'].includes(source.type)) {
+    viewSourceStoryEntryList(source);
+  }
 }
 
 function viewSourceGrave(source) {
@@ -100,5 +104,29 @@ function viewSourceLinks(source) {
   if (source.links.length) {
     rend('<h2>Links</h2>');
     rend(source.links.map(getFancyLink));
+  }
+}
+
+function viewSourceStoryEntryList(source) {
+  const story = source.story;
+
+  if (!story) {
+    return;
+  }
+
+  const entries = story.entries.filter(s => s != source);
+
+  if (entries.length == 0) {
+    return;
+  }
+
+  h2('More from ' + story.title);
+
+  if (source.type == 'grave') {
+    entries.trueSort((a, b) => a.title < b.title);
+    showListOfGraves(entries)
+  } else {
+    entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
+    showListOfArticles(entries);
   }
 }
