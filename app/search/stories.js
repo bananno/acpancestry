@@ -18,9 +18,12 @@ class SearchResultsArtifacts extends SearchResults {
 
   renderResults() {
     this.title('Artifacts');
-    this.resultsList.forEach(story => {
-      rend('<p style="margin: 10px 0 0 15px;" class="search-result-item">'
-        + linkToStory(story) + '</p>');
+    this.resultsList.forEach((story, i) => {
+      artifactBlock(story, {
+        firstItem: i == 0,
+        largeHeader: false,
+        people: [],
+      });
     });
   }
 }

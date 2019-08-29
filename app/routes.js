@@ -48,12 +48,8 @@ function loadContent() {
     return viewAbout();
   }
 
-  if (PATH == 'artifacts') {
-    return viewArtifacts();
-  }
-
-  if (PATH == 'landmarks') {
-    return viewLandmarks();
+  if (PATH.match('artifact') || PATH.match('landmark')) {
+    return viewArtifactOrLandmark();
   }
 
   if (PATH.match('cemeter') || PATH.match('newspaper')) {

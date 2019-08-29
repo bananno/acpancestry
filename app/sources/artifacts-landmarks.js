@@ -1,5 +1,27 @@
 
-function viewArtifacts() {
+function viewArtifactOrLandmark() {
+  if (PATH == 'artifacts') {
+    return viewArtifactsIndex();
+  }
+  if (PATH == 'landmarks') {
+    return viewLandmarksIndex();
+  }
+
+  const [storyType, storyId, extraText] = PATH.split('/');
+  const story = DATABASE.storyRef[storyId];
+
+  if (!story || extraText) {
+    return pageNotFound();
+  }
+
+  if (storyType == 'artifact' || storyType == 'landmark') {
+    return viewOneArtifactOrLandmark(storyType, story);
+  }
+
+  return pageNotFound();
+}
+
+function viewArtifactsIndex() {
   setPageTitle('Artifacts');
   h1('Artifacts and family heirlooms');
 
@@ -14,7 +36,7 @@ function viewArtifacts() {
   });
 }
 
-function viewLandmarks() {
+function viewLandmarksIndex() {
   setPageTitle('Landmarks');
   h1('Landmarks and buildings');
 
@@ -33,6 +55,22 @@ function viewLandmarks() {
   });
 }
 
+function viewOneArtifactOrLandmark(storyType, story) {
+  headerTrail([storyType]);
+  h1(story.title);
+
+  [story.date.format, story.location.format, story.summary].forEach(val => {
+    if (val) {
+      rend('<p style="margin-top: 20px;">' + val + '</p>');
+    }
+  });
+
+  if (story.people.length) {
+    h2('People');
+    rend($makePeopleList(story.people, 'photo'));
+  }
+}
+
 function artifactBlock(story, specs) {
   const $box = $('<div>');
 
@@ -40,7 +78,7 @@ function artifactBlock(story, specs) {
     $box.append('<h2>' + story.title + '</h2>');
   } else {
     $box.css('margin-left', '15px');
-    $box.append('<p><b>' + story.title + '</b></p>');
+    $box.append('<p>' + linkToStory(story) + '</p>');
     if (!specs.firstItem) {
       $box.css('margin-top', '20px');
     }
