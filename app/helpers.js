@@ -77,6 +77,12 @@ function linkToPerson(person, leaf, text, keywords) {
     + (leaf && person.star ? '&#160;<span class="person-leaf"></span>' : ''));
 }
 
+function linkToStory(story, text) {
+  let path = story.type;
+  text = text || story.title;
+  return localLink(path + '/' + story._id, text);
+}
+
 function linkToSource(source, text) {
   text = text || source.title;
   return localLink('source/' + source._id, text);

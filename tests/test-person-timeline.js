@@ -430,25 +430,25 @@ test(t => {
   );
 
   testItemSource.summary = '';
-  testItemSource.sourceGroup = {};
-  testItemSource.sourceGroup.summary = 'info3\ninfo4';
+  testItemSource.story = {};
+  testItemSource.story.summary = 'info3\ninfo4';
   timelineItem = new PersonTimelineItem(testItemSource, true);
-  t.assertEqual('item text is an array for sources with a source group summary',
+  t.assertEqual('item text is an array for sources with a story summary',
     ['info3', 'info4'],
     timelineItem.getItemText(),
   );
 
   testItemSource.summary = 'info1\ninfo2';
-  testItemSource.sourceGroup = {};
-  testItemSource.sourceGroup.summary = 'info3\ninfo4';
+  testItemSource.story = {};
+  testItemSource.story.summary = 'info3\ninfo4';
   timelineItem = new PersonTimelineItem(testItemSource, true);
-  t.assertEqual('item text is a combined array for sources with a summary and a group summary',
+  t.assertEqual('item text is a combined array for sources with a summary and a story summary',
     ['info3', 'info4', 'info1', 'info2'],
     timelineItem.getItemText(),
   );
 
   testItemSource.summary = '';
-  testItemSource.sourceGroup = {};
+  testItemSource.story = {};
   timelineItem = new PersonTimelineItem(testItemSource, true);
   t.assertEqual('item text is an empty array for sources without any summary',
     [],

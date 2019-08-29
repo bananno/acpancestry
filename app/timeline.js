@@ -154,8 +154,8 @@ class TimelineItem {
       return [];
     }
     let arr = [];
-    if (this.item.sourceGroup && this.item.sourceGroup.summary) {
-      arr = this.item.sourceGroup.summary.split('\n');
+    if (this.item.story && this.item.story.summary) {
+      arr = this.item.story.summary.split('\n');
     }
     if (this.item.summary) {
       arr = [...arr, ...this.item.summary.split('\n')];

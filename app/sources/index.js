@@ -64,10 +64,6 @@ function routeSources() {
     return viewOneSource();
   }
 
-  if (PATH.match('sourceGroup/')) {
-    return viewSourceGroup();
-  }
-
   const categoryPath = PATH.slice(8);
 
   const category = sourceCategories.filter(category => {
