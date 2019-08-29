@@ -92,21 +92,35 @@ function viewCemeteryOrNewspaper(storyType) {
 
   rend('<p style="padding-top: 10px;">' + story.location.format + '</p>');
 
-  story.images.forEach((imageUrl, i) => {
-    rend(makeImage(story, i, 100, 100).css('margin', '10px 5px 0 5px'));
-  });
-
   rend($makePeopleList(story.people, 'photo'));
 
   if (story.notes) {
     rend('<p>' + story.notes + '</p>');
   }
 
-  story.links.forEach(linkUrl => {
-    rend($(getFancyLink(linkUrl)).css('margin-left', '10px'));
-  });
+  if (story.images.length) {
+    h2('Images');
+    story.images.forEach((imageUrl, i) => {
+      rend(makeImage(story, i, 100, 100).css('margin', '10px 5px 0 5px'));
+    });
+  }
 
-  story.entries.forEach(showCemeteryNewspaperSource);
+  if (story.links.length) {
+    h2('Links');
+    story.links.forEach(linkUrl => {
+      rend($(getFancyLink(linkUrl)).css('margin-left', '10px'));
+    });
+  }
+
+  if (storyType == 'cemetery') {
+    story.entries.trueSort((a, b) => a.title < b.title);
+    h2('Graves');
+    showListOfGraves(story.entries)
+  } else {
+    story.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
+    h2('Articles');
+    showListOfArticles(story.entries);
+  }
 }
 
 function getNumberOfGravesInCemetery(story) {
@@ -119,31 +133,38 @@ function getNumberOfGravesInCemetery(story) {
   return count;
 }
 
-function showCemeteryNewspaperSource(source) {
-  h2(source.title);
+function showListOfGraves(sources) {
+  sources.forEach((source, i) => {
+    const $box = $('<div style="margin: 20px 10px;">');
 
-  if (source.date.format) {
-    rend('<p style="margin-left: 10px; margin-bottom: 10px;">' +
-      source.date.format + '</p>');
-  }
+    $box.append('<p>' + linkToSource(source) + '</p>');
 
-  source.images.forEach((imageUrl, i) => {
-    rend(makeImage(source, i, 100, 100).css('margin', '0 5px'));
+    if (source.summary) {
+      $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
+    }
+
+    rend($box);
   });
+}
 
-  rend($makePeopleList(source.people, 'photo'));
+function showListOfArticles(sources) {
+  sources.forEach((source, i) => {
+    if (i > 0) {
+      rend('<hr>');
+    }
 
-  if (source.notes) {
-    rend('<p>' + source.notes + '</p>');
-  }
+    const $box = $('<div style="margin: 20px 10px;">');
 
-  source.links.forEach(linkUrl => {
-    rend($(getFancyLink(linkUrl)).css('margin-left', '10px'));
+    $box.append('<p>' + linkToSource(source) + '</p>');
+
+    if (source.date.format) {
+      $box.append('<p style="margin-top: 5px">' + source.date.format + '</p>');
+    }
+
+    if (source.summary) {
+      $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
+    }
+
+    rend($box);
   });
-
-  if (source.content) {
-    rend(formatTranscription(source.content));
-  } else if (source.type == 'newspaper') {
-    rend('<p style="margin: 10px"><i>Transcription not available.</i></p>');
-  }
 }
