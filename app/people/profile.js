@@ -261,17 +261,26 @@ function personTree(person, safety, n) {
   }
 
   if (person == null) {
-    return '<div class="treecell unknown">' + ['father', 'mother'][n] + ' unknown</div>';
+    return '<div class="treecell unknown">unknown '
+      + ['father', 'mother'][n] + '</div>';
+  }
+
+  // Offset the parents array if the mother is included but not the father.
+  let p1 = 0, p2 = 1;
+  if (person.parents.length == 1
+      && person.parents[0].tags.gender == 'female') {
+    p1 = null;
+    p2 = 0;
   }
 
   return (
     '<table' + treeStyle + '>' +
       '<tr>' +
         '<td valign="bottom">' +
-          personTree(person.parents[0], safety + 1, 0) +
+          personTree(person.parents[p1], safety + 1, 0) +
         '</td>' +
         '<td valign="bottom">' +
-          personTree(person.parents[1], safety + 1, 1) +
+          personTree(person.parents[p2], safety + 1, 1) +
         '</td>' +
       '</tr>' +
       '<tr>' +
