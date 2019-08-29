@@ -15,6 +15,8 @@ function viewSearch() {
 
   new SearchResultsPeople(keywords);
   new SearchResultsPlaces(keywords);
+  new SearchResultsLandmarks(keywords);
+  new SearchResultsArtifacts(keywords);
   new SearchResultsDocuments(keywords);
   new SearchResultsCemeteries(keywords);
   new SearchResultsNewspapers(keywords);
