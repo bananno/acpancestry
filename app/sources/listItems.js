@@ -1,47 +1,38 @@
 
-function sourceListitemCemetery(rootSource, numEntries, hideLocation) {
-  return sourceListitemCemeteryOrNewspaper(rootSource, 'grave', numEntries, hideLocation);
-}
-
-function sourceListitemNewspaper(rootSource, numEntries, hideLocation) {
-  return sourceListitemCemeteryOrNewspaper(rootSource, 'article', numEntries, hideLocation);
-}
-
-function sourceListitemCemeteryOrNewspaper(rootSource, entryName, numEntries, hideLocation) {
-  if (numEntries == undefined) {
-    numEntries = DATABASE.sources.filter(source => {
-      return source.type == rootSource.type && source.group == rootSource.group;
-    }).length;
+function showSourceCategoryList(options) {
+  showStory = options.showStoryInLink;
+  if (showStory === undefined) {
+    showStory = true;
   }
 
-  return (
-    '<p style="padding-top: 15px">' +
-      linkToSourceGroup(rootSource, rootSource.group) +
-      '<br>' +
-      ((rootSource.location.format && !hideLocation)
-        ? rootSource.location.format + '<br>' : '') +
-      numEntries + ' ' + entryName + (numEntries == 1 ? '' : 's') +
-    '</p>'
-  );
+  if (options.title) {
+    h2(options.title);
+  }
+
+  options.stories.forEach(story => {
+    if (options.showStoryTitles) {
+      h2(story.title);
+    }
+    showSourceList(story.entries, true, true, showStory);
+  });
 }
 
-function showSourceList(sourceList, showLocation, showDate, showGroup, getHeaderName) {
+function showSourceList(sourceList, showLocation, showDate, showStory) {
   let previousHeader;
   let firstItem = true;
 
   sourceList.forEach(source => {
-    if (getHeaderName) {
-      let newHeader = getHeaderName(source);
-      if (newHeader != previousHeader) {
-        rend('<h2>' + newHeader + '</h2>');
-        previousHeader = newHeader;
-        firstItem = true;
-      }
+    let linkText;
+
+    if (showStory) {
+      linkText = source.story.title + ' - ' + source.title;
+    } else {
+      linkText = source.title;
     }
 
     rend(
       '<p style="padding-top: ' + (firstItem ? '5' : '15') + 'px; padding-left: 10px;">' +
-        linkToSource(source, (showGroup ? source.group + ' - ' : '') + source.title) +
+        linkToSource(source, linkText) +
       '</p>'
     );
 

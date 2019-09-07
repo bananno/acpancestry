@@ -88,11 +88,6 @@ function linkToSource(source, text) {
   return localLink('source/' + source._id, text);
 }
 
-function linkToSourceGroup(source, text) {
-  text = text || source.title;
-  return localLink('sourceGroup/' + source._id, text);
-}
-
 function formatDate(date) {
   if (date == null) {
     return '';

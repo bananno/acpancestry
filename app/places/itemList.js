@@ -1,5 +1,9 @@
 
 function viewPlacesItemList(itemList, hideLocation) {
+
+  // view list of stories/sources in given location - REPAIR LATER
+  return;
+
   [['Cemeteries', 'grave', 'grave'],
   ['Newspapers', 'newspaper', 'article']].forEach(([sectionTitle, sourceType, entryName]) => {
     const groupList = createListOfNewspapersOrCemeteries(sourceType, itemList)[1];

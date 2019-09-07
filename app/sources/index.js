@@ -75,6 +75,7 @@ function routeSources() {
   }
 
   setPageTitle(category.title);
+  headerTrail('sources');
   rend('<h1>' + category.title + '</h1>');
 
   if (category.route) {
@@ -107,9 +108,9 @@ function viewSourcesAll() {
   DATABASE.sources.forEach(source => {
     const $row = $('<tr>').appendTo($table);
 
-    addTd($row, linkToSource(source, source.type));
-    addTd($row, source.group);
-    addTd($row, source.title);
+    addTd($row, source.story.type);
+    addTd($row, linkToStory(source.story));
+    addTd($row, linkToSource(source, source.title));
     addTd($row, formatDate(source.date));
     addTd($row, formatLocation(source.location));
     addTd($row, $makePeopleList(source.people));
@@ -147,134 +148,83 @@ function viewListOfPhotographs() {
   });
 }
 
-function viewListOfNewspapersOrCemeteries(sourceType, entryName) {
-  const groupNameList = createListOfNewspapersOrCemeteries(sourceType)[0];
-  let previousHeader = null;
-
-  groupNameList.forEach(sourceGroup => {
-    if (previousHeader != sourceGroup.header) {
-      rend('<h2>' + sourceGroup.header + '</h2>');
-      previousHeader = sourceGroup.header;
-    }
-    const item = sourceListitemCemeteryOrNewspaper(sourceGroup.root, entryName,
-      sourceGroup.sources.length);
-    rend(item);
-  });
-}
-
-function createListOfNewspapersOrCemeteries(sourceType, sourceList) {
-  const groupNameList = [];
-  const sourcesInGroup = [];
-
-  (sourceList || DATABASE.sources).forEach(source => {
-    if (source.type != sourceType) {
-      return;
-    }
-    const groupName = source.group;
-    if (!sourcesInGroup[groupName]) {
-      sourcesInGroup[groupName] = [];
-      groupNameList.push({
-        name: groupName,
-        root: source,
-        sources: sourcesInGroup[groupName],
-        header: source.location.country == 'United States' && source.location.region1
-          ? USA_STATES[source.location.region1] : 'Other',
-      });
-    }
-    sourcesInGroup[groupName].push(source);
-  });
-
-  groupNameList.trueSort((a, b) => {
-    return a.header != 'Other' && a.header < b.header;
-  });
-
-  return [groupNameList, sourcesInGroup];
-}
-
 function viewSourcesCensusUSA() {
-  const groupList = [];
-
   for (let year = 1790; year <= 1950; year += 10) {
-    const list = DATABASE.sources.filter(source => {
-      return source.group == ('Census USA ' + year);
-    });
+    const story = DATABASE.stories.filter(story => {
+      return story.title == 'Census USA ' + year;
+    })[0];
+
+    if (!story) {
+      continue;
+    }
+
+    h2(year);
 
     if (year == 1890) {
-      rend('<h2>1890</h2>');
       rend(
         '<p style="padding-left: 10px;">' +
           'Most of the 1890 census was destroyed in a 1921 fire.' +
         '</p>'
       );
-    } else {
-      if (list.length == 0) {
-        continue;
-      }
-      rend('<h2>' + year + '</h2>');
     }
 
-    showSourceList(list, true, false, false);
+    showSourceList(story.entries, true, false, false);
   }
 }
 
 function viewSourcesCensusState() {
-  const list = DATABASE.sources.filter(isItemStateCensus);
+  const stories = DATABASE.stories.filter(isStoryStateCensus);
 
-  list.trueSort((a, b) => {
-    return a.group < b.group;
+  stories.sortBy(story => story.title);
+
+  let previousHeader;
+
+  stories.forEach(story => {
+    const headerName = USA_STATES[story.location.region1];
+
+    if (previousHeader != headerName) {
+      h2(headerName);
+      previousHeader = headerName;
+    }
+
+    showSourceList(story.entries, true, true, true);
   });
-
-  const getHeaderName = source => USA_STATES[source.location.region1];
-
-  showSourceList(list, true, true, true, getHeaderName);
 }
 
-function isItemStateCensus(source) {
-  return source.group.match('Census Minnesota')
-    || source.group.match('Census Nebraska');
+function isStoryStateCensus(story) {
+  return story.tags['Census US States'];
 }
 
 function viewSourcesCensusOther() {
-  const list = DATABASE.sources.filter(source => {
-    return source.group.match('Census') && !source.group.match('Census USA')
-      && !isItemStateCensus(source);
+  const storyList = DATABASE.stories.filter(story => {
+    return story.title.match('Census')
+      && !story.title.match('USA')
+      && !isStoryStateCensus(story);
   });
 
-  showSourceList(list, true, true, true);
+  storyList.sortBy(story => story.title);
+
+  showSourceCategoryList({
+    showStoryTitles: true,
+    showStoryInLink: false,
+    stories: storyList
+  });
 }
 
 function viewSourcesDraft() {
-  const list1 = DATABASE.sources.filter(source => {
-    return source.group == 'World War I draft';
+  ['World War I draft', 'World War II draft'].forEach(title => {
+    showSourceCategoryList({
+      title: title,
+      stories: DATABASE.stories.filter(story => story.title == title),
+      showStoryInLink: false
+    });
   });
-
-  const list2 = DATABASE.sources.filter(source => {
-    return source.group == 'World War II draft';
-  });
-
-  rend('<h2>World War I</h2>');
-  showSourceList(list1, true, true, false);
-  rend('<h2>World War II</h2>');
-  showSourceList(list2, true, true, false);
 }
 
 function viewSourcesIndexOnly() {
-  const listBirth = DATABASE.sources.filter(source => {
-    return source.type == 'index' && source.group.match('Birth Index');
-  });
+  const storiesIndex = DATABASE.stories.filter(story => story.type == 'index');
 
-  const listDeath = DATABASE.sources.filter(source => {
-    return source.type == 'index' && source.group.match('Death Index');
-  });
-
-  const listOther = DATABASE.sources.filter(source => {
-    return source.type == 'index' && !source.group.match('Birth Index')
-      && !source.group.match('Death Index');
-  });
-
-  listBirth.trueSort((a, b) => a.group < b.group);
-  listDeath.trueSort((a, b) => a.group < b.group);
-  listOther.trueSort((a, b) => a.group < b.group);
+  storiesIndex.sortBy(story => story.title);
 
   rend(
     '<p style="padding: 10px 0;">' +
@@ -284,43 +234,56 @@ function viewSourcesIndexOnly() {
     '</p>'
   );
 
-  rend('<h2>Birth Index</h2>');
-  showSourceList(listBirth, true, true, true);
-  rend('<h2>Death Index</h2>');
-  showSourceList(listDeath, true, true, true);
-  rend('<h2>Other</h2>');
-  showSourceList(listOther, true, true, true);
+  showSourceCategoryList({
+    title: 'Birth Index',
+    stories: storiesIndex.filter(story => story.title.match('Birth Index'))
+  });
+
+  showSourceCategoryList({
+    title: 'Death Index',
+    stories: storiesIndex.filter(story => story.title.match('Death Index'))
+  });
+
+  showSourceCategoryList({
+    title: 'Other',
+    stories: storiesIndex.filter(story => {
+      return !story.title.match('Birth Index')
+        && !story.title.match('Death Index');
+    })
+  });
 }
 
 function viewSourcesOther() {
-  const list = DATABASE.sources.filter(source => {
-    return source.type != 'photo'
-      && source.type != 'grave'
-      && source.type != 'newspaper'
-      && source.type != 'index'
-      && !source.group.match('Census')
-      && source.group != 'World War I draft'
-      && source.group != 'World War II draft';
+  const storiesOther = DATABASE.stories.filter(story => {
+    return !['cemetery', 'newspaper', 'index', 'book'].includes(story.type)
+      && !['World War I draft', 'World War II draft',
+        'Photo'].includes(story.title)
+      && !story.title.match('Census');
   });
 
-  list.trueSort((a, b) => a.group < b.group);
+  storiesOther.sortBy(story => story.title);
 
-  const listBaptism = list.filter(source => source.group.match('Baptism'));
-  const listMarriage = list.filter(source => source.group.match('Marriage'));
-  const listPassengers = list.filter(source => source.group.match('Passenger'));
-
-  const listOther = list.filter(source => {
-    return !source.group.match('Baptism')
-      && !source.group.match('Marriage')
-      && !source.group.match('Passenger');
+  showSourceCategoryList({
+    title: 'Baptism',
+    stories: storiesOther.filter(story => story.title.match('Baptism'))
   });
 
-  rend('<h2>Baptism</h2>');
-  showSourceList(listBaptism, true, true, true);
-  rend('<h2>Marriage</h2>');
-  showSourceList(listMarriage, true, true, true);
-  rend('<h2>Immigration & Travel</h2>');
-  showSourceList(listPassengers, true, true, true);
-  rend('<h2>Other</h2>');
-  showSourceList(listOther, true, true, true);
+  showSourceCategoryList({
+    title: 'Marriage',
+    stories: storiesOther.filter(story => story.title.match('Marriage'))
+  });
+
+  showSourceCategoryList({
+    title: 'Immigration & Travel',
+    stories: storiesOther.filter(story => story.title.match('Passenger'))
+  });
+
+  showSourceCategoryList({
+    title: 'Other',
+    stories: storiesOther.filter(story => {
+      return !story.title.match('Baptism')
+        && !story.title.match('Marriage')
+        && !story.title.match('Passenger');
+    })
+  });
 }

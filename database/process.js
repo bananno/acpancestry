@@ -37,8 +37,6 @@ function processDatabase() {
   DATABASE.citations = DATABASE.citations.map(getProcessedCitation);
 
   DATABASE.notations = DATABASE.notations.map(getProcessedNotation);
-
-  findSourceGroups();
 }
 
 function getProcessedPerson(person) {
@@ -117,6 +115,9 @@ function getProcessedSource(source) {
 
   source.people = removeNullValues(source.people);
 
+  source.story = DATABASE.storyRef[source.story];
+  source.story.entries.push(source);
+
   source.date = source.date || {};
   source.date.format = formatDate(source.date);
   source.date.sort = getSortDate(source.date);
@@ -125,15 +126,8 @@ function getProcessedSource(source) {
   source.citations = [];
   source.tags = source.tags || {};
 
-  if (source.group.match('Census USA')) {
+  if (source.story.title.match('Census')) {
     source.title += ' household';
-  }
-
-  if (source.story) {
-    source.story = DATABASE.storyRef[source.story];
-    if (source.story) {
-      source.story.entries.push(source);
-    }
   }
 
   return source;
@@ -164,26 +158,4 @@ function getProcessedNotation(notation) {
 
 function removeNullValues(array) {
   return array.filter(value => value != null);
-}
-
-function findSourceGroups() {
-  // For each source group, there might be a designated "SOURCE GROUP" source that holds
-  // general information about the group.
-
-  DATABASE.sources.forEach(source => {
-    source.isGroupMain = source.title.toLowerCase() == 'source group';
-  });
-
-  DATABASE.sourceGroups = DATABASE.sources.filter(source => source.isGroupMain);
-  DATABASE.sources = DATABASE.sources.filter(source => !source.isGroupMain);
-
-  DATABASE.sourceGroups.forEach(sourceGroupMain => {
-    sourceGroupMain.sourceList = DATABASE.sources.filter(source => {
-      if (source.type == sourceGroupMain.type && source.group == sourceGroupMain.group) {
-        source.sourceGroup = sourceGroupMain;
-        return true;
-      }
-      return false;
-    });
-  });
 }

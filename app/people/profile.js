@@ -134,7 +134,7 @@ function showPersonBiographies(person) {
       '<div class="cover-background" ' +
           'style="margin-left: 12px;' + (i > 0 ? 'margin-top:15px' : '') + '">' +
         '<p>' +
-          '<b>' + source.group + '</b>' +
+          '<b>' + source.story.title + '</b>' +
         '</p>' +
         '<p style="margin-top: 8px">' +
           source.content.slice(0, 500) +
@@ -298,22 +298,26 @@ function viewPersonSource(person, sourceId) {
   const source = DATABASE.sourceRef[sourceId];
 
   if (source == null) {
-    rend(`<h2>Source not found: ${sourceId}</h2>`);
+    h2('Source not found: ' + sourceId);
     return;
   }
 
-  rend('<h2>Biography</h2>');
+  h2('Biography');
   rend(formatTranscription(source.content));
 
-  rend('<h2>About this source</h2>');
-  rend('<p style="margin-left: 10px;">' + source.type + '</p>');
-  rend('<p style="margin-left: 10px;">' + source.group + '</p>');
-  rend('<p style="margin-left: 10px;">' + source.title + '</p>');
-  rend('<p style="margin-left: 10px;">' + formatDate(source.date) + '</p>');
-  rend('<p style="margin-left: 10px;">' + formatLocation(source.location) + '</p>');
+  h2('About this source');
+
+  [
+    source.story.type + ': ' + linkToStory(source.story),
+    source.title,
+    source.date.format,
+    source.location.format
+  ].filter(s => s).forEach(text => {
+    rend('<p style="margin: 10px 0 0 10px;">' + text + '</p>');
+  });
 
   if (source.images.length) {
-    rend('<h2>Images</h2>');
+    h2('Images');
     source.images.forEach((imageUrl, i) => {
       rend(makeImage(source, i, 200));
     });
@@ -323,7 +327,7 @@ function viewPersonSource(person, sourceId) {
   viewSourceNotes(source);
 
   if (source.people.length > 1) {
-    rend('<h2>Other people in this source</h2>');
+    h2('Other people in this source');
     rend($makePeopleList(source.people.filter(p => p != person), 'photo'));
   }
 

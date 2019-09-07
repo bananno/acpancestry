@@ -91,13 +91,13 @@ function viewMain() {
   DATABASE.sources.filter(s => s.tags.featured).forEach(source => {
     rend(
       '<p style="margin: 10px">' +
-        linkToSource(source, source.group + ' - ' + source.title) +
+        linkToSource(source, source.story.title + ' - ' + source.title) +
       '</p>'
     );
   });
 
   h2('photos');
-  DATABASE.sources.filter(s => s.type == 'photo').forEach(source => {
+  DATABASE.sources.filter(s => s.story.title == 'Photo').forEach(source => {
     if (source.images.length) {
       rend(
         localLink('source/' + source._id, '<img src="' + source.images[0] +
