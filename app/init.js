@@ -2,9 +2,9 @@
 const [ORIGIN, PATH, ENV] = getFilePaths();
 
 $(document).ready(() => {
+  setupLayout();
   setPageTitle();
   processDatabase();
-  createHeaderLinks();
   loadContent();
   runTests();
 });
@@ -24,17 +24,6 @@ function getFilePaths() {
   }
 
   return [url, path, env];
-}
-
-function createHeaderLinks() {
-  $('#page-header h1').append('<a href="' + ORIGIN + '">' + SITE_TITLE + '</a>');
-  const $list = $('#main-navigation ul');
-
-  $list.append('<li><a href="' + ORIGIN + '">Home</a></li>');
-
-  ['People', 'Events', 'Sources', 'Places'].forEach(nav => {
-    $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');
-  });
 }
 
 Array.prototype.trueSort = function(callback) {
