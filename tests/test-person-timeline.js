@@ -329,8 +329,12 @@ test(t => {
 });
 
 test(t => {
+  const testItemStory = {
+  };
+
   const testItemSource = {
     source: true,
+    story: testItemStory,
     event: false,
     relationship: null,
     personal: false,
@@ -380,28 +384,28 @@ test(t => {
 
   t.setTitle2('item title');
 
-  testItemSource.type = 'index';
+  testItemStory.type = 'index';
   timelineItem = new PersonTimelineItem(testItemSource, true);
   t.assertEqual('should be equal to "source" for index-type sources',
     'source',
     timelineItem.getItemTitle(),
   );
 
-  testItemSource.type = 'grave';
+  testItemStory.type = 'cemetery';
   timelineItem = new PersonTimelineItem(testItemSource, true);
-  t.assertEqual('should be equal to "cemetery" for grave-type sources',
+  t.assertEqual('should be equal to "cemetery" for cemetery-type sources',
     'cemetery',
     timelineItem.getItemTitle(),
   );
 
-  testItemSource.type = 'newspaper';
+  testItemStory.type = 'newspaper';
   timelineItem = new PersonTimelineItem(testItemSource, true);
   t.assertEqual('should be equal to "newspaper article" for newspaper-type sources',
     'newspaper article',
     timelineItem.getItemTitle(),
   );
 
-  testItemSource.type = 'other source type';
+  testItemStory.type = 'other source type';
   timelineItem = new PersonTimelineItem(testItemSource, true);
   t.assertEqual('should be equal to source type for all other sources',
     'other source type',

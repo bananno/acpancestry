@@ -92,17 +92,16 @@ class TimelineItem {
       return this.item.title;
     }
 
-    if (this.item.type == 'index') {
+    const storyType = this.item.story.type;
+
+    if (storyType == 'index') {
       return 'source';
     }
-    if (this.item.type == 'grave') {
-      return 'cemetery';
-    }
-    if (this.item.type == 'newspaper') {
+    if (storyType == 'newspaper') {
       return 'newspaper article';
     }
 
-    return this.item.type;
+    return storyType;
   }
 
   shouldShowPeople() {
