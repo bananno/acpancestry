@@ -41,6 +41,9 @@ function getFancyLink(link) {
     if (linkText == 'Ancestry') {
       imageName = 'logo-ancestry.png';
       linkText = '';
+    } else if (linkText == 'BillionGraves') {
+      imageName = 'logo-billiongraves.svg';
+      linkText = '';
     } else if (linkText == 'FamilySearch') {
       imageName = 'logo-familysearch.png';
       linkText = '';
