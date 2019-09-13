@@ -61,7 +61,7 @@ function routeSources() {
   }
 
   if (PATH.match('source/')) {
-    return viewOneSource();
+    return ViewOneSource.byUrl();
   }
 
   const categoryPath = PATH.slice(8);
