@@ -237,6 +237,14 @@ function isDateBeforeDate(date1, date2) {
   return false;
 }
 
+function singularize(word, number) {
+  if (number !== undefined && number !== 1) {
+    return word;
+  }
+  return {
+  }[word] || word.slice(0, word.length - 1);
+}
+
 function pluralize(word, number) {
   if (number === 1) {
     return word;

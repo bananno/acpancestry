@@ -50,21 +50,40 @@ class ViewPage {
   }
 
   makeList(list, options = {}) {
-    const $ul = $('<ul style="margin-left: 30px;">');
-    rend($ul);
+    let $ul;
 
-    if (options.type == 'stories') {
-      list.forEach(story => {
-        const $li = $('<li>').appendTo($ul);
-        $li.append(linkToStory(story));
-      });
+    if (options.bullet !== false) {
+      $ul = $('<ul style="margin-left: 30px;">');
+      rend($ul);
     }
 
-    if (options.type == 'sources') {
-      list.forEach(source => {
-        const $li = $('<li>').appendTo($ul);
-        $li.append(linkToSource(source, options.showStory));
-      });
-    }
+    list.forEach(item => {
+      let $container;
+
+      if ($ul) {
+        $container = $('<li>').appendTo($ul);
+      } else {
+        $container = $('<div>');
+        rend($container);
+      }
+
+      if (options.divider) {
+        $container.append('<hr style="margin: 20px 0;">');
+      }
+
+      if (options.type == 'stories') {
+        $container.append(linkToStory(item));
+      } else if (options.type == 'sources') {
+        $container.append(linkToSource(item, options.showStory));
+      } else {
+        $container.append(item);
+      }
+
+      if (options.summary && item.summary) {
+        $container.append(
+          '<p style="margin-top: 10px;">' + item.summary + '</p>'
+        );
+      }
+    });
   }
 }

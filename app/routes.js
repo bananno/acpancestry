@@ -49,7 +49,7 @@ function loadContent() {
   }
 
   if (PATH.match('artifact') || PATH.match('landmark')) {
-    return viewArtifactOrLandmark();
+    return ViewStoryIndex.byUrl() || ViewStoryArtifactOrLandmark.byUrl();
   }
 
   if (PATH.match('cemeter') || PATH.match('newspaper')) {
