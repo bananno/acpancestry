@@ -9,7 +9,7 @@ function loadContent() {
   }
 
   if (PATH.match('person/')) {
-    return viewPerson();
+    return ViewPerson.byUrl();
   }
 
   if (PATH == 'events') {
