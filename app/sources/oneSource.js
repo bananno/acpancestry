@@ -1,4 +1,4 @@
-class ViewOneSource {
+class ViewOneSource extends ViewPage {
   static byUrl() {
     const sourceId = PATH.replace('source/', '');
 
@@ -13,6 +13,7 @@ class ViewOneSource {
   }
 
   constructor(source) {
+    super(source);
     this.source = source;
     this.story = source.story;
     this.type = source.story.type;
@@ -22,12 +23,12 @@ class ViewOneSource {
     this.setTitle();
     this.headerTrail();
     this.viewTitles();
-    this.viewSummary();
+    this.viewSectionSummary();
     this.viewImages();
-    this.viewContent();
-    this.viewPeople();
-    this.viewNotes();
-    this.viewLinks();
+    this.viewSectionContent();
+    this.viewSectionPeople();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
     this.otherEntries();
   }
 
@@ -81,17 +82,6 @@ class ViewOneSource {
     rend('<p>' + this.source.location.format || source.story.location.format + '</p>');
   }
 
-  viewSummary() {
-    if (!this.source.summary) {
-      return;
-    }
-    h2('Summary');
-    rend(
-      this.source.summary.split('\n')
-      .map(text => '<p>' + text + '</p>').join('')
-    );
-  }
-
   viewImages() {
     if (!this.source.images.length) {
       return;
@@ -111,42 +101,6 @@ class ViewOneSource {
     this.source.images.forEach((imageUrl, i) => {
       rend(makeImage(this.source, i, measure).css('margin-right', '5px'));
     });
-  }
-
-  viewContent() {
-    if (!this.source.content) {
-      return;
-    }
-    h2('Transcription');
-    rend(formatTranscription(this.source.content));
-  }
-
-  viewPeople() {
-    if (!this.source.people.length) {
-      return;
-    }
-    h2('People');
-    rend($makePeopleList(this.source.people, 'photo'));
-  }
-
-  viewNotes() {
-    if (!this.source.notes) {
-      return;
-    }
-    h2('Notes');
-    rend(
-      '<ul class="bullet"><li>' +
-        this.source.notes.split('\n').join('</li><li>') +
-      '</li></ul>'
-    );
-  }
-
-  viewLinks() {
-    if (!this.source.links.length) {
-      return;
-    }
-    h2('Links');
-    rend(this.source.links.map(getFancyLink));
   }
 
   otherEntries() {

@@ -1,5 +1,6 @@
-class ViewStory {
+class ViewStory extends ViewPage {
   constructor(story) {
+    super(story);
     this.story = story;
     this.type = story.type;
     this.entries = story.entries;
@@ -21,34 +22,6 @@ class ViewStory {
     this.story.images.forEach((imageUrl, i) => {
       rend(makeImage(this.story, i, 100, 100).css('margin', '10px 5px 0 5px'));
     });
-  }
-
-  viewPeople() {
-    if (!this.story.people.length) {
-      return;
-    }
-    h2('People');
-    rend($makePeopleList(this.story.people, 'photo'));
-  }
-
-  viewNotes() {
-    if (!this.story.notes) {
-      return;
-    }
-    h2('Notes');
-    rend(
-      '<ul class="bullet"><li>' +
-        this.story.notes.split('\n').join('</li><li>') +
-      '</li></ul>'
-    );
-  }
-
-  viewLinks() {
-    if (!this.story.links.length) {
-      return;
-    }
-    h2('Links');
-    rend(this.story.links.map(getFancyLink));
   }
 }
 
@@ -82,10 +55,11 @@ class ViewCemeteryOrNewspaper extends ViewStory {
 
     rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
 
-    this.viewPeople();
+    this.viewSectionPeople();
     this.viewImages();
-    this.viewNotes();
-    this.viewLinks();
+    this.viewSectionContent();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
     this.showEntries();
   }
 
@@ -124,10 +98,11 @@ class ViewStoryBook extends ViewStory {
       }
     });
 
-    this.viewPeople();
+    this.viewSectionPeople();
     this.viewImages();
-    this.viewNotes();
-    this.viewLinks();
+    this.viewSectionContent();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
     this.showEntries();
   }
 
