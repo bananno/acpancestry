@@ -1,4 +1,4 @@
-class ViewOneSource extends ViewPage {
+class ViewSource extends ViewPage {
   static byUrl() {
     const sourceId = PATH.replace('source/', '');
 
@@ -9,7 +9,7 @@ class ViewOneSource extends ViewPage {
       return;
     }
 
-    new ViewOneSource(source).render();
+    new ViewSource(source).render();
   }
 
   constructor(source) {
