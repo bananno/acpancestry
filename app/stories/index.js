@@ -60,7 +60,21 @@ class ViewCemeteryOrNewspaper extends ViewStory {
     this.viewSectionContent();
     this.viewSectionNotes();
     this.viewSectionLinks();
+    this.viewSources();
     this.showEntries();
+  }
+
+  viewSources() {
+    const sources = DATABASE.sources.filter(source => {
+      return source.stories.includes(this.story);
+    });
+    if (sources.length == 0) {
+      return;
+    }
+    h2('Sources');
+    sources.forEach(source => {
+      rend('<p style="margin: 10px">' + linkToSource(source, true) + '</p>');
+    });
   }
 
   showEntries() {

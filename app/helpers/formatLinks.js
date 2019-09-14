@@ -19,7 +19,11 @@ function linkToStory(story, text) {
 }
 
 function linkToSource(source, text) {
-  text = text || source.title;
+  if (text === true) {
+    text = source.story.title + ' - ' + source.title;
+  } else {
+    text = text || source.title;
+  }
   return localLink('source/' + source._id, text);
 }
 

@@ -104,6 +104,7 @@ function getProcessedStory(story) {
   story.location = story.location || {};
   story.location.format = formatLocation(story.location);
   story.tags = story.tags || {};
+  story.sources = [];
   story.entries = [];
   return story;
 }
@@ -117,6 +118,12 @@ function getProcessedSource(source) {
 
   source.story = DATABASE.storyRef[source.story];
   source.story.entries.push(source);
+
+  source.stories = source.stories.map(storyId => {
+    const story = DATABASE.storyRef[storyId];
+    story.sources.push(source);
+    return story;
+  });
 
   source.date = source.date || {};
   source.date.format = formatDate(source.date);
