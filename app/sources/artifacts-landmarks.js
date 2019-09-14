@@ -7,18 +7,7 @@ function viewArtifactOrLandmark() {
     return viewLandmarksIndex();
   }
 
-  const [storyType, storyId, extraText] = PATH.split('/');
-  const story = DATABASE.storyRef[storyId];
-
-  if (!story || extraText) {
-    return pageNotFound();
-  }
-
-  if (storyType == 'artifact' || storyType == 'landmark') {
-    return viewOneArtifactOrLandmark(storyType, story);
-  }
-
-  return pageNotFound();
+  ViewStoryArtifactOrLandmark.byUrl();
 }
 
 function viewArtifactsIndex() {
@@ -53,22 +42,6 @@ function viewLandmarksIndex() {
 
     rend($makePeopleList(story.people, 'photo'));
   });
-}
-
-function viewOneArtifactOrLandmark(storyType, story) {
-  headerTrail([storyType]);
-  h1(story.title);
-
-  [story.date.format, story.location.format, story.summary].forEach(val => {
-    if (val) {
-      rend('<p style="margin-top: 20px;">' + val + '</p>');
-    }
-  });
-
-  if (story.people.length) {
-    h2('People');
-    rend($makePeopleList(story.people, 'photo'));
-  }
 }
 
 function artifactBlock(story, specs) {

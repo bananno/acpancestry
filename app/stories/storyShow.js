@@ -11,6 +11,10 @@ class ViewStory extends ViewPage {
       return headerTrail('sources', pluralize(this.type));
     }
 
+    if (['artifact', 'landmark'].includes(this.type)) {
+      return headerTrail(pluralize(this.type));
+    }
+
     return headerTrail('sources');
   }
 
@@ -21,6 +25,19 @@ class ViewStory extends ViewPage {
     h2('Images');
     this.story.images.forEach((imageUrl, i) => {
       rend(makeImage(this.story, i, 100, 100).css('margin', '10px 5px 0 5px'));
+    });
+  }
+
+  viewSources() {
+    const sources = DATABASE.sources.filter(source => {
+      return source.stories.includes(this.story);
+    });
+    if (sources.length == 0) {
+      return;
+    }
+    h2('Sources');
+    sources.forEach(source => {
+      rend('<p style="margin: 10px">' + linkToSource(source, true) + '</p>');
     });
   }
 }
@@ -62,19 +79,6 @@ class ViewCemeteryOrNewspaper extends ViewStory {
     this.viewSectionLinks();
     this.viewSources();
     this.showEntries();
-  }
-
-  viewSources() {
-    const sources = DATABASE.sources.filter(source => {
-      return source.stories.includes(this.story);
-    });
-    if (sources.length == 0) {
-      return;
-    }
-    h2('Sources');
-    sources.forEach(source => {
-      rend('<p style="margin: 10px">' + linkToSource(source, true) + '</p>');
-    });
   }
 
   showEntries() {
@@ -132,5 +136,42 @@ class ViewStoryBook extends ViewStory {
       type: 'sources',
       showStory: false,
     });
+  }
+}
+
+class ViewStoryArtifactOrLandmark extends ViewStory {
+  static byUrl() {
+    const [storyType, storyId, extraText] = PATH.split('/');
+    const story = DATABASE.storyRef[storyId];
+
+    if (storyType != 'artifact' && storyType != 'landmark') {
+      return false;
+    }
+
+    if (!story || extraText) {
+      return pageNotFound();
+    }
+
+    new ViewStoryArtifactOrLandmark(story).render();
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  render() {
+    this.headerTrail();
+
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
+    rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
+
+    this.viewSectionPeople();
+    this.viewImages();
+    this.viewSectionContent();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
+    this.viewSources();
   }
 }
