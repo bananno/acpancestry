@@ -750,6 +750,9 @@ function getFancyLink(link) {
     if (linkText == 'Ancestry') {
       imageName = 'logo-ancestry.png';
       linkText = '';
+    } else if (linkText == 'BillionGraves') {
+      imageName = 'logo-billiongraves.svg';
+      linkText = '';
     } else if (linkText == 'FamilySearch') {
       imageName = 'logo-familysearch.png';
       linkText = '';
@@ -2637,15 +2640,7 @@ function viewBook() {
     return viewBooksIndex();
   }
 
-  const storyId = PATH.replace('book/', '');
-
-  const story = DATABASE.storyRef[storyId];
-
-  if (story) {
-    return viewOneBook(story);
-  }
-
-  return pageNotFound();
+  ViewStoryBook.byUrl();
 }
 
 function viewBooksIndex() {
@@ -2672,63 +2667,6 @@ function viewBooksIndex() {
   });
 }
 
-function viewOneBook(story) {
-  headerTrail('sources', 'books');
-  setPageTitle(story.title);
-  h1(story.title);
-
-  ['date', 'location'].forEach(attr => {
-    if (story[attr].format) {
-      rend('<p style="padding-top: 10px;">' + story[attr].format + '</p>');
-    }
-  });
-
-  story.images.forEach((imageUrl, i) => {
-    rend(makeImage(story, i, 100, 100).css('margin', '10px 5px 0 5px'));
-  });
-
-  rend($makePeopleList(story.people, 'photo').css('margin', '15px 0'));
-
-  if (story.notes) {
-    rend('<p>' + story.notes + '</p>');
-  }
-
-  story.links.forEach(linkUrl => {
-    rend($(getFancyLink(linkUrl)).css('margin-left', '10px'));
-  });
-
-  story.entries.forEach(showBookEntry);
-}
-
-function showBookEntry(source) {
-  h2(source.title);
-
-  if (source.date.format) {
-    rend('<p style="margin-left: 10px; margin-bottom: 10px;">' +
-      source.date.format + '</p>');
-  }
-
-  source.images.forEach((imageUrl, i) => {
-    rend(makeImage(source, i, 100, 100).css('margin', '0 5px'));
-  });
-
-  rend($makePeopleList(source.people, 'photo'));
-
-  if (source.notes) {
-    rend('<p>' + source.notes + '</p>');
-  }
-
-  source.links.forEach(linkUrl => {
-    rend($(getFancyLink(linkUrl)).css('margin-left', '10px'));
-  });
-
-  if (source.content) {
-    rend(formatTranscription(source.content));
-  } else if (source.type == 'newspaper') {
-    rend('<p style="margin: 10px"><i>Transcription not available.</i></p>');
-  }
-}
-
 
 function viewCemeteriesOrNewspapers() {
   if (PATH == 'cemeteries') {
@@ -2736,7 +2674,7 @@ function viewCemeteriesOrNewspapers() {
   }
 
   if (PATH.match('cemetery')) {
-    return viewCemeteryOrNewspaper('cemetery');
+    return ViewCemeteryOrNewspaper.byUrl();
   }
 
   if (PATH == 'newspapers') {
@@ -2744,7 +2682,7 @@ function viewCemeteriesOrNewspapers() {
   }
 
   if (PATH.match('newspaper')) {
-    return viewCemeteryOrNewspaper('newspaper');
+    return ViewCemeteryOrNewspaper.byUrl();
   }
 
   return pageNotFound();
@@ -2803,55 +2741,6 @@ function getStoriesByPlace(storyType) {
   }
 
   return [placeList, storiesByPlace];
-}
-
-function viewCemeteryOrNewspaper(storyType) {
-  const storyId = PATH.replace(storyType + '/', '');
-  const story = DATABASE.storyRef[storyId];
-
-  if (!story) {
-    return pageNotFound();
-  }
-
-  if (storyType == 'newspaper') {
-    story.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
-  }
-
-  headerTrail('sources', pluralize(storyType));
-  setPageTitle(story.title);
-  h1(story.title);
-
-  rend('<p style="padding-top: 10px;">' + story.location.format + '</p>');
-
-  rend($makePeopleList(story.people, 'photo'));
-
-  if (story.notes) {
-    rend('<p>' + story.notes + '</p>');
-  }
-
-  if (story.images.length) {
-    h2('Images');
-    story.images.forEach((imageUrl, i) => {
-      rend(makeImage(story, i, 100, 100).css('margin', '10px 5px 0 5px'));
-    });
-  }
-
-  if (story.links.length) {
-    h2('Links');
-    story.links.forEach(linkUrl => {
-      rend($(getFancyLink(linkUrl)).css('margin-left', '10px'));
-    });
-  }
-
-  if (storyType == 'cemetery') {
-    story.entries.trueSort((a, b) => a.title < b.title);
-    h2('Graves');
-    showListOfGraves(story.entries)
-  } else {
-    story.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
-    h2('Articles');
-    showListOfArticles(story.entries);
-  }
 }
 
 function getNumberOfGravesInCemetery(story) {
@@ -2963,7 +2852,7 @@ function routeSources() {
   }
 
   if (PATH.match('source/')) {
-    return viewOneSource();
+    return ViewOneSource.byUrl();
   }
 
   const categoryPath = PATH.slice(8);
@@ -3248,136 +3137,336 @@ function showSourceList(sourceList, showLocation, showDate, showStory) {
   });
 }
 
+class ViewOneSource {
+  static byUrl() {
+    const sourceId = PATH.replace('source/', '');
 
-function viewOneSource() {
-  const sourceId = PATH.replace('source/', '');
+    const source = DATABASE.sourceRef[sourceId];
 
-  const source = DATABASE.sources.filter(source => source._id == sourceId)[0];
-
-  if (!source) {
-    rend('<h1>Source not found</h1>');
-    return;
-  }
-
-  if (source.type == 'grave') {
-    viewSourceGrave(source);
-  } else {
-    viewSourceOther(source);
-  }
-
-  rend('<h2>People</h2>');
-  rend($makePeopleList(source.people, 'photo'));
-
-  viewSourceNotes(source);
-  viewSourceLinks(source);
-
-  if (['newspaper', 'grave'].includes(source.type)) {
-    viewSourceStoryEntryList(source);
-  }
-}
-
-function viewSourceGrave(source) {
-  const story = source.story;
-
-  setPageTitle(story.title);
-
-  headerTrail('sources', 'cemeteries',
-    ['cemetery/' + story._id, story.title]);
-
-  rend('<p>' + story.location.format + '</p>');
-  rend('<p><br></p>');
-  h1(source.title);
-
-  viewSourceSummary(source);
-
-  if (source.images.length) {
-    rend('<h2>Images</h2>');
-    source.images.forEach((imageUrl, i) => {
-      rend(makeImage(source, i, 200).css('margin-right', '5px'));
-    });
-  }
-}
-
-function viewSourceOther(source) {
-  const story = source.story;
-
-  setPageTitle('Source');
-
-  if (source.type == 'newspaper') {
-    headerTrail('sources', 'newspapers',
-      story ? ['newspaper/' + story._id, story.title] : null);
-  }
-
-  rend('<h1>Source</h1>');
-  rend('<p>' + source.type + '</p>');
-  rend('<p>' + source.group + '</p>');
-  rend('<p>' + source.title + '</p>');
-  rend('<p>' + formatDate(source.date) + '</p>');
-  rend('<p>' + formatLocation(source.location) + '</p>');
-
-  viewSourceSummary(source);
-
-  if (source.images.length) {
-    rend('<h2>Images</h2>');
-
-    if (source.tags.cropped) {
-      rend('<p style="margin-bottom:10px">The image is cropped to show the most relevent ' +
-        'portion. See the "links" section below to see the full image.</p>');
+    if (!source) {
+      h1('Source not found');
+      return;
     }
 
-    source.images.forEach((imageUrl, i) => {
-      rend(makeImage(source, i).css('margin-right', '5px'));
+    new ViewOneSource(source).render();
+  }
+
+  constructor(source) {
+    this.source = source;
+    this.story = source.story;
+    this.type = source.story.type;
+  }
+
+  render() {
+    this.setTitle();
+    this.headerTrail();
+    this.viewTitles();
+    this.viewSummary();
+    this.viewImages();
+    this.viewContent();
+    this.viewPeople();
+    this.viewNotes();
+    this.viewLinks();
+    this.otherEntries();
+  }
+
+  setTitle() {
+    if (this.type == 'cemetery') {
+      setPageTitle(this.story.title);
+    } else {
+      setPageTitle('Source');
+    }
+  }
+
+  headerTrail() {
+    if (this.type == 'cemetery') {
+      return headerTrail('sources', 'cemeteries',
+        ['cemetery/' + this.story._id, this.story.title]);
+    }
+
+    if (this.type == 'newspaper') {
+      return headerTrail('sources', 'newspapers',
+        ['newspaper/' + this.story._id, this.story.title]);
+    }
+
+    return headerTrail('sources');
+  }
+
+  viewTitles() {
+    if (this.type == 'cemetery') {
+      rend('<p>' + this.story.location.format + '</p>');
+      rend('<p><br></p>');
+      h1(this.source.title);
+      return;
+    }
+
+    if (this.type == 'newspaper') {
+      h1(this.source.title);
+      rend('<p>newspaper article</p>');
+      rend('<p>' + this.story.location.format + '</p>');
+      rend('<p>' + this.source.date.format + '</p>');
+      return;
+    }
+
+    if (this.type == 'document') {
+      h1('Document');
+    } else {
+      h1('Source');
+      rend('<p>' + this.story.type + '</p>');
+    }
+
+    rend('<p>' + this.source.title + '</p>');
+    rend('<p>' + this.source.date.format || source.story.date.format + '</p>');
+    rend('<p>' + this.source.location.format || source.story.location.format + '</p>');
+  }
+
+  viewSummary() {
+    if (!this.source.summary) {
+      return;
+    }
+    h2('Summary');
+    rend(
+      this.source.summary.split('\n')
+      .map(text => '<p>' + text + '</p>').join('')
+    );
+  }
+
+  viewImages() {
+    if (!this.source.images.length) {
+      return;
+    }
+
+    h2('Images');
+
+    if (this.source.tags.cropped) {
+      rend('<p style="margin-bottom:10px">' +
+        'The image is cropped to show the most relevent portion. ' +
+        'See the "links" section below to see the full image.' +
+      '</p>');
+    }
+
+    let measure = this.type == 'cemetery' ? 200 : null;
+
+    this.source.images.forEach((imageUrl, i) => {
+      rend(makeImage(this.source, i, measure).css('margin-right', '5px'));
     });
   }
 
-  if (source.content) {
-    rend('<h2>Transcription</h2>');
-    rend(formatTranscription(source.content));
+  viewContent() {
+    if (!this.source.content) {
+      return;
+    }
+    h2('Transcription');
+    rend(formatTranscription(this.source.content));
+  }
+
+  viewPeople() {
+    if (!this.source.people.length) {
+      return;
+    }
+    h2('People');
+    rend($makePeopleList(this.source.people, 'photo'));
+  }
+
+  viewNotes() {
+    if (!this.source.notes) {
+      return;
+    }
+    h2('Notes');
+    rend(
+      '<ul class="bullet"><li>' +
+        this.source.notes.split('\n').join('</li><li>') +
+      '</li></ul>'
+    );
+  }
+
+  viewLinks() {
+    if (!this.source.links.length) {
+      return;
+    }
+    h2('Links');
+    rend(this.source.links.map(getFancyLink));
+  }
+
+  otherEntries() {
+    if (!['newspaper', 'cemetery'].includes(this.type)) {
+      return;
+    }
+
+    const entries = this.story.entries.filter(s => s != this.source);
+
+    if (entries.length == 0) {
+      return;
+    }
+
+    h2('More from ' + this.story.title);
+
+    if (this.type == 'cemetery') {
+      entries.sortBy(source => source.title);
+      showListOfGraves(entries);
+    } else {
+      entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
+      showListOfArticles(entries);
+    }
   }
 }
 
-function viewSourceSummary(source) {
-  if (source.summary) {
-    rend('<h2>Summary</h2>');
-    rend(source.summary.split('\n').map(text => '<p>' + text + '</p>').join(''));
+class ViewStory {
+  constructor(story) {
+    this.story = story;
+    this.type = story.type;
+    this.entries = story.entries;
+  }
+
+  headerTrail() {
+    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
+      return headerTrail('sources', pluralize(this.type));
+    }
+
+    return headerTrail('sources');
+  }
+
+  viewImages() {
+    if (!this.story.images.length) {
+      return;
+    }
+    h2('Images');
+    this.story.images.forEach((imageUrl, i) => {
+      rend(makeImage(this.story, i, 100, 100).css('margin', '10px 5px 0 5px'));
+    });
+  }
+
+  viewPeople() {
+    if (!this.story.people.length) {
+      return;
+    }
+    h2('People');
+    rend($makePeopleList(this.story.people, 'photo'));
+  }
+
+  viewNotes() {
+    if (!this.story.notes) {
+      return;
+    }
+    h2('Notes');
+    rend(
+      '<ul class="bullet"><li>' +
+        this.story.notes.split('\n').join('</li><li>') +
+      '</li></ul>'
+    );
+  }
+
+  viewLinks() {
+    if (!this.story.links.length) {
+      return;
+    }
+    h2('Links');
+    rend(this.story.links.map(getFancyLink));
   }
 }
 
-function viewSourceNotes(source) {
-  if (source.notes) {
-    rend('<h2>Notes</h2>');
-    rend('<ul class="bullet"><li>' + source.notes.split('\n').join('</li><li>') + '</li></ul>');
+class ViewCemeteryOrNewspaper extends ViewStory {
+  static byUrl() {
+    const storyId = PATH.replace('newspaper/', '').replace('cemetery/', '');
+    const story = DATABASE.storyRef[storyId];
+
+    if (!story) {
+      return pageNotFound();
+    }
+
+    new ViewCemeteryOrNewspaper(story).render();
+  }
+
+  constructor(story) {
+    super(story);
+
+    if (this.type == 'cemetery') {
+      this.entries.sortBy(source => source.title);
+    } else if (this.storyType == 'newspaper') {
+      this.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
+    }
+  }
+
+  render() {
+    this.headerTrail();
+
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
+    rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
+
+    this.viewPeople();
+    this.viewImages();
+    this.viewNotes();
+    this.viewLinks();
+    this.showEntries();
+  }
+
+  showEntries() {
+    if (this.type == 'cemetery') {
+      h2('Graves');
+      showListOfGraves(this.entries)
+    } else {
+      h2('Articles');
+      showListOfArticles(this.entries);
+    }
   }
 }
 
-function viewSourceLinks(source) {
-  if (source.links.length) {
-    rend('<h2>Links</h2>');
-    rend(source.links.map(getFancyLink));
-  }
-}
+class ViewStoryBook extends ViewStory {
+  static byUrl() {
+    const storyId = PATH.replace('book/', '');
+    const story = DATABASE.storyRef[storyId];
 
-function viewSourceStoryEntryList(source) {
-  const story = source.story;
+    if (!story) {
+      return pageNotFound();
+    }
 
-  if (!story) {
-    return;
+    new ViewStoryBook(story).render();
   }
 
-  const entries = story.entries.filter(s => s != source);
+  render() {
+    this.headerTrail();
 
-  if (entries.length == 0) {
-    return;
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
+    ['date', 'location'].forEach(attr => {
+      if (this.story[attr].format) {
+        rend('<p style="padding-top: 10px;">' + this.story[attr].format + '</p>');
+      }
+    });
+
+    this.viewPeople();
+    this.viewImages();
+    this.viewNotes();
+    this.viewLinks();
+    this.showEntries();
   }
 
-  h2('More from ' + story.title);
+  showEntries() {
+    h2('Chapters');
 
-  if (source.type == 'grave') {
-    entries.trueSort((a, b) => a.title < b.title);
-    showListOfGraves(entries)
-  } else {
-    entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
-    showListOfArticles(entries);
+    if (this.entries.length == 0) {
+      rend('<p style="margin: 15px 10px;"><i>None</i></p>');
+      return;
+    }
+
+    this.entries.forEach((source, i) => {
+      if (i > 0) {
+        rend('<hr style="margin: 30px 0;">');
+      }
+
+      const $box = $('<div style="margin: 20px 10px;">');
+
+      $box.append('<p>' + linkToSource(source) + '</p>');
+
+      if (source.summary) {
+        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
+      }
+
+      rend($box);
+    });
   }
 }
 
