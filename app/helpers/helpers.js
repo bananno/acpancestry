@@ -158,6 +158,9 @@ function headerTrail(...args) {
     '<p class="header-trail">' +
       args.map(linkInfo => {
         let [path, text] = [].concat(linkInfo);
+        if (path === false) {
+          return text;
+        }
         return localLink(path, text || path);
       }).join(' ' + RIGHT_ARROW + ' ') +
     '</p>'

@@ -42,19 +42,17 @@ class ViewOneSource extends ViewPage {
   }
 
   headerTrail() {
-    if (this.type == 'cemetery') {
-      return headerTrail('sources', 'cemeteries',
-        ['cemetery/' + this.story._id, this.story.title]);
-    }
-
-    if (this.type == 'newspaper') {
-      return headerTrail('sources', 'newspapers',
-        ['newspaper/' + this.story._id, this.story.title]);
+    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
+      return headerTrail(
+        'sources',
+        pluralize(this.type),
+        [this.type + '/' + this.story._id, this.story.title]
+      );
     }
 
     if (this.type == 'document' && this.story.title.match('Census USA')) {
-      return headerTrail('sources',
-        ['sources/censusUSA', 'Census USA']);
+      return headerTrail('sources', ['sources/censusUSA', 'Census USA'],
+        [false, this.source.date.year]);
     }
 
     return headerTrail('sources');
@@ -90,8 +88,8 @@ class ViewOneSource extends ViewPage {
       pg(this.source.title);
     }
 
-    pg(this.source.date.format || source.story.date.format);
-    pg(this.source.location.format || source.story.location.format);
+    pg(this.source.date.format || this.story.date.format);
+    pg(this.source.location.format || this.story.location.format);
   }
 
   viewImages() {

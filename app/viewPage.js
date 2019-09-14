@@ -63,7 +63,7 @@ class ViewPage {
     if (options.type == 'sources') {
       list.forEach(source => {
         const $li = $('<li>').appendTo($ul);
-        $li.append(linkToSource(source));
+        $li.append(linkToSource(source, options.showStory));
       });
     }
   }

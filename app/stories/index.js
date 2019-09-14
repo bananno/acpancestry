@@ -124,24 +124,13 @@ class ViewStoryBook extends ViewStory {
     h2('Chapters');
 
     if (this.entries.length == 0) {
-      rend('<p style="margin: 15px 10px;"><i>None</i></p>');
+      pg('<i>None</i>').css('margin', '15px 10px');
       return;
     }
 
-    this.entries.forEach((source, i) => {
-      if (i > 0) {
-        rend('<hr style="margin: 30px 0;">');
-      }
-
-      const $box = $('<div style="margin: 20px 10px;">');
-
-      $box.append('<p>' + linkToSource(source) + '</p>');
-
-      if (source.summary) {
-        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
-      }
-
-      rend($box);
+    this.makeList(this.entries, {
+      type: 'sources',
+      showStory: false,
     });
   }
 }
