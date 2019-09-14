@@ -52,35 +52,46 @@ class ViewOneSource extends ViewPage {
         ['newspaper/' + this.story._id, this.story.title]);
     }
 
+    if (this.type == 'document' && this.story.title.match('Census USA')) {
+      return headerTrail('sources',
+        ['sources/censusUSA', 'Census USA']);
+    }
+
     return headerTrail('sources');
   }
 
   viewTitles() {
     if (this.type == 'cemetery') {
-      rend('<p>' + this.story.location.format + '</p>');
-      rend('<p><br></p>');
+      pg(this.story.location.format);
+      pg('<br>');
       h1(this.source.title);
       return;
     }
 
     if (this.type == 'newspaper') {
       h1(this.source.title);
-      rend('<p>newspaper article</p>');
-      rend('<p>' + this.story.location.format + '</p>');
-      rend('<p>' + this.source.date.format + '</p>');
+      pg('newspaper article');
+      pg(this.story.location.format);
+      pg(this.source.date.format);
       return;
     }
 
     if (this.type == 'document') {
-      h1('Document');
+      if (this.story.title.match('Census USA')) {
+        h1(this.source.title);
+        pg(this.story.type);
+      } else {
+        h1('Document');
+        pg(this.source.title);
+      }
     } else {
       h1('Source');
-      rend('<p>' + this.story.type + '</p>');
+      pg(this.story.type);
+      pg(this.source.title);
     }
 
-    rend('<p>' + this.source.title + '</p>');
-    rend('<p>' + this.source.date.format || source.story.date.format + '</p>');
-    rend('<p>' + this.source.location.format || source.story.location.format + '</p>');
+    pg(this.source.date.format || source.story.date.format);
+    pg(this.source.location.format || source.story.location.format);
   }
 
   viewImages() {
@@ -113,6 +124,22 @@ class ViewOneSource extends ViewPage {
   }
 
   otherEntries() {
+    if (this.type == 'document' && this.story.title.match('Census USA')) {
+      const neighbors = this.story.entries.filter(source => {
+        return source.location.format == this.source.location.format;
+      });
+
+      if (neighbors.length == 0) {
+        return;
+      }
+
+      h2('Neighbors');
+      pg('Other households in <b>' + this.source.location.format + '</b> in '
+        + this.source.date.year + '.').css('margin-bottom', '10px');
+      this.makeList(neighbors, { type: 'sources', showStory: false });
+      return;
+    }
+
     if (!['newspaper', 'cemetery'].includes(this.type)) {
       return;
     }

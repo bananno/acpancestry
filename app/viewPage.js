@@ -59,5 +59,12 @@ class ViewPage {
         $li.append(linkToStory(story));
       });
     }
+
+    if (options.type == 'sources') {
+      list.forEach(source => {
+        const $li = $('<li>').appendTo($ul);
+        $li.append(linkToSource(source));
+      });
+    }
   }
 }

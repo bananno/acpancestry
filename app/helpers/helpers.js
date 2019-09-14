@@ -20,6 +20,12 @@ function h2(content) {
   rend($('<h2>').append(content));
 }
 
+function pg(content) {
+  const $p = $('<p>').append(content);
+  rend($p);
+  return $p;
+}
+
 function bulletList(array, skipRender) {
   const $list = $('<ul class="bullet">');
   array.forEach(content => $list.append($('<li>').append(content)));
