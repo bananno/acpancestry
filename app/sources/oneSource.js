@@ -27,6 +27,7 @@ class ViewOneSource extends ViewPage {
     this.viewImages();
     this.viewSectionContent();
     this.viewSectionPeople();
+    this.viewStories();
     this.viewSectionNotes();
     this.viewSectionLinks();
     this.otherEntries();
@@ -101,6 +102,14 @@ class ViewOneSource extends ViewPage {
     this.source.images.forEach((imageUrl, i) => {
       rend(makeImage(this.source, i, measure).css('margin-right', '5px'));
     });
+  }
+
+  viewStories() {
+    if (this.source.stories.length == 0) {
+      return;
+    }
+    h2('See Also');
+    this.makeList(this.source.stories, { type: 'stories' });
   }
 
   otherEntries() {

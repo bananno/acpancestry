@@ -48,4 +48,16 @@ class ViewPage {
     h2('Transcription');
     rend(formatTranscription(this.item.content));
   }
+
+  makeList(list, options = {}) {
+    const $ul = $('<ul style="margin-left: 30px;">');
+    rend($ul);
+
+    if (options.type == 'stories') {
+      list.forEach(story => {
+        const $li = $('<li>').appendTo($ul);
+        $li.append(linkToStory(story));
+      });
+    }
+  }
 }
