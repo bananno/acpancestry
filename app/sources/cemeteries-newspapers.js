@@ -5,7 +5,7 @@ function viewCemeteriesOrNewspapers() {
   }
 
   if (PATH.match('cemetery')) {
-    return viewCemeteryOrNewspaper('cemetery');
+    return ViewCemeteryOrNewspaper.byUrl();
   }
 
   if (PATH == 'newspapers') {
@@ -13,7 +13,7 @@ function viewCemeteriesOrNewspapers() {
   }
 
   if (PATH.match('newspaper')) {
-    return viewCemeteryOrNewspaper('newspaper');
+    return ViewCemeteryOrNewspaper.byUrl();
   }
 
   return pageNotFound();
@@ -72,55 +72,6 @@ function getStoriesByPlace(storyType) {
   }
 
   return [placeList, storiesByPlace];
-}
-
-function viewCemeteryOrNewspaper(storyType) {
-  const storyId = PATH.replace(storyType + '/', '');
-  const story = DATABASE.storyRef[storyId];
-
-  if (!story) {
-    return pageNotFound();
-  }
-
-  if (storyType == 'newspaper') {
-    story.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
-  }
-
-  headerTrail('sources', pluralize(storyType));
-  setPageTitle(story.title);
-  h1(story.title);
-
-  rend('<p style="padding-top: 10px;">' + story.location.format + '</p>');
-
-  rend($makePeopleList(story.people, 'photo'));
-
-  if (story.notes) {
-    rend('<p>' + story.notes + '</p>');
-  }
-
-  if (story.images.length) {
-    h2('Images');
-    story.images.forEach((imageUrl, i) => {
-      rend(makeImage(story, i, 100, 100).css('margin', '10px 5px 0 5px'));
-    });
-  }
-
-  if (story.links.length) {
-    h2('Links');
-    story.links.forEach(linkUrl => {
-      rend($(getFancyLink(linkUrl)).css('margin-left', '10px'));
-    });
-  }
-
-  if (storyType == 'cemetery') {
-    story.entries.trueSort((a, b) => a.title < b.title);
-    h2('Graves');
-    showListOfGraves(story.entries)
-  } else {
-    story.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
-    h2('Articles');
-    showListOfArticles(story.entries);
-  }
 }
 
 function getNumberOfGravesInCemetery(story) {
