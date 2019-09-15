@@ -57,11 +57,10 @@ function loadContent() {
     return ViewStoryIndex.byUrl() || ViewCemeteryOrNewspaper.byUrl()
       || pageNotFound();
   }
-/*
-Kenneth + Anna
-*/
+
   if (PATH.match('book')) {
-    return viewBook();
+    return ViewStoryIndex.byUrl() || ViewStoryBook.byUrl()
+      || pageNotFound();
   }
 
   return pageNotFound();

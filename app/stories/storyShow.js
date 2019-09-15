@@ -158,6 +158,7 @@ class ViewStoryBook extends ViewStory {
     }
 
     new ViewStoryBook(story).render();
+    return true;
   }
 
   render() {
@@ -190,9 +191,12 @@ class ViewStoryBook extends ViewStory {
       return;
     }
 
-    this.makeList(this.entries, {
+    this.viewSectionList(this.entries, {
       type: 'sources',
       showStory: false,
+      bullet: true,
+      divider: false,
+      summary: true,
     });
   }
 }

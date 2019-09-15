@@ -49,10 +49,10 @@ class ViewPage {
     rend(formatTranscription(this.item.content));
   }
 
-  makeList(list, options = {}) {
+  viewSectionList(list, options = {}) {
     let $ul;
 
-    if (options.bullet !== false) {
+    if (options.bullet) {
       $ul = $('<ul style="margin-left: 30px;">');
       rend($ul);
     }
@@ -88,6 +88,12 @@ class ViewPage {
       if (options.location && item.location.format) {
         $container.append(
           '<p style="margin-top: 10px;">' + item.location.format + '</p>'
+        );
+      }
+
+      if (options.date && item.date.format) {
+        $container.append(
+          '<p style="margin-top: 10px;">' + item.date.format + '</p>'
         );
       }
     });

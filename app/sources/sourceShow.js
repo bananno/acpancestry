@@ -118,7 +118,14 @@ class ViewSource extends ViewPage {
       return;
     }
     h2('See Also');
-    this.makeList(this.source.stories, { type: 'stories' });
+    this.viewSectionList(this.source.stories, {
+      type: 'stories',
+      bullet: true,
+      divider: false,
+      summary: true,
+      location: true,
+      date: true,
+    });
   }
 
   otherEntries() {
@@ -134,7 +141,15 @@ class ViewSource extends ViewPage {
       h2('Neighbors');
       pg('Other households in <b>' + this.source.location.format + '</b> in '
         + this.source.date.year + '.').css('margin-bottom', '10px');
-      this.makeList(neighbors, { type: 'sources', showStory: false });
+      this.viewSectionList(neighbors, {
+        type: 'sources',
+        showStory: false,
+        bullet: true,
+        divider: false,
+        summary: true,
+        location: false,
+        date: false,
+      });
       return;
     }
 

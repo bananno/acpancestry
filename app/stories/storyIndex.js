@@ -1,6 +1,6 @@
 class ViewStoryIndex extends ViewPage {
   static byUrl() {
-    if (['artifacts', 'cemeteries', 'landmarks', 'newspapers']
+    if (['artifacts', 'books', 'cemeteries', 'landmarks', 'newspapers']
         .includes(PATH)) {
       new ViewStoryIndex(PATH).render();
       return true;
@@ -44,7 +44,7 @@ class ViewStoryIndex extends ViewPage {
   }
 
   headerTrail() {
-    if (['cemetery', 'newspaper'].includes(this.type)) {
+    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
       headerTrail('sources');
     }
   }
@@ -64,20 +64,18 @@ class ViewStoryIndex extends ViewPage {
   }
 
   viewStories() {
-    if (['artifact', 'landmark'].includes(this.type)) {
-      this.makeList(this.stories, {
-        type: 'stories',
-        bullet: false,
-        divider: true,
-        summary: true,
-        location: true,
-      });
-      return;
-    }
     if (['cemetery', 'newspaper'].includes(this.type)) {
-      this.viewCemeteriesNewspapers();
-      return;
+      return this.viewCemeteriesNewspapers();
     }
+
+    this.viewSectionList(this.stories, {
+      type: 'stories',
+      bullet: false,
+      divider: true,
+      summary: true,
+      location: true,
+      date: true,
+    });
   }
 
   viewCemeteriesNewspapers() {
