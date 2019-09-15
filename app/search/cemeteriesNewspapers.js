@@ -1,33 +1,3 @@
-
-class SearchResultsDocuments extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
-
-  getResults() {
-    this.resultsList = DATABASE.sources.filter(source => {
-      return source.type == 'document' && this.isMatch(source.title + source.content);
-    });
-  }
-
-  sortResults() {
-  }
-
-  renderResults() {
-    this.title('Documents');
-    this.resultsList.forEach(source => {
-      let linkText = source.group + ' - ' + source.title;
-      linkText = this.highlight(linkText, this.keywords);
-      rend(
-        '<p style="padding: 5px;" class="search-result-item">' +
-          linkToSource(source, linkText) +
-        '</p>'
-      );
-    });
-  }
-}
-
 class SearchResultsCemeteriesOrNewspapers extends SearchResults {
   constructor(keywords, isTest, sourceType, groupTitle, entryTitle, entrySingular) {
     super(keywords, isTest);
@@ -117,37 +87,5 @@ class SearchResultsCemeteries extends SearchResultsCemeteriesOrNewspapers {
 class SearchResultsNewspapers extends SearchResultsCemeteriesOrNewspapers {
   constructor(keywords, isTest) {
     super(keywords, isTest, 'grave', 'Cemeteries', 'Graves', 'grave');
-  }
-}
-
-class SearchResultsOtherSources extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
-
-  getResults() {
-    this.resultsList = DATABASE.sources.filter(source => {
-      let searchString = ['group', 'title', 'content', 'notes', 'summary']
-        .map(attr => source[attr] || '').join(',');
-      return !['document', 'newspaper', 'book', 'grave'].includes(source.type)
-        && this.isMatch(searchString);
-    });
-  }
-
-  sortResults() {
-  }
-
-  renderResults() {
-    this.title('Other Sources');
-    this.resultsList.forEach(source => {
-      let linkText = source.group + ' - ' + source.title;
-      linkText = this.highlight(linkText);
-      rend(
-        '<p style="padding: 5px;" class="search-result-item">' +
-          linkToSource(source, linkText) +
-        '</p>'
-      );
-    });
   }
 }

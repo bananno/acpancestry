@@ -1,37 +1,38 @@
+class SearchResults extends ViewPage {
+  static byUrl() {
+    setPageTitle('Search Results');
 
-function viewSearch() {
-  setPageTitle('Search Results');
+    const keywords = PATH.slice(7).toLowerCase().split('+')
+      .filter(word => word.length > 0);
 
-  const keywords = PATH.slice(7).toLowerCase().split('+').filter(word => word.length > 0);
-  $('.search-form [name="search"]').val(keywords.join(' '));
+    $('.search-form [name="search"]').val(keywords.join(' '));
 
-  if (keywords.length === 0) {
-    rend('<h1>Search Results</h1>');
-    return;
+    if (keywords.length === 0) {
+      return h1('Search Results');
+    }
+
+    h1('Search Results for "' + keywords.join(' ') + '"');
+    pg().css('padding-top', '10px').attr('id', 'number-of-search-results');
+
+    new SearchResultsPeople(keywords);
+    new SearchResultsPlaces(keywords);
+    new SearchResultsLandmarks(keywords);
+    new SearchResultsArtifacts(keywords);
+    new SearchResultsDocuments(keywords);
+    new SearchResultsCemeteries(keywords);
+    new SearchResultsNewspapers(keywords);
+    new SearchResultsBooks(keywords);
+    new SearchResultsOtherSources(keywords);
+    new SearchResultsEvents(keywords);
+
+    const totalResults = $('.search-result-item').length;
+
+    $('#number-of-search-results').append(totalResults
+      + ' result'.pluralize(totalResults));
   }
 
-  rend('<h1>Search Results for "' + keywords.join(' ') + '"</h1>');
-  rend('<p style="padding-top:10px;" id="number-of-search-results"></p>');
-
-  new SearchResultsPeople(keywords);
-  new SearchResultsPlaces(keywords);
-  new SearchResultsLandmarks(keywords);
-  new SearchResultsArtifacts(keywords);
-  new SearchResultsDocuments(keywords);
-  new SearchResultsCemeteries(keywords);
-  new SearchResultsNewspapers(keywords);
-  new SearchResultsBooks(keywords);
-  new SearchResultsOtherSources(keywords);
-  new SearchResultsEvents(keywords);
-
-  const totalResults = $('.search-result-item').length;
-
-  $('#number-of-search-results').append(totalResults == 1 ? '1 result' : totalResults +
-    ' results');
-}
-
-class SearchResults {
   constructor(keywords, isTest) {
+    super();
     this.keywords = keywords;
     this.isTest = isTest;
     this.resultsList = [];

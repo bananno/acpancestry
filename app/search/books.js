@@ -2,74 +2,65 @@
 class SearchResultsBooks extends SearchResults {
   constructor(keywords, isTest) {
     super(keywords, isTest);
+    this.type = 'book';
     this.execute();
   }
 
   getResults() {
-    DATABASE.sources.filter(source => source.type == 'book').forEach(source => {
-      let searchStringSource = ['title', 'notes', 'summary', 'content']
-        .map(attr => source[attr] || '').join(',');
+    DATABASE.stories
+    .filter(story => story.type == this.type)
+    .forEach(story => {
+      const searchStringStory = ['title', 'notes', 'summary', 'content']
+        .map(attr => story[attr] || '').join(',');
 
-      let searchStringGroup = '';
+      let matchStory = this.isMatch(searchStringStory);
+      let addedStory = matchStory;
 
-      if (source.sourceGroup) {
-        searchStringGroup = ['group', 'notes', 'summary', 'content']
-          .map(attr => source.sourceGroup[attr] || '').join(',');
-      } else {
-        searchStringSource += source.group;
+      const matchingEntries = [];
+
+      if (matchStory) {
+        this.add({ isStory: true, matchingEntries, ...story });
       }
 
-      const matchSource = this.isMatch(searchStringSource);
-      const matchGroup = this.isMatch(searchStringGroup);
-      const matchTotal = this.isMatch(searchStringSource + ',' + searchStringGroup);
+      story.entries.forEach(source => {
+        const searchStringSource = ['title', 'notes', 'summary', 'content']
+          .map(attr => source[attr] || '').join(',');
 
-      // The group is included if any match was found - whether it's the group, the sub-source,
-      // or if combined properties are required for a match.
-      if (source.sourceGroup && (matchGroup || matchTotal)) {
-        this.add(source.sourceGroup);
-      }
+        const sourceMatch = this.isMatch(searchStringSource);
+        const matchTotal = !matchStory
+          && this.isMatch(searchStringSource + ',' + searchStringStory);
 
-      // The sub-source is included if it matches on its own OR if the combination is required
-      // for a match. The sub-source is excluded if the keywords were only found in the group
-      // properties.
-      if (matchSource || (matchTotal && !matchGroup)) {
-        this.add(source);
-      }
+        if (sourceMatch || matchTotal) {
+          if (!addedStory) {
+            addedStory = true;
+            this.add({ isStory: true, matchingEntries, ...story });
+          }
+          matchingEntries.push(source);
+        }
+      });
     });
-
-    // Add any source groups that don't contain sub-sources.
-    DATABASE.sourceGroups.filter(source => source.sourceList.length == 0).forEach(source => {
-      let searchString = ['group', 'notes', 'summary', 'content']
-        .map(attr => source[attr] || '').join(',');
-
-      if (this.isMatch(searchString)) {
-        this.add(source);
-      }
-    });
-
-    this.resultsList = removeDuplicatesById(this.resultsList);
   }
 
   sortResults() {
-    this.resultsList.trueSort((a, b) => {
-      if (a.group != b.group) {
-        return a.group < b.group;
-      }
-      return a.isGroupMain || (a.title < b.title && !b.isGroupMain);
-    });
   }
 
   renderResults() {
-    this.title('Books');
+    this.title(this.type.pluralize().capitalize());
 
-    let previousBookGroup = null;
-    let justPrintedGroup = false;
+    this.resultsList.forEach((story, i) => {
+      if (i > 0) {
+        rend('<hr style="margin-top: 15px;">');
+      }
 
-    this.resultsList.forEach((source, i) => {
-      if (previousBookGroup == source.group && source.sourceGroup) {
-        if (justPrintedGroup) {
-          rend('<p style="padding: 5px;">Matching chapters/entries:</p>');
-          justPrintedGroup = false;
+      pg(linkToStory(story, this.highlight(story.title)))
+        .css('margin', '15px 0 0 5px');
+
+      pg(this.highlight(this.summary)).css('margin', '5px');
+
+      story.matchingEntries.forEach((source, j) => {
+        if (j == 0) {
+          pg('<i>Matching chapters/entries:</i>')
+            .css('margin', '5px').css('color', 'gray');
         }
 
         rend(
@@ -79,49 +70,7 @@ class SearchResultsBooks extends SearchResults {
             '</li>' +
           '</ul>'
         );
-
-        return;
-      }
-
-      // Could be a new group section or could be the next item in a group that has no
-      // designated "source group".
-      if (i > 0 && previousBookGroup != source.group) {
-        rend('<hr style="margin: 10px 0">');
-      }
-
-      previousBookGroup = source.group;
-      justPrintedGroup = true;
-
-      if (source.isGroupMain) {
-        rend(
-          '<p style="padding: 5px" class="search-result-item">' +
-            linkToSourceGroup(source, this.highlight(source.group)) +
-          '</p>'
-        );
-
-        if (source.summary) {
-          rend(
-            '<p style="padding: 2px;" class="search-result-item">' +
-              '<i>' + source.summary + '</i>' +
-            '</p>'
-          );
-        }
-
-        return;
-      }
-
-      let linkText = source.group;
-
-      if (source.title != 'null') {
-        linkText += ' - ' + source.title;
-      }
-
-      // Stand-alone sources are not chapters under a group.
-      rend(
-        '<p style="padding: 5px" class="search-result-item">' +
-          linkToSource(source, this.highlight(linkText)) +
-        '</p>'
-      );
+      });
     });
   }
 }

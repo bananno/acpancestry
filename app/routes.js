@@ -21,7 +21,7 @@ function loadContent() {
   }
 
   if (PATH.match('search')) {
-    return viewSearch();
+    return SearchResults.byUrl();
   }
 
   if (PATH.match('place')) {
