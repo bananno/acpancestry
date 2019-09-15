@@ -106,6 +106,7 @@ function getProcessedStory(story) {
   story.tags = story.tags || {};
   story.sources = [];
   story.entries = [];
+  story.notations = [];
   return story;
 }
 
@@ -157,8 +158,16 @@ function getProcessedCitation(citation) {
 }
 
 function getProcessedNotation(notation) {
+  if (notation.source) {
+    notation.source = DATABASE.sourceRef[notation.source];
+  }
   notation.people = notation.people.map(person => {
     return DATABASE.personRef[person];
+  });
+  notation.stories = notation.stories.map(story => {
+    story = DATABASE.storyRef[story];
+    story.notations.push(notation);
+    return story;
   });
   return notation;
 }

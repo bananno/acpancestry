@@ -40,6 +40,24 @@ class ViewStory extends ViewPage {
       rend('<p style="margin: 10px">' + linkToSource(source, true) + '</p>');
     });
   }
+
+  viewExcerpts() {
+    const excerpts = this.story.notations.filter(notation => {
+      return notation.title == 'excerpt';
+    });
+    if (excerpts.length == 0) {
+      return;
+    }
+    h2('Excerpts');
+    excerpts.forEach((notation, i) => {
+      if (i > 0) {
+        rend('<hr style="margin: 20px 0;">');
+      }
+      pg(notation.text).css('margin-top', '20px');
+      pg('from ' + linkToSource(notation.source, true))
+        .css('margin', '10px 0 0 30px');
+    });
+  }
 }
 
 class ViewCemeteryOrNewspaper extends ViewStory {
@@ -78,6 +96,7 @@ class ViewCemeteryOrNewspaper extends ViewStory {
     this.viewSectionNotes();
     this.viewSectionLinks();
     this.viewSources();
+    this.viewExcerpts();
     this.showEntries();
   }
 
@@ -121,6 +140,8 @@ class ViewStoryBook extends ViewStory {
     this.viewSectionContent();
     this.viewSectionNotes();
     this.viewSectionLinks();
+    this.viewSources();
+    this.viewExcerpts();
     this.showEntries();
   }
 
@@ -173,5 +194,6 @@ class ViewStoryArtifactOrLandmark extends ViewStory {
     this.viewSectionNotes();
     this.viewSectionLinks();
     this.viewSources();
+    this.viewExcerpts();
   }
 }

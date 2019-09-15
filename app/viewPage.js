@@ -84,6 +84,12 @@ class ViewPage {
           '<p style="margin-top: 10px;">' + item.summary + '</p>'
         );
       }
+
+      if (options.location && item.location.format) {
+        $container.append(
+          '<p style="margin-top: 10px;">' + item.location.format + '</p>'
+        );
+      }
     });
   }
 }

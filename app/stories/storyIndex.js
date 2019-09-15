@@ -60,6 +60,7 @@ class ViewStoryIndex extends ViewPage {
         bullet: false,
         divider: true,
         summary: true,
+        location: true,
       });
       return;
     }
