@@ -25,15 +25,3 @@ function getFilePaths() {
 
   return [url, path, env];
 }
-
-Array.prototype.trueSort = function(callback) {
-  this.sort((a, b) => {
-    return callback(a, b) ? -1 : 0;
-  });
-};
-
-Array.prototype.sortBy = function(callback) {
-  this.sort((a, b) => {
-    return callback(a) < callback(b) ? -1 : 0;
-  });
-};

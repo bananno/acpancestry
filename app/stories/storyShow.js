@@ -70,6 +70,7 @@ class ViewCemeteryOrNewspaper extends ViewStory {
     }
 
     new ViewCemeteryOrNewspaper(story).render();
+    return true;
   }
 
   constructor(story) {
@@ -103,11 +104,47 @@ class ViewCemeteryOrNewspaper extends ViewStory {
   showEntries() {
     if (this.type == 'cemetery') {
       h2('Graves');
-      showListOfGraves(this.entries)
+      ViewCemeteryOrNewspaper.showListOfGraves(this.entries)
     } else {
       h2('Articles');
-      showListOfArticles(this.entries);
+      ViewCemeteryOrNewspaper.showListOfArticles(this.entries);
     }
+  }
+
+  static showListOfGraves(sources) {
+    sources.forEach((source, i) => {
+      const $box = $('<div style="margin: 20px 10px;">');
+
+      $box.append('<p>' + linkToSource(source) + '</p>');
+
+      if (source.summary) {
+        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
+      }
+
+      rend($box);
+    });
+  }
+
+  static showListOfArticles(sources) {
+    sources.forEach((source, i) => {
+      if (i > 0) {
+        rend('<hr>');
+      }
+
+      const $box = $('<div style="margin: 20px 10px;">');
+
+      $box.append('<p>' + linkToSource(source) + '</p>');
+
+      if (source.date.format) {
+        $box.append('<p style="margin-top: 5px">' + source.date.format + '</p>');
+      }
+
+      if (source.summary) {
+        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
+      }
+
+      rend($box);
+    });
   }
 }
 
@@ -174,6 +211,7 @@ class ViewStoryArtifactOrLandmark extends ViewStory {
     }
 
     new ViewStoryArtifactOrLandmark(story).render();
+    return true;
   }
 
   constructor(story) {

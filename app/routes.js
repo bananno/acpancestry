@@ -49,13 +49,17 @@ function loadContent() {
   }
 
   if (PATH.match('artifact') || PATH.match('landmark')) {
-    return ViewStoryIndex.byUrl() || ViewStoryArtifactOrLandmark.byUrl();
+    return ViewStoryIndex.byUrl() || ViewStoryArtifactOrLandmark.byUrl()
+      || pageNotFound();
   }
 
   if (PATH.match('cemeter') || PATH.match('newspaper')) {
-    return viewCemeteriesOrNewspapers();
+    return ViewStoryIndex.byUrl() || ViewCemeteryOrNewspaper.byUrl()
+      || pageNotFound();
   }
-
+/*
+Kenneth + Anna
+*/
   if (PATH.match('book')) {
     return viewBook();
   }

@@ -152,10 +152,10 @@ class ViewSource extends ViewPage {
 
     if (this.type == 'cemetery') {
       entries.sortBy(source => source.title);
-      showListOfGraves(entries);
+      ViewCemeteryOrNewspaper.showListOfGraves(entries);
     } else {
       entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
-      showListOfArticles(entries);
+      ViewCemeteryOrNewspaper.showListOfArticles(entries);
     }
   }
 }

@@ -1,15 +1,19 @@
 class ViewStoryIndex extends ViewPage {
   static byUrl() {
-    if (['artifacts', 'landmarks'].includes(PATH)) {
+    if (['artifacts', 'cemeteries', 'landmarks', 'newspapers']
+        .includes(PATH)) {
       new ViewStoryIndex(PATH).render();
       return true;
     }
+    return false;
   }
 
   constructor(storyType) {
     super();
-    this.type = singularize(storyType);
+    this.type = storyType.singularize();
+    this.mainTitle = storyType.capitalize();
     this.stories = this.getStories();
+    this.entryName = this.getEntryName();
   }
 
   getStories() {
@@ -23,6 +27,15 @@ class ViewStoryIndex extends ViewPage {
     });
   }
 
+  getEntryName() {
+    if (this.type == 'cemetery') {
+      return 'grave';
+    }
+    if (this.type == 'newspaper') {
+      return 'article';
+    }
+  }
+
   render() {
     this.headerTrail();
     this.setPageTitle();
@@ -31,16 +44,13 @@ class ViewStoryIndex extends ViewPage {
   }
 
   headerTrail() {
+    if (['cemetery', 'newspaper'].includes(this.type)) {
+      headerTrail('sources');
+    }
   }
 
   setPageTitle() {
-    if (this.type == 'artifact') {
-      return setPageTitle('Artifacts');
-    }
-    if (this.type == 'landmark') {
-      return setPageTitle('Landmarks');
-    }
-    setPageTitle(this.type);
+    setPageTitle(this.mainTitle);
   }
 
   viewTitle() {
@@ -50,7 +60,7 @@ class ViewStoryIndex extends ViewPage {
     if (this.type == 'landmark') {
       return h1('Landmarks and buildings');
     }
-    h1(this.type);
+    h1(this.mainTitle);
   }
 
   viewStories() {
@@ -64,5 +74,68 @@ class ViewStoryIndex extends ViewPage {
       });
       return;
     }
+    if (['cemetery', 'newspaper'].includes(this.type)) {
+      this.viewCemeteriesNewspapers();
+      return;
+    }
+  }
+
+  viewCemeteriesNewspapers() {
+    const [placeList, storiesByPlace] = this.getStoriesByPlace();
+
+    placeList.forEach(place => {
+      h2(place);
+      storiesByPlace[place].forEach(story => {
+        pg(linkToStory(story)).css('margin', '15px 0 0 5px');
+        pg(story.location.format).css('margin-left', '5px');
+
+        let numEntries;
+
+        if (this.type == 'cemetery') {
+          numEntries = ViewStoryIndex.getNumberOfGravesInCemetery(story);
+        } else {
+          numEntries = story.entries.length;
+        }
+
+        pg(numEntries + ' ' + this.entryName.pluralize(numEntries))
+          .css('margin-left', '5px');
+      });
+    });
+  }
+
+  getStoriesByPlace() {
+    const placeList = [];
+    const storiesByPlace = { Other: [] };
+    const stories = DATABASE.stories.filter(s => s.type == this.type);
+
+    stories.forEach(story => {
+      let placeName = 'Other';
+      if (story.location.country == 'United States' && story.location.region1) {
+        placeName = USA_STATES[story.location.region1];
+      }
+      if (storiesByPlace[placeName] == undefined) {
+        placeList.push(placeName);
+        storiesByPlace[placeName] = [];
+      }
+      storiesByPlace[placeName].push(story);
+    });
+
+    placeList.sort();
+
+    if (storiesByPlace.Other.length) {
+      placeList.push('Other');
+    }
+
+    return [placeList, storiesByPlace];
+  }
+
+  static getNumberOfGravesInCemetery(story) {
+    let count = 0;
+
+    story.entries.forEach(source => {
+      count += source.people.length || 1;
+    });
+
+    return count;
   }
 }
