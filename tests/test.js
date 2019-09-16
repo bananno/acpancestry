@@ -21,7 +21,7 @@ class RunTests {
 
     if (this.displayOnPage) {
       h2('Check pages');
-      rend('<p>' + localLink('about/person-profile', 'About person profile') + '</p>');
+      pg(localLink('about/person-profile', 'About person profile'));
     }
 
     const methods = {
@@ -29,6 +29,8 @@ class RunTests {
       setTitle2: this.displayOnPage ? this.setTitle2 : (() => {}),
       stubDatabase: this.stubDatabase.bind(this),
       assertEqual: this.assertEqual.bind(this),
+      assertArrayContains: this.assertArrayContains.bind(this),
+      fakePerson: this.fakePerson,
     };
 
     testList.forEach(callback => {
@@ -51,11 +53,13 @@ class RunTests {
   clearDatabase() {
     DATABASE.people = [];
     DATABASE.sources = [];
-    DATABASE.sourceGroups = [];
+    DATABASE.stories = [];
     DATABASE.events = [];
+    DATABASE.notations = [];
     DATABASE.citations = [];
     DATABASE.personRef = {};
     DATABASE.sourceRef = {};
+    DATABASE.storyRef = {};
   }
 
   restoreVariables() {
@@ -93,9 +97,7 @@ class RunTests {
     rend('<p><b>' + str + '</b></h2>');
   }
 
-  assertEqual(subtitle, expectedValue, actualValue) {
-    const pass = areValuesEqual(expectedValue, actualValue);
-
+  addAssertion(subtitle, pass) {
     if (pass) {
       this.testsPassing += 1;
     } else {
@@ -106,6 +108,28 @@ class RunTests {
       rend('<ul><li class="unit-tests test-passing-' + pass + '">'
         + subtitle + '</li></ul>');
     }
+  }
+
+  assertEqual(subtitle, expectedValue, actualValue) {
+    this.addAssertion(subtitle, areValuesEqual(expectedValue, actualValue));
+  }
+
+  assertArrayContains(subtitle, array, expectedValue) {
+    this.addAssertion(subtitle, array.some(value => {
+      return areValuesEqual(value, expectedValue);
+    }));
+  }
+
+  fakePerson(person = {}) {
+    person._id = person._id || ('' + Math.random()).slice(2, 6);
+    person.name = person.name || 'Test Person ' + person._id;
+
+    ['parents', 'spouses', 'children'].forEach(relationship => {
+      person[relationship] = person[relationship] || [];
+    });
+
+    DATABASE.people.push(person);
+    return person;
   }
 }
 

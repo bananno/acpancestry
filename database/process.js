@@ -18,7 +18,6 @@ function processDatabase() {
   });
 
   DATABASE.people = DATABASE.people.map(getProcessedPerson);
-  DATABASE.people.forEach(addPersonChildSiblings);
 
   DATABASE.events = DATABASE.events.map(getProcessedEvent);
 
@@ -49,24 +48,11 @@ function getProcessedPerson(person) {
   });
 
   person.tags = person.tags || {};
-  person.siblings = [];
   person.links = person.links || [];
   person.citations = [];
   person.profileImage = person.profileImage || 'images/generic-profile-picture.png';
 
   return person;
-}
-
-function addPersonChildSiblings(person) {
-  person.children.forEach((sibling1, i) => {
-    const otherSiblings = person.children.slice(i + 1);
-    otherSiblings.forEach(sibling2 => {
-      if (sibling1.siblings.indexOf(sibling2) === -1) {
-        sibling1.siblings.push(sibling2);
-        sibling2.siblings.push(sibling1);
-      }
-    });
-  });
 }
 
 function getProcessedEvent(event) {
