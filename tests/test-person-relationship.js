@@ -1,16 +1,18 @@
+(() => {
+
+function addRelationship(person1, person2, relationship1) {
+  relationship1 = relationship1.pluralize();
+  const relationship2 = {
+    parents: 'children',
+    children: 'parents',
+    spouses: 'spouses',
+  }[relationship1];
+
+  person1[relationship1].push(person2._id);
+  person2[relationship2].push(person1._id);
+}
+
 test(t => {
-  function addRelationship(person1, person2, relationship1) {
-    relationship1 = relationship1.pluralize();
-    const relationship2 = {
-      parents: 'children',
-      children: 'parents',
-      spouses: 'spouses',
-    }[relationship1];
-
-    person1[relationship1].push(person2._id);
-    person2[relationship2].push(person1._id);
-  }
-
   const rootPerson = t.fakePerson();
   const parent1 = t.fakePerson();
   const parent2 = t.fakePerson();
@@ -99,3 +101,54 @@ test(t => {
     stepChild,
   );
 });
+
+test(t => {
+  const rootPerson = t.fakePerson();
+  const parent1 = t.fakePerson();
+  const fullSibling = t.fakePerson();
+
+  addRelationship(rootPerson, parent1, 'parent');
+  addRelationship(fullSibling, parent1, 'parent');
+
+  rootPerson.tags['full siblings only'] = true;
+
+  t.stubDatabase();
+
+  const person = Person.create(rootPerson);
+  const sibling = Person.create(fullSibling);
+
+  person.populateFamily();
+  sibling.populateFamily();
+
+  t.setTitle('person relationships');
+  t.setTitle2('half siblings show as full siblings if at least one of ' +
+    'them has "full siblings only" tag');
+
+  t.assertEqual('person contains correct number of half-siblings',
+    0,
+    person['half-siblings'].length,
+  );
+  t.assertEqual('person contains correct number of siblings',
+    1,
+    person['siblings'].length,
+  );
+  t.assertArrayContains('person contains correct sibling',
+    person['siblings'],
+    fullSibling,
+  );
+
+  t.assertEqual('sibling also contains correct number of half-siblings',
+    0,
+    sibling['half-siblings'].length,
+  );
+  t.assertEqual('sibling also contains correct number of siblings',
+    1,
+    sibling['siblings'].length,
+  );
+  t.assertArrayContains('sibling also contains correct sibling',
+    sibling['siblings'],
+    rootPerson,
+  );
+});
+
+})();

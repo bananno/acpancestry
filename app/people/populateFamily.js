@@ -28,9 +28,14 @@ Person.prototype.populateFamily = function() {
       if (relativeMap[sibling._id]) {
         return;
       }
-      if (this.parents.length == 2 && sibling.parents.length == 2
+
+      const fullSiblingsOnly = this.tags['full siblings only']
+        || sibling.tags['full siblings only'];
+
+      if (fullSiblingsOnly || (
+          this.parents.length == 2 && sibling.parents.length == 2
           && this.parents[0] == sibling.parents[0]
-          && this.parents[1] == sibling.parents[1]) {
+          && this.parents[1] == sibling.parents[1])) {
         this['siblings'].push(sibling);
         relativeMap[sibling._id] = 'sibling';
       } else {

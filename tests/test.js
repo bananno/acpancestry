@@ -128,6 +128,8 @@ class RunTests {
       person[relationship] = person[relationship] || [];
     });
 
+    person.tags = person.tags || {};
+
     DATABASE.people.push(person);
     return person;
   }
