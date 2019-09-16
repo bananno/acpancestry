@@ -20,8 +20,13 @@ Person.prototype.populateFamily = function() {
   this.parents.forEach(parent => {
     parent.spouses.forEach(spouse => {
       if (!relativeMap[spouse._id]) {
-        this['step-parents'].push(spouse);
-        relativeMap[spouse._id] = 'step-parent';
+        if (spouse.death && this.birth
+            && isDateBeforeDate(spouse.death, this.birth)) {
+          relativeMap[spouse._id] = 'not-step-parent';
+        } else {
+          this['step-parents'].push(spouse);
+          relativeMap[spouse._id] = 'step-parent';
+        }
       }
     });
     parent.children.forEach(sibling => {
@@ -64,8 +69,13 @@ Person.prototype.populateFamily = function() {
     Person.populateList(spouse.children);
     spouse.children.forEach(child => {
       if (!relativeMap[child._id]) {
-        this['step-children'].push(child);
-        relativeMap[child._id] = 'step-child';
+        if (this.death && child.birth
+            && isDateBeforeDate(this.death, child.birth)) {
+          relativeMap[child._id] = 'not-step-child';
+        } else {
+          this['step-children'].push(child);
+          relativeMap[child._id] = 'step-child';
+        }
       }
     });
   });

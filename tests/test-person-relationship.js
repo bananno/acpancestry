@@ -151,4 +151,50 @@ test(t => {
   );
 });
 
+test(t => {
+  /*
+    Example timeline:
+      Man marries Woman1
+      Woman1 dies
+      Man marries Woman2
+      Child is born
+    Woman1 and Child should not have a step-parent/child relationship
+    since Woman1 died before Child was born.
+  */
+
+  const testMan = t.fakePerson();
+  const testWoman1 = t.fakePerson();
+  const testWoman2 = t.fakePerson();
+  const testChild = t.fakePerson();
+
+  testWoman1.death = { date: { year: 1900, month: 0, day: 0 }};
+  testChild.birth = { date: { year: 1910, month: 0, day: 0 }};
+
+  addRelationship(testMan, testWoman1, 'spouse');
+  addRelationship(testMan, testWoman2, 'spouse');
+  addRelationship(testChild, testMan, 'parent');
+  addRelationship(testChild, testWoman2, 'parent');
+
+  t.stubDatabase();
+
+  const stepParent = Person.create(testWoman1);
+  const stepChild = Person.create(testChild);
+
+  stepParent.populateFamily();
+  stepChild.populateFamily();
+
+  t.setTitle('person relationships');
+  t.setTitle2('step-parent does not count if they died before birth of ' +
+    'would-be step-child');
+
+  t.assertEqual('child does not have any step-parents',
+    0,
+    stepChild['step-parents'].length,
+  );
+  t.assertEqual('parent does not have any step-children',
+    0,
+    stepParent['step-children'].length,
+  );
+});
+
 })();
