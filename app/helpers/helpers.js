@@ -221,11 +221,11 @@ function isDateBeforeDate(date1, date2) {
   const dateParts2 = [date2.year, date2.month, date2.day];
 
   for (let i = 0; i < 3; i++) {
-    if (dateParts2[i] == null) {
+    if (dateParts2[i] == null || dateParts2[i] == 0) {
       return true;
     }
 
-    if (dateParts1[i] == null) {
+    if (dateParts1[i] == null || dateParts1[i] == 0) {
       return false;
     }
 

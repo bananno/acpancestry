@@ -6,10 +6,10 @@ class Person {
     return DATABASE.personRef[person];
   }
 
-  static create(personId) {
+  static create(personId, isTest) {
     const person = Person.find(personId);
     if (person) {
-      return new Person(person);
+      return new Person(person, isTest);
     }
   }
 
@@ -19,8 +19,9 @@ class Person {
     });
   }
 
-  constructor(person) {
+  constructor(person, isTest) {
     this.person = person;
+    this.isTest = isTest;
     for (let key in person) {
       this[key] = person[key];
     }

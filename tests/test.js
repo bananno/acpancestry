@@ -88,13 +88,13 @@ class RunTests {
 
   setTitle(str) {
     if (str != this.currentTitle) {
-      rend('<h2>' + str + '</h2>');
+      h2(str);
       this.currentTitle = str;
     }
   }
 
   setTitle2(str) {
-    rend('<p><b>' + str + '</b></h2>');
+    pg('<b>' + str + '</b>').css('margin', '5px');
   }
 
   addAssertion(subtitle, pass) {

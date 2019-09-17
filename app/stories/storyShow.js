@@ -78,7 +78,7 @@ class ViewCemeteryOrNewspaper extends ViewStory {
 
     if (this.type == 'cemetery') {
       this.entries.sortBy(source => source.title);
-    } else if (this.storyType == 'newspaper') {
+    } else if (this.type == 'newspaper') {
       this.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
     }
   }

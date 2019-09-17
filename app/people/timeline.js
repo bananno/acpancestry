@@ -1,22 +1,21 @@
+class PersonTimeline extends Timeline {
+  static show(person) {
+    if (person.private) {
+      return;
+    }
 
-function showPersonTimeline(person) {
-  if (person.private) {
-    return;
+    rend(
+      '<h2>Timeline</h2>' +
+      '<div class="timeline-key">' +
+        '<div class="timeline-life">life events</div>' +
+        '<div class="timeline-source">sources</div>' +
+        '<div class="timeline-family">family events</div>' +
+      '</div>'
+    );
+
+    new PersonTimeline(person);
   }
 
-  rend(
-    '<h2>Timeline</h2>' +
-    '<div class="timeline-key">' +
-      '<div class="timeline-life">life events</div>' +
-      '<div class="timeline-source">sources</div>' +
-      '<div class="timeline-family">family events</div>' +
-    '</div>'
-  );
-
-  new PersonTimeline(person);
-}
-
-class PersonTimeline extends Timeline {
   constructor(person, isTest) {
     super(person, isTest);
 
@@ -29,7 +28,7 @@ class PersonTimeline extends Timeline {
 
   createEventList() {
     DATABASE.events.forEach(item => {
-      if (item.people.indexOf(this.person) >= 0) {
+      if (item.people.map(p => p._id).includes(this.person._id)) {
         this.insertItem({
           ...item,
           event: true
@@ -38,7 +37,7 @@ class PersonTimeline extends Timeline {
     });
 
     DATABASE.sources.forEach(item => {
-      if (item.people.indexOf(this.person) >= 0) {
+      if (item.people.map(p => p._id).includes(this.person._id)) {
         this.insertItem({
           ...item,
           source: true

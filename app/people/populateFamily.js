@@ -70,7 +70,7 @@ Person.prototype.populateFamily = function() {
     spouse.children.forEach(child => {
       if (!relativeMap[child._id]) {
         if (this.death && child.birth
-            && isDateBeforeDate(this.death, child.birth)) {
+            && isDateBeforeDate(this.death.date, child.birth.date)) {
           relativeMap[child._id] = 'not-step-child';
         } else {
           this['step-children'].push(child);

@@ -45,7 +45,7 @@ test(t => {
 
   t.stubDatabase();
 
-  const person = Person.create(rootPerson);
+  const person = Person.create(rootPerson, true);
 
   person.populateFamily();
 
@@ -114,8 +114,8 @@ test(t => {
 
   t.stubDatabase();
 
-  const person = Person.create(rootPerson);
-  const sibling = Person.create(fullSibling);
+  const person = Person.create(rootPerson, true);
+  const sibling = Person.create(fullSibling, true);
 
   person.populateFamily();
   sibling.populateFamily();
@@ -177,8 +177,8 @@ test(t => {
 
   t.stubDatabase();
 
-  const stepParent = Person.create(testWoman1);
-  const stepChild = Person.create(testChild);
+  const stepParent = Person.create(testWoman1, true);
+  const stepChild = Person.create(testChild, true);
 
   stepParent.populateFamily();
   stepChild.populateFamily();

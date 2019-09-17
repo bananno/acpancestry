@@ -259,7 +259,7 @@ class ViewPerson extends ViewPage {
   }
 
   viewTimeline() {
-    showPersonTimeline(this.person);
+    PersonTimeline.show(this.person);
   }
 
   viewCitations() {
