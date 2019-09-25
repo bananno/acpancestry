@@ -6,11 +6,24 @@ class Person {
     return DATABASE.personRef[person];
   }
 
-  static create(personId, isTest) {
-    const person = Person.find(personId);
+  static new(person, isTest) {
+    if (!person) {
+      return null;
+    }
+    if (person.constructor == Person) {
+      return new Person(person.person, isTest);
+    }
+    if (person.name) {
+      return new Person(person, isTest);
+    }
+    person = Person.find(person);
     if (person) {
       return new Person(person, isTest);
     }
+  }
+
+  static create(person, isTest) { // phase out
+    return Person.new(person, isTest);
   }
 
   static populateList(arr) {
@@ -50,5 +63,13 @@ class Person {
     }
 
     return people;
+  }
+
+  get mother() {
+    return Person.new(this.parents.filter(person => person.gender == GENDER.FEMALE)[0]);
+  }
+
+  get father() {
+    return Person.new(this.parents.filter(person => person.gender == GENDER.MALE)[0]);
   }
 }

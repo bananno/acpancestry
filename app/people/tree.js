@@ -1,4 +1,4 @@
-function personTree(person, safety, n) {
+function personTree(person, safety, parent) {
   let treeStyle = '';
 
   if (safety == undefined) {
@@ -13,26 +13,17 @@ function personTree(person, safety, n) {
   }
 
   if (person == null) {
-    return '<div class="treecell unknown">unknown '
-      + ['father', 'mother'][n] + '</div>';
-  }
-
-  // Offset the parents array if the mother is included but not the father.
-  let p1 = 0, p2 = 1;
-  if (person.parents.length == 1
-      && person.parents[0].tags.gender == 'female') {
-    p1 = null;
-    p2 = 0;
+    return '<div class="treecell unknown">unknown ' + parent + '</div>';
   }
 
   return (
     '<table' + treeStyle + '>' +
       '<tr>' +
         '<td valign="bottom">' +
-          personTree(person.parents[p1], safety + 1, 0) +
+          personTree(person.father, safety + 1, 'father') +
         '</td>' +
         '<td valign="bottom">' +
-          personTree(person.parents[p2], safety + 1, 1) +
+          personTree(person.mother, safety + 1, 'mother') +
         '</td>' +
       '</tr>' +
       '<tr>' +
