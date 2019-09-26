@@ -217,6 +217,14 @@ function areDatesEqual(date1, date2) {
 }
 
 function isDateBeforeDate(date1, date2) {
+  if (date1.date) {
+    date1 = date1.date;
+  }
+
+  if (date2.date) {
+    date2 = date2.date;
+  }
+
   const dateParts1 = [date1.year, date1.month, date1.day];
   const dateParts2 = [date2.year, date2.month, date2.day];
 
