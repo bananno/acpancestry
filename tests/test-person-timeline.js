@@ -1,26 +1,20 @@
+(() => {
 
 test(t => {
-  const testPerson = {
-    _id: '0001',
-    name: 'Test Person 1',
-  };
-
-  const testEventDeath = {
-    _id: 'aaa1',
-    title: 'death',
-  };
-
-  DATABASE.people = [testPerson];
-  DATABASE.events = [testEventDeath];
+  const testPersonTemplate = t.fakePerson();
+  const testEventDeath = t.fakeEvent({ title: 'death' });
 
   t.stubDatabase();
+
+  const testPerson = Person.create(testPersonTemplate, true);
+
+  testPerson.populateFamily();
 
   let timeline;
 
   t.setTitle('person timeline');
   t.setTitle2('events');
 
-  testEventDeath.people = [];
   testPerson.death = null;
   timeline = new PersonTimeline(testPerson, true);
   timeline.createEventList();
@@ -37,15 +31,15 @@ test(t => {
   timeline.createEventList();
   t.assertEqual('do not add an empty death event if person death event exists without a date',
     true,
-    timeline.list.length == 1 && timeline.list[0]._id == 'aaa1'
+    timeline.list.length == 1 && timeline.list[0]._id == testEventDeath._id
   );
   t.assertEqual('add a note to person death event if it has a location but not a date',
     true,
-    timeline.list[0].date.format == 'date unknown' && timeline.list[0]._id == 'aaa1'
+    timeline.list[0].date.format == 'date unknown' && timeline.list[0]._id == testEventDeath._id
   );
   t.assertEqual('add a sorting value to person death event if it has a location but not a date',
     true,
-    timeline.list[0].date.sort == '3000-00-00' && timeline.list[0]._id == 'aaa1'
+    timeline.list[0].date.sort == '3000-00-00' && timeline.list[0]._id == testEventDeath._id
   );
 
   testEventDeath.people = [testPerson];
@@ -61,32 +55,29 @@ test(t => {
 });
 
 test(t => {
-  const testPerson1 = {
-    name: 'Test Person 1',
-    customId: 'TestPerson1',
-    _id: '0001',
+  const testPersonTemplate1 = t.fakePerson({
     birth: { date: { year: 1900, month: 1, day: 1 }},
     death: { date: { year: 1980, month: 1, day: 1 }},
-  };
+  });
 
-  const testPerson2 = {
-    name: 'Test Person 2',
-    customId: 'TestPerson2',
-    _id: '0002',
-  };
+  const testPersonTemplate2 = t.fakePerson();
 
-  const testEvent = {
-    people: [testPerson2],
-    date: { year: 1920, month: 1, day: 1 },
-  };
-
-  let timeline, tempSaveValue;
+  const testEvent = t.fakeEvent({ title: 'death' });
 
   t.stubDatabase();
+
+  const testPerson1 = Person.create(testPersonTemplate1, true);
+  const testPerson2 = Person.create(testPersonTemplate2, true);
+
+  let timeline, tempSaveValue;
+  testEvent.people = [testPerson2.person];
 
   t.setTitle('person timeline family events');
 
   // timeline.shouldIncludeFamilyEvent arguments: relative, relationship, item
+
+  // The person, the relative, and the event do not have to be connected. Just
+  // pass to the method, which assumes they are connected correctly.
 
   t.setTitle2('parents');
 
@@ -535,3 +526,5 @@ test(t => {
     timelineItem.shouldDisplayPeopleAboveText(),
   );
 });
+
+})();

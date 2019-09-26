@@ -31,6 +31,7 @@ class RunTests {
       assertEqual: this.assertEqual.bind(this),
       assertArrayContains: this.assertArrayContains.bind(this),
       fakePerson: this.fakePerson,
+      fakeEvent: this.fakeEvent,
     };
 
     testList.forEach(callback => {
@@ -132,6 +133,13 @@ class RunTests {
 
     DATABASE.people.push(person);
     return person;
+  }
+
+  fakeEvent(event = {}) {
+    event._id = event._id || ('' + Math.random()).slice(2, 6);
+    event.people = event.people || [];
+    DATABASE.events.push(event);
+    return event;
   }
 }
 

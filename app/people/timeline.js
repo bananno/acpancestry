@@ -69,7 +69,7 @@ class PersonTimeline extends Timeline {
   }
 
   shouldIncludeFamilyEvent(relative, relationship, item) {
-    if (item.people.indexOf(relative) < 0) {
+    if (!item.people.map(p => p._id).includes(relative._id)) {
       return false;
     }
 
