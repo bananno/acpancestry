@@ -163,47 +163,40 @@ test(t => {
 
   testItemSource.people = [];
   timelineItem = new PersonTimelineItem(testItemSource, true);
-  t.assertEqual('always show people list for sources',
-    true,
+  t.assertTrue('always show people list for sources',
     timelineItem.shouldShowPeople(),
   );
 
   testItemFamilyEvent.people = [];
   timelineItem = new PersonTimelineItem(testItemFamilyEvent, true);
-  t.assertEqual('always show people list for family events',
-    true,
+  t.assertTrue('always show people list for family events',
     timelineItem.shouldShowPeople(),
   );
 
   testItemPersonalEvent.people = [{ name: 'test person 1'}, { name: 'test person 2'}];
   timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
-  t.assertEqual('show people list for personal events if there are multiple people in the list',
-    true,
+  t.assertTrue('show people list for personal events if there are multiple people in the list',
     timelineItem.shouldShowPeople(),
   );
 
   testItemPersonalEvent.people = [{ name: 'test person 1'}];
   timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
-  t.assertEqual('do not show people list for personal events with only 1 person',
-    false,
-    timelineItem.shouldShowPeople(),
+  t.assertFalse('do not show people list for personal events with only 1 person',
+    timelineItem.shouldShowPeople(true),
   );
 
   timelineItem = new PersonTimelineItem(testItemFamilyEvent, true);
-  t.assertEqual('show people above item text for family events',
-    true,
+  t.assertTrue('show people above item text for family events',
     timelineItem.shouldDisplayPeopleAboveText(),
   );
 
   timelineItem = new PersonTimelineItem(testItemPersonalEvent, true);
-  t.assertEqual('show people below item text for personal events',
-    false,
+  t.assertFalse('show people below item text for personal events',
     timelineItem.shouldDisplayPeopleAboveText(),
   );
 
   timelineItem = new PersonTimelineItem(testItemSource, true);
-  t.assertEqual('show people below item text for sources',
-    false,
+  t.assertFalse('show people below item text for sources',
     timelineItem.shouldDisplayPeopleAboveText(),
   );
 });

@@ -53,7 +53,7 @@ class Timeline {
   renderTimeline() {
     if (this.isPerson) {
       this.list.forEach(item => {
-        new PersonTimelineItem(item);
+        new PersonTimelineItem(item, this.isTest, this.person);
       });
     } else {
       this.list.forEach(item => {
@@ -64,13 +64,16 @@ class Timeline {
 }
 
 class TimelineItem {
-  constructor(item, isPerson, isTest) {
+  constructor(item, person, isTest) {
     this.item = item;
-    this.isPerson = isPerson === true;
+    if (person && person !== true) {
+      this.person = person;
+    }
+    this.isPerson = person != undefined;
     this.isTest = isTest === true;
 
-    if (!isTest) {
-      this.renderItem(item);
+    if (!this.isTest) {
+      this.renderItem();
     }
   }
 
@@ -87,11 +90,7 @@ class TimelineItem {
   getItemTitle() {
     if (this.item.event) {
       if (this.item.relationship) {
-        let relationship = this.item.relationship;
-        if (this.item.people && this.item.people.length) {
-          relationship = Person.relationshipName(relationship, this.item.people[0]);
-        }
-        return this.item.title + ' of ' + relationship;
+        return this.item.title + ' of ' + this.getEventRelationship();
       }
       return this.item.title;
     }
@@ -166,7 +165,8 @@ class TimelineItem {
     return arr;
   }
 
-  renderItem(item) {
+  renderItem() {
+    const item = this.item;
     const $div = $('<div class="timeline-item">');
     rend($div);
 

@@ -10,7 +10,7 @@
   pass everything to the method, which assumes they are connected correctly.
 */
 
-test(t => { // PARENTS
+test(t => { // PARENTS - include events
   const testPersonTemplate1 = t.fakePerson({
     birth: { date: { year: 1900, month: 1, day: 1 }},
     death: { date: { year: 1980, month: 1, day: 1 }},
@@ -100,6 +100,77 @@ test(t => { // PARENTS
   timeline = new PersonTimeline(testPerson1, true);
   t.assertFalse('exclude parent marriage if after person\'s death',
     timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
+  );
+});
+
+test(t => { // PARENTS - event titles
+  const testPersonTemplate1 = t.fakePerson({
+    birth: { date: { year: 1900, month: 1, day: 1 }},
+    death: { date: { year: 1980, month: 1, day: 1 }},
+  });
+
+  const personFatherTemplate = t.fakePerson({ gender: GENDER.MALE });
+  const personMotherTemplate = t.fakePerson({ gender: GENDER.FEMALE });
+  const personStepFatherTemplate = t.fakePerson({ gender: GENDER.MALE });
+  const personStepMotherTemplate = t.fakePerson({ gender: GENDER.FEMALE });
+
+  testPersonTemplate1.parents = [personFatherTemplate._id,
+    personMotherTemplate._id];
+
+  const testEvent = t.fakeEvent({ title: 'marriage' });
+
+  t.stubDatabase();
+
+  const rootPerson = Person.create(testPersonTemplate1, true);
+  const personFather = Person.create(personFatherTemplate, true);
+  const personMother = Person.create(personMotherTemplate, true);
+  const personStepFather = Person.create(personStepFatherTemplate, true);
+  const personStepMother = Person.create(personStepMotherTemplate, true);
+
+  let timeline, timelineItem, tempSaveValue;
+  testEvent.people = [personMother.person];
+
+  const timelineEvent = {
+    source: false,
+    event: true,
+    relationship: 'parent',
+    personal: false,
+    ...testEvent
+  };
+
+  timelineEvent.people = [personMother];
+  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
+  t.assertEqual('title is "marriage of mother" when event contains mother only',
+    'marriage of mother',
+    timelineItem.getItemTitle(),
+  );
+
+  timelineEvent.people = [personStepFather, personMother];
+  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
+  t.assertEqual('title is "marriage of mother" when event contains mother and stepfather',
+    'marriage of mother',
+    timelineItem.getItemTitle(),
+  );
+
+  timelineEvent.people = [personFather];
+  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
+  t.assertEqual('title is "marriage of father" when event contains father only',
+    'marriage of father',
+    timelineItem.getItemTitle(),
+  );
+
+  timelineEvent.people = [personFather, personStepMother];
+  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
+  t.assertEqual('title is "marriage of father" when event contains father and stepmother',
+    'marriage of father',
+    timelineItem.getItemTitle(),
+  );
+
+  timelineEvent.people = [personFather, personMother];
+  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
+  t.assertEqual('title is "marriage of parents" when event contains both parents',
+    'marriage of parents',
+    timelineItem.getItemTitle(),
   );
 });
 
