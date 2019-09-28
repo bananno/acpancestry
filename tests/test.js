@@ -21,7 +21,22 @@ class RunTests {
 
     if (this.displayOnPage) {
       h2('Check pages');
-      pg(localLink('about/person-profile', 'About person profile'));
+      this.setTitle2('person profile');
+
+      [
+        'anthony-hroch',
+        'hans-johansen',
+      ].forEach(personId => {
+        const person = DATABASE.personRef[personId];
+        if (person) {
+          this.listLink('person/' + personId + '/test', person.name);
+        } else {
+          console.error('Tests - person not found: ' + personId);
+        }
+      });
+
+      this.setTitle2('other');
+      this.listLink('about/person-profile', 'About person profile');
     }
 
     const methods = {
@@ -111,6 +126,10 @@ class RunTests {
       rend('<ul><li class="unit-tests test-passing-' + pass + '">'
         + subtitle + '</li></ul>');
     }
+  }
+
+  listLink(path, text) {
+    rend('<ul><li class="unit-tests">' + localLink(path, text) + '</li></ul>');
   }
 
   assertEqual(subtitle, expectedValue, actualValue) {

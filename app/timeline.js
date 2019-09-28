@@ -201,7 +201,9 @@ class TimelineItem {
       $col1.append('<p><i>(' + locationNotes + ')</i></p>');
     }
 
-    $col2.append('<p><b>' + this.getItemTitle() + '</b></p>');
+    let title = this.getItemTitle();
+    $div.attr('item-title', title);
+    $col2.append('<p><b>' + title + '</b></p>');
 
     if (this.shouldDisplayPeopleAboveText()) {
       this.renderItemPeople();

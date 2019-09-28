@@ -33,8 +33,10 @@ class ViewPerson extends ViewPage {
     this.viewHeader();
 
     if (this.subPath.length) {
-      this.viewSubPath();
-      return;
+      let showFullProfile = this.viewSubPath();
+      if (!showFullProfile) {
+        return;
+      }
     }
 
     this.viewProfileSummary();
@@ -47,6 +49,10 @@ class ViewPerson extends ViewPage {
     this.viewArtifacts();
     this.viewTimeline();
     this.viewCitations();
+
+    if (this.runTests) {
+      this.runTests(this.person);
+    }
   }
 
   setPageTitle() {
@@ -105,6 +111,12 @@ class ViewPerson extends ViewPage {
   }
 
   viewSubPath() {
+    if (this.subPath.length == 1 && this.subPath[0] == 'test'
+        && ENV == 'dev') {
+      this.viewTests();
+      return true;
+    }
+
     rend(
       '<p style="margin-left: 10px; margin-top: 10px;">' +
         linkToPerson(this.person, false, '&#10229; back to profile') +
