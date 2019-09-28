@@ -29,13 +29,13 @@ $(document).ready(() => {
     if (number !== undefined && number !== 1) {
       return this;
     }
-    return stringSingularToPlural[this] || this.slice(0, this.length - 1);
+    return stringPluralToSingular[this] || this.slice(0, this.length - 1);
   };
 
   String.prototype.pluralize = function(number) {
     if (number === 1) {
       return this;
     }
-    return stringPluralToSingular[this] || this + 's';
+    return stringSingularToPlural[this] || this + 's';
   };
 });
