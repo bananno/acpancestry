@@ -6,7 +6,7 @@ class ViewPerson extends ViewPage {
       return false;
     }
 
-    const person = Person.create(personId);
+    const person = Person.new(personId);
 
     if (!person) {
       return ViewPerson.notFound(personId);

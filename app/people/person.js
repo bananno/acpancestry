@@ -3,7 +3,12 @@ class Person {
     if (person.name) {
       return person;
     }
-    return DATABASE.personRef[person];
+    if (!person) {
+      return null;
+    }
+
+    let strippedID = person.toLowerCase().split('-').join('');
+    return DATABASE.personRef[strippedID];
   }
 
   static new(person, isTest) {

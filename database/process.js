@@ -6,7 +6,11 @@ function processDatabase() {
 
   DATABASE.people.forEach(person => {
     DATABASE.personRef[person._id] = person;
-    DATABASE.personRef[person.customId] = person;
+    if (person.customId) {
+      DATABASE.personRef[person.customId] = person;
+      let id = person.customId.toLowerCase().split('-').join('');
+      DATABASE.personRef[id] = person;
+    }
   });
 
   DATABASE.stories.forEach(story => {
