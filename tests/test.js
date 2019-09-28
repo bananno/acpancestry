@@ -29,6 +29,8 @@ class RunTests {
       setTitle2: this.displayOnPage ? this.setTitle2 : (() => {}),
       stubDatabase: this.stubDatabase.bind(this),
       assertEqual: this.assertEqual.bind(this),
+      assertTrue: this.assertTrue.bind(this),
+      assertFalse: this.assertFalse.bind(this),
       assertArrayContains: this.assertArrayContains.bind(this),
       fakePerson: this.fakePerson,
       fakeEvent: this.fakeEvent,
@@ -113,6 +115,14 @@ class RunTests {
 
   assertEqual(subtitle, expectedValue, actualValue) {
     this.addAssertion(subtitle, areValuesEqual(expectedValue, actualValue));
+  }
+
+  assertTrue(subtitle, actualValue) {
+    this.addAssertion(subtitle, areValuesEqual(true, actualValue));
+  }
+
+  assertFalse(subtitle, actualValue) {
+    this.addAssertion(subtitle, areValuesEqual(false, actualValue));
   }
 
   assertArrayContains(subtitle, array, expectedValue) {
