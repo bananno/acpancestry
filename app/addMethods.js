@@ -14,25 +14,28 @@ String.prototype.capitalize = function() {
   return this.slice(0, 1).toUpperCase() + this.slice(1);
 };
 
+$(document).ready(() => {
+  const stringSingularToPlural = {};
+  const stringPluralToSingular = {};
 
-String.prototype.singularize = function(number) {
-  if (number !== undefined && number !== 1) {
-    return this;
-  }
-  return {
-    cemeteries: 'cemetery',
-    Cemeteries: 'Cemetery',
-  }[this] || this.slice(0, this.length - 1);
-};
+  SINGULAR_PLURAL_STRINGS.forEach(([singular, plural]) => {
+    stringSingularToPlural[singular] = plural;
+    stringSingularToPlural[singular.capitalize()] = plural.capitalize();
+    stringPluralToSingular[plural] = singular;
+    stringPluralToSingular[plural.capitalize()] = singular.capitalize();
+  });
 
-String.prototype.pluralize = function(number) {
-  if (number === 1) {
-    return this;
-  }
-  return {
-    cemetery: 'cemeteries',
-    Cemetery: 'Cemeteries',
-    child: 'children',
-    Child: 'Children',
-  }[this] || this + 's';
-};
+  String.prototype.singularize = function(number) {
+    if (number !== undefined && number !== 1) {
+      return this;
+    }
+    return stringSingularToPlural[this] || this.slice(0, this.length - 1);
+  };
+
+  String.prototype.pluralize = function(number) {
+    if (number === 1) {
+      return this;
+    }
+    return stringPluralToSingular[this] || this + 's';
+  };
+});

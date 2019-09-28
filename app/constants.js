@@ -20,3 +20,9 @@ const USA_STATES = {
 const PLACE_PARTS = ['country', 'region1', 'region2', 'city'];
 
 const GENDER = { FEMALE: 1, MALE: 2 };
+
+const SINGULAR_PLURAL_STRINGS = [
+  ['cemetery', 'cemeteries'],
+  ['child', 'children'],
+  ['step-child', 'step-children'],
+];
