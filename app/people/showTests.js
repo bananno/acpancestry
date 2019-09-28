@@ -90,8 +90,8 @@
   function personTestsPeterWinblad(person) {
     setTitle2('timeline');
 
-    assertTrue('timeline includes "immigration of family" for spouse and children',
-      $('.timeline-item.timeline-family[item-title="immigration of family"]').length == 1
+    assertTrue('timeline includes "immigration of family members" for spouse and children',
+      $('.timeline-item.timeline-family[item-title="immigration of family members"]').length == 1
     );
 
     assertTrue('timeline includes "birth of children" for twins',

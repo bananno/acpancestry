@@ -51,26 +51,22 @@ class Timeline {
   }
 
   renderTimeline() {
-    if (this.isPerson) {
-      this.list.forEach(item => {
-        new PersonTimelineItem(item, this.isTest, this.person);
-      });
-    } else {
-      this.list.forEach(item => {
-        new TimelineItem(item);
-      });
-    }
+    this.list.forEach(item => {
+      new TimelineItem(item, this.isTest, this.person);
+    });
   }
 }
 
 class TimelineItem {
-  constructor(item, person, isTest) {
+  constructor(item, isTest, person) {
     this.item = item;
+    this.isTest = isTest === true;
+
     if (person && person !== true) {
       this.person = person;
     }
-    this.isPerson = person != undefined;
-    this.isTest = isTest === true;
+
+    this.isPerson = person != undefined || item.relationship || item.personal;
 
     if (!this.isTest) {
       this.renderItem();
@@ -111,7 +107,7 @@ class TimelineItem {
     if (!this.isPerson) {
       return true;
     }
-    if (!this.item.relationship && this.item.event && this.item.people.length == 1) {
+    if (this.item.personal && this.item.event && this.item.people.length == 1) {
       return false;
     }
     return true;
@@ -228,5 +224,46 @@ class TimelineItem {
     if (!this.shouldDisplayPeopleAboveText()) {
       this.renderItemPeople();
     }
+  }
+
+  getEventRelationship() {
+    let relationship = this.item.relationship;
+
+    if ((this.item.people || []).length == 0) {
+      return relationship;
+    }
+
+    if (relationship == 'spouse' && this.item.title == 'birth') {
+      return 'future ' + Person.relationshipName(relationship, this.item.people[0]);
+    }
+
+    if (!['parent', 'spouse', 'sibling', 'child'].includes(relationship)
+        || !this.person || this.item.people.length <= 1) {
+      return Person.relationshipName(relationship, this.item.people[0]);
+    }
+
+    let allFamilyMembers = [];
+    let numCategories = 0;
+
+    ['parents', 'siblings', 'spouses', 'children'].forEach(rel => {
+      const theseFamilyMembers = this.item.people.filter(p => {
+        return this.person[rel].map(p => p._id).includes(p._id);
+      });
+
+      if (theseFamilyMembers.length) {
+        numCategories += 1;
+        allFamilyMembers = [...allFamilyMembers, ...theseFamilyMembers];
+      }
+    });
+
+    if (allFamilyMembers.length == 1) {
+      return Person.relationshipName(relationship, allFamilyMembers[0]);
+    }
+
+    if (numCategories > 1) {
+      return 'family members';
+    }
+
+    return relationship.pluralize();
   }
 }

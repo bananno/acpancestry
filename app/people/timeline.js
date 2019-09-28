@@ -163,32 +163,3 @@ class PersonTimeline extends Timeline {
     });
   }
 }
-
-class PersonTimelineItem extends TimelineItem {
-  constructor(item, isTest, person) {
-    super(item, person || true, isTest);
-  }
-
-  getEventRelationship() {
-    let relationship = this.item.relationship;
-
-    if ((this.item.people || []).length == 0) {
-      return relationship;
-    }
-
-    if (relationship == 'parent' && this.item.title == 'marriage'
-        && this.person && this.item.people.length == 2) {
-      let parentsInEvent = this.item.people.filter(p => {
-        return this.person.parents.map(p => p._id).includes(p._id);
-      });
-
-      if (parentsInEvent.length == 2) {
-        return 'parents';
-      }
-
-      return Person.relationshipName(relationship, parentsInEvent[0]);
-    }
-
-    return Person.relationshipName(relationship, this.item.people[0]);
-  }
-}
