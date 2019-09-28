@@ -45,9 +45,9 @@ class PersonTimeline extends Timeline {
       }
     });
 
-    ['parent', 'sibling', 'spouse', 'child'].forEach(relationship => {
-      this.person[pluralize(relationship)].forEach(relative => {
-        this.addFamilyEventsToList(relative, relationship);
+    this.person.forEachRelationship((relationship, relatives) => {
+      relatives.forEach(relative => {
+        this.addFamilyEventsToList(relative, relationship.singularize());
       });
     });
 
@@ -97,7 +97,7 @@ class PersonTimeline extends Timeline {
     }
 
     // include siblings's birth or death if it happens during person's life.
-    if (relationship == 'sibling') {
+    if (relationship.match('sibling')) {
       return (item.title == 'birth' || item.title == 'death') && duringPersonsLife;
     }
 
