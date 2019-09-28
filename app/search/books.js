@@ -1,5 +1,9 @@
 
 class SearchResultsBooks extends SearchResults {
+  static newTest(...keywords) {
+    return new SearchResultsBooks(keywords, true);
+  }
+
   constructor(keywords, isTest) {
     super(keywords, isTest);
     this.type = 'book';

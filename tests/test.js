@@ -21,8 +21,8 @@ class RunTests {
 
     if (this.displayOnPage) {
       h2('Check pages');
-      this.setTitle2('person profile');
 
+      this.setTitle2('person profile');
       [
         'anthony-hroch',
         'hans-johansen',
@@ -37,6 +37,14 @@ class RunTests {
         }
       });
 
+      this.setTitle2('search results');
+      [
+        'clifton',
+        'marriage',
+      ].forEach(str => {
+        this.listLink('search=' + str, str);
+      });
+
       this.setTitle2('other');
       this.listLink('about/person-profile', 'About person profile');
     }
@@ -46,11 +54,14 @@ class RunTests {
       setTitle2: this.displayOnPage ? this.setTitle2 : (() => {}),
       stubDatabase: this.stubDatabase.bind(this),
       assertEqual: this.assertEqual.bind(this),
+      assertArrayEqualById: this.assertArrayEqualById.bind(this),
       assertTrue: this.assertTrue.bind(this),
       assertFalse: this.assertFalse.bind(this),
       assertArrayContains: this.assertArrayContains.bind(this),
       fakePerson: this.fakePerson,
       fakeEvent: this.fakeEvent,
+      fakeStory: this.fakeStory,
+      fakeSource: this.fakeSource,
     };
 
     testList.forEach(callback => {
@@ -134,6 +145,11 @@ class RunTests {
     rend('<ul><li class="unit-tests">' + localLink(path, text) + '</li></ul>');
   }
 
+  assertArrayEqualById(subtitle, expectedValue, actualValue) {
+    this.addAssertion(subtitle, expectedValue.length == actualValue.length
+      && expectedValue.map(v => v._id).join(',') == actualValue.map(v => v._id).join(','));
+  }
+
   assertEqual(subtitle, expectedValue, actualValue) {
     this.addAssertion(subtitle, areValuesEqual(expectedValue, actualValue));
   }
@@ -153,7 +169,7 @@ class RunTests {
   }
 
   fakePerson(person = {}) {
-    person._id = person._id || ('' + Math.random()).slice(2, 6);
+    person._id = person._id || makeRandomId();
     person.name = person.name || 'Test Person ' + person._id;
 
     ['parents', 'spouses', 'children'].forEach(relationship => {
@@ -167,11 +183,30 @@ class RunTests {
   }
 
   fakeEvent(event = {}) {
-    event._id = event._id || ('' + Math.random()).slice(2, 6);
+    event._id = event._id || makeRandomId();
     event.people = event.people || [];
     DATABASE.events.push(event);
     return event;
   }
+
+  fakeStory(story = {}) {
+    story._id = story._id || makeRandomId();
+    story.people = story.people || [];
+    DATABASE.stories.push(story);
+    return story;
+  }
+
+  fakeSource(source = {}) {
+    source._id = source._id || makeRandomId();
+    source.people = source.people || [];
+    source.stories = source.stories || [];
+    DATABASE.sources.push(source);
+    return source;
+  }
+}
+
+function makeRandomId() {
+  return ('' + Math.random()).slice(2, 6);
 }
 
 function areValuesEqual(val1, val2) {

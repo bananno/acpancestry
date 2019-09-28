@@ -1,84 +1,68 @@
+(() => {
 
 test(t => {
-  const sourceBook1 = {
-    _id: '0001',
+  const bookStory1 = t.fakeStory({
     type: 'book',
-    group: 'History Book',
-    title: 'SOURCE GROUP',
+    title: 'History Book',
     summary: 'American Revolution',
-  };
+  });
 
-  const sourceBook2 = {
-    _id: '0002',
+  const bookStory2 = t.fakeStory({
     type: 'book',
-    group: 'History Book',
+    title: 'Some Other Book',
+    summary: 'More information',
+  });
+
+  const bookSource1 = t.fakeSource({
     title: 'John Smith biography',
-  };
+    story: bookStory1._id,
+  });
 
-  const sourceBook3 = {
-    _id: '0003',
-    type: 'book',
-    group: 'History Book',
+  const bookSource2 = t.fakeSource({
     title: 'Jane Doe biography',
-  };
-
-  const sourceBook4 = {
-    _id: '0004',
-    type: 'book',
-    group: 'Some Other Book',
-    title: 'SOURCE GROUP',
-  };
-
-  DATABASE.sources = [sourceBook1, sourceBook2, sourceBook3, sourceBook4];
+    story: bookStory1._id,
+  });
 
   t.stubDatabase();
 
   let search;
 
   t.setTitle('search results');
-
   t.setTitle2('books');
 
-  search = new SearchResultsBooks(['history'], true);
-  t.assertEqual('include group, exclude sub-sources, if the group name is the only match',
-    [sourceBook1],
+  search = SearchResultsBooks.newTest('history');
+  t.assertArrayEqualById('include story, exclude its entries, if the story ' +
+      'name is the only match',
+    [bookStory1],
     search.resultsList,
   );
 
-  search = new SearchResultsBooks(['revolution'], true);
-  t.assertEqual('include group, exclude sub-sources, if other group properties are the only match',
-    [sourceBook1],
+  search = SearchResultsBooks.newTest('revolution');
+  t.assertArrayEqualById('include story, exclude its entries, if other ' +
+      'story properties are the only match',
+    [bookStory1],
     search.resultsList,
   );
 
-  search = new SearchResultsBooks(['jane'], true);
-  t.assertEqual('include non-matching source group if any of its sub-sources match',
-    [sourceBook1, sourceBook3],
+  search = SearchResultsBooks.newTest('jane');
+  t.assertArrayEqualById('include non-matching story if any of its entries match',
+    [bookStory1],
     search.resultsList,
   );
 
-  search = new SearchResultsBooks(['revolution', 'john'], true);
-  t.assertEqual('include source if it partly matches and the rest of the keywords are found ' +
-      'in the source group properties',
-    [sourceBook1, sourceBook2],
-    search.resultsList,
+  search = SearchResultsBooks.newTest('revolution', 'john');
+  t.assertArrayEqualById('include source if it partly matches and the rest ' +
+      'of the keywords are found in the story properties',
+    [bookSource1],
+    search.resultsList[0].matchingEntries,
   );
 
-  search = new SearchResultsBooks(['biography'], true);
-  t.assertEqual('sub-sources are ordered alphabetically by title',
-    [sourceBook1, sourceBook3, sourceBook2],
+  search = SearchResultsBooks.newTest('other');
+  t.assertArrayEqualById('matching stories are included even if they ' +
+      'contain no entries',
+    [bookStory2],
     search.resultsList,
   );
-
-  search = new SearchResultsBooks(['other'], true);
-  t.assertEqual('source groups are included even if they contain no sub-sources',
-    [sourceBook4],
-    search.resultsList,
-  );
-
-  /*
-    Search to test visual layout:
-      clifton
-      marriage
-  */
 });
+
+})();
