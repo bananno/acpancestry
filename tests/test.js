@@ -26,6 +26,8 @@ class RunTests {
       [
         'anthony-hroch',
         'hans-johansen',
+        'peter-winblad',
+        'william-winblad',
       ].forEach(personId => {
         const person = DATABASE.personRef[personId];
         if (person) {

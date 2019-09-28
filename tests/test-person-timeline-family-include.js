@@ -10,7 +10,7 @@
   pass everything to the method, which assumes they are connected correctly.
 */
 
-test(t => { // PARENTS - include events
+test(t => { // PARENTS
   const testPersonTemplate1 = t.fakePerson({
     birth: { date: { year: 1900, month: 1, day: 1 }},
     death: { date: { year: 1980, month: 1, day: 1 }},
@@ -28,9 +28,11 @@ test(t => { // PARENTS - include events
   let timeline, tempSaveValue;
   testEvent.people = [testPerson2.person];
 
-  t.setTitle('person timeline family events');
+  t.setTitle('person timeline family events: when to include');
 
-  t.setTitle2('parents - birth & death');
+  t.setTitle2('parents');
+
+  // BIRTH & DEATH
 
   testEvent.title = 'birth';
   timeline = new PersonTimeline(testPerson1, true);
@@ -69,7 +71,7 @@ test(t => { // PARENTS - include events
     timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
   );
 
-  t.setTitle2('parents - marriage');
+  // MARRIAGE
 
   testEvent.title = 'marriage';
   testEvent.date.year = 1899;
@@ -101,76 +103,47 @@ test(t => { // PARENTS - include events
   t.assertFalse('exclude parent marriage if after person\'s death',
     timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
   );
-});
 
-test(t => { // PARENTS - event titles
-  const testPersonTemplate1 = t.fakePerson({
-    birth: { date: { year: 1900, month: 1, day: 1 }},
-    death: { date: { year: 1980, month: 1, day: 1 }},
-  });
+  // IMMIGRATION
 
-  const personFatherTemplate = t.fakePerson({ gender: GENDER.MALE });
-  const personMotherTemplate = t.fakePerson({ gender: GENDER.FEMALE });
-  const personStepFatherTemplate = t.fakePerson({ gender: GENDER.MALE });
-  const personStepMotherTemplate = t.fakePerson({ gender: GENDER.FEMALE });
-
-  testPersonTemplate1.parents = [personFatherTemplate._id,
-    personMotherTemplate._id];
-
-  const testEvent = t.fakeEvent({ title: 'marriage' });
-
-  t.stubDatabase();
-
-  const rootPerson = Person.create(testPersonTemplate1, true);
-  const personFather = Person.create(personFatherTemplate, true);
-  const personMother = Person.create(personMotherTemplate, true);
-  const personStepFather = Person.create(personStepFatherTemplate, true);
-  const personStepMother = Person.create(personStepMotherTemplate, true);
-
-  let timeline, timelineItem, tempSaveValue;
-  testEvent.people = [personMother.person];
-
-  const timelineEvent = {
-    source: false,
-    event: true,
-    relationship: 'parent',
-    personal: false,
-    ...testEvent
-  };
-
-  timelineEvent.people = [personMother];
-  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
-  t.assertEqual('title is "marriage of mother" when event contains mother only',
-    'marriage of mother',
-    timelineItem.getItemTitle(),
+  testEvent.title = 'immigration';
+  testEvent.date.year = 1899;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertFalse('exclude parent immigration if before person\'s birth',
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
   );
 
-  timelineEvent.people = [personStepFather, personMother];
-  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
-  t.assertEqual('title is "marriage of mother" when event contains mother and stepfather',
-    'marriage of mother',
-    timelineItem.getItemTitle(),
+  testEvent.title = 'immigration';
+  testEvent.date.year = 1950;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertTrue('include parent immigration if during person\'s life',
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
   );
 
-  timelineEvent.people = [personFather];
-  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
-  t.assertEqual('title is "marriage of father" when event contains father only',
-    'marriage of father',
-    timelineItem.getItemTitle(),
+  testEvent.title = 'immigration';
+  testEvent.date.year = 1981;
+  tempSaveValue = testPerson1.death;
+  testPerson1.death = null;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertTrue('include parent immigration if person\'s death date is null',
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
+  );
+  testPerson1.death = tempSaveValue;
+
+  testEvent.title = 'immigration';
+  testEvent.date.year = 1981;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertFalse('exclude parent immigration if after person\'s death',
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
   );
 
-  timelineEvent.people = [personFather, personStepMother];
-  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
-  t.assertEqual('title is "marriage of father" when event contains father and stepmother',
-    'marriage of father',
-    timelineItem.getItemTitle(),
-  );
+  // OTHER
 
-  timelineEvent.people = [personFather, personMother];
-  timelineItem = new PersonTimelineItem(timelineEvent, true, rootPerson);
-  t.assertEqual('title is "marriage of parents" when event contains both parents',
-    'marriage of parents',
-    timelineItem.getItemTitle(),
+  testEvent.title = 'other-event';
+  testEvent.date.year = 1950;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertFalse('exclude other parent events during person\'s life',
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
   );
 });
 
@@ -192,7 +165,7 @@ test(t => {
   let timeline, tempSaveValue;
   testEvent.people = [testPerson2.person];
 
-  t.setTitle('person timeline family events');
+  t.setTitle('person timeline family events: when to include');
 
   ['sibling', 'half-sibling', 'step-sibling'].forEach(siblingType => {
     t.setTitle2(siblingType + 's');

@@ -91,9 +91,10 @@ class PersonTimeline extends Timeline {
 
     const duringPersonsLife = afterPersonsBirth && beforePersonsDeath;
 
-    // Include parent's marriage or death if it happens during person's life.
+    // Include parent's marriage or immigration if it happens during person's life.
+    // Include parent's death if it's before person's death, and even if it's before person's birth.
     if (relationship == 'parent') {
-      if (item.title == 'marriage') {
+      if (['immigration', 'marriage'].includes(item.title)) {
         return duringPersonsLife;
       }
       return item.title == 'death' && beforePersonsDeath;

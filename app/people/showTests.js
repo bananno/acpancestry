@@ -17,6 +17,12 @@
     if (personId == 'hans-johansen') {
       return personTestsHansHansen;
     }
+    if (personId == 'peter-winblad') {
+      return personTestsPeterWinblad;
+    }
+    if (personId == 'william-winblad') {
+      return personTestsWilliamWinblad;
+    }
   }
 
   function printTest(pass, subtitle) {
@@ -78,6 +84,34 @@
 
     assertTrue('timeline includes "marriage of parents"',
       $('.timeline-item.timeline-family[item-title="marriage of parents"]').length == 1
+    );
+  }
+
+  function personTestsPeterWinblad(person) {
+    setTitle2('timeline');
+
+    assertTrue('timeline includes "immigration of family" for spouse and children',
+      $('.timeline-item.timeline-family[item-title="immigration of family"]').length == 1
+    );
+
+    assertTrue('timeline includes "birth of children" for twins',
+      $('.timeline-item.timeline-family[item-title="birth of children"]').length == 1
+    );
+  }
+
+  function personTestsWilliamWinblad(person) {
+    setTitle2('timeline');
+
+    assertTrue('timeline includes "immigration of father"',
+      $('.timeline-item.timeline-family[item-title="immigration of father"]').length == 1
+    );
+
+    assertTrue('timeline includes "birth of siblings" for twin brother & sister',
+      $('.timeline-item.timeline-family[item-title="birth of siblings"]').length == 1
+    );
+
+    assertTrue('timeline includes "birth of daughter" despite being after his death',
+      $('.timeline-item.timeline-family[item-title="birth of daughter"]').length == 1
     );
   }
 })();
