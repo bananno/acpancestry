@@ -527,4 +527,98 @@ test(t => {
   );
 });
 
+test(t => {
+  const personRelativeTemplate = t.fakePerson();
+
+  t.stubDatabase();
+
+  const personRelative = Person.create(personRelativeTemplate, true);
+
+  personRelative.name = 'TEST PERSON RELATIVE';
+
+  let timelineItem;
+
+  let item = {
+    event: true,
+    source: false,
+    personal: false,
+    people: [personRelative]
+  };
+
+  t.setTitle2('family event title');
+  item.people = [personRelative];
+
+  item.title = 'death';
+  item.relationship = 'parent';
+  personRelative.gender = GENDER.FEMALE;
+  timelineItem = new PersonTimelineItem(item, true, true);
+  t.assertEqual('"death of mother"',
+    'death of mother',
+    timelineItem.getItemTitle(),
+  );
+
+  item.title = 'death';
+  item.relationship = 'parent';
+  personRelative.gender = GENDER.MALE;
+  timelineItem = new PersonTimelineItem(item, true, true);
+  t.assertEqual('"death of father"',
+    'death of father',
+    timelineItem.getItemTitle(),
+  );
+
+  item.title = 'death';
+  item.relationship = 'parent';
+  personRelative.gender = 0;
+  timelineItem = new PersonTimelineItem(item, true, true);
+  t.assertEqual('"death of parent" when parent gender is missing',
+    'death of parent',
+    timelineItem.getItemTitle(),
+  );
+
+  item.title = 'death';
+  item.relationship = 'spouse';
+  personRelative.gender = GENDER.FEMALE;
+  timelineItem = new PersonTimelineItem(item, true, true);
+  t.assertEqual('"death of wife"',
+    'death of wife',
+    timelineItem.getItemTitle(),
+  );
+
+  item.title = 'birth';
+  item.relationship = 'child';
+  personRelative.gender = 0;
+  timelineItem = new PersonTimelineItem(item, true, true);
+  t.assertEqual('"birth of child"',
+    'birth of child',
+    timelineItem.getItemTitle(),
+  );
+
+  item.title = 'birth';
+  item.relationship = 'child';
+  personRelative.gender = GENDER.MALE;
+  timelineItem = new PersonTimelineItem(item, true, true);
+  t.assertEqual('"birth of son"',
+    'birth of son',
+    timelineItem.getItemTitle(),
+  );
+
+  item.title = 'birth';
+  item.relationship = 'sibling';
+  personRelative.gender = 0;
+  timelineItem = new PersonTimelineItem(item, true, true);
+  t.assertEqual('"birth of sibling"',
+    'birth of sibling',
+    timelineItem.getItemTitle(),
+  );
+
+  item.title = 'other-event';
+  item.relationship = 'other-relative';
+  personRelative.gender = 0;
+  timelineItem = new PersonTimelineItem(item, true, true);
+  t.assertEqual('"other-event of other-relative"',
+    'other-event of other-relative',
+    timelineItem.getItemTitle(),
+  );
+});
+
 })();

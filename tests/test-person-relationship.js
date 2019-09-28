@@ -45,7 +45,7 @@ test(t => {
 
   t.stubDatabase();
 
-  const person = Person.create(rootPerson, true);
+  const person = Person.new(rootPerson, true);
 
   person.populateFamily();
 
@@ -114,8 +114,8 @@ test(t => {
 
   t.stubDatabase();
 
-  const person = Person.create(rootPerson, true);
-  const sibling = Person.create(fullSibling, true);
+  const person = Person.new(rootPerson, true);
+  const sibling = Person.new(fullSibling, true);
 
   person.populateFamily();
   sibling.populateFamily();
@@ -177,8 +177,8 @@ test(t => {
 
   t.stubDatabase();
 
-  const stepParent = Person.create(testWoman1, true);
-  const stepChild = Person.create(testChild, true);
+  const stepParent = Person.new(testWoman1, true);
+  const stepChild = Person.new(testChild, true);
 
   stepParent.populateFamily();
   stepChild.populateFamily();
@@ -194,6 +194,25 @@ test(t => {
   t.assertEqual('parent does not have any step-children',
     0,
     stepParent['step-children'].length,
+  );
+});
+
+test(t => {
+  t.setTitle2('relationship titles');
+
+  t.assertEqual('sister',
+    'sister',
+    Person.relationshipName('sibling', GENDER.FEMALE),
+  );
+
+  t.assertEqual('father',
+    'father',
+    Person.relationshipName('parent', GENDER.MALE),
+  );
+
+  t.assertEqual('step-daughter',
+    'step-daughter',
+    Person.relationshipName('step-child', GENDER.FEMALE),
   );
 });
 

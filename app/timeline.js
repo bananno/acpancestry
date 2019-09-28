@@ -87,7 +87,11 @@ class TimelineItem {
   getItemTitle() {
     if (this.item.event) {
       if (this.item.relationship) {
-        return this.item.title + ' of ' + this.item.relationship;
+        let relationship = this.item.relationship;
+        if (this.item.people && this.item.people.length) {
+          relationship = Person.relationshipName(relationship, this.item.people[0]);
+        }
+        return this.item.title + ' of ' + relationship;
       }
       return this.item.title;
     }

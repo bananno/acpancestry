@@ -32,6 +32,28 @@ class Person {
     });
   }
 
+  static relationshipName(relationship, gender) {
+    // can pass either gender or entire person object:
+    gender = (gender || {}).gender || gender;
+
+    const relationships = {
+      'parent': ['mother', 'father'],
+      'step-parent': ['step-mother', 'step-father'],
+      'sibling': ['sister', 'brother'],
+      'half-sibling': ['half-sister', 'half-brother'],
+      'step-sibling': ['step-sister', 'step-brother'],
+      'spouse': ['wife', 'husband'],
+      'child': ['daughter', 'son'],
+      'step-child': ['step-daughter', 'step-son'],
+    };
+
+    if (relationships[relationship]) {
+      return relationships[relationship][gender - 1] || relationship;
+    }
+
+    return relationship;
+  }
+
   constructor(person, isTest) {
     this.person = person;
     this.isTest = isTest;
