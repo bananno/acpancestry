@@ -145,6 +145,15 @@ test(t => { // PARENTS
   t.assertFalse('exclude other parent events during person\'s life',
     timeline.shouldIncludeFamilyEvent(testPerson2, 'parent', testEvent),
   );
+
+  // STEP-PARENTS
+
+  testEvent.title = 'death';
+  testEvent.date.year = 1950;
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertTrue('include step-parent death if during person\'s life',
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'step-parent', testEvent),
+  );
 });
 
 test(t => {

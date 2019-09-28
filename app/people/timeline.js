@@ -100,6 +100,11 @@ class PersonTimeline extends Timeline {
       return item.title == 'death' && beforePersonsDeath;
     }
 
+    // Include step-parent's death if it's during person's life.
+    if (relationship == 'step-parent') {
+      return item.title == 'death' && duringPersonsLife;
+    }
+
     // include siblings's birth or death if it happens during person's life.
     if (relationship.match('sibling')) {
       return (item.title == 'birth' || item.title == 'death') && duringPersonsLife;
