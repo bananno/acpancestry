@@ -49,6 +49,48 @@ function viewAboutPersonProfile() {
   $('#example-tree').append('insert tree')
 }
 
+Array.prototype.sortBy = function(callback) {
+  this.sort((a, b) => {
+    return callback(a) < callback(b) ? -1 : 0;
+  });
+};
+
+Array.prototype.trueSort = function(callback) {
+  this.sort((a, b) => {
+    return callback(a, b) ? -1 : 0;
+  });
+};
+
+String.prototype.capitalize = function() {
+  return this.slice(0, 1).toUpperCase() + this.slice(1);
+};
+
+$(document).ready(() => {
+  const stringSingularToPlural = {};
+  const stringPluralToSingular = {};
+
+  SINGULAR_PLURAL_STRINGS.forEach(([singular, plural]) => {
+    stringSingularToPlural[singular] = plural;
+    stringSingularToPlural[singular.capitalize()] = plural.capitalize();
+    stringPluralToSingular[plural] = singular;
+    stringPluralToSingular[plural.capitalize()] = singular.capitalize();
+  });
+
+  String.prototype.singularize = function(number) {
+    if (number !== undefined && number !== 1) {
+      return this;
+    }
+    return stringPluralToSingular[this] || this.slice(0, this.length - 1);
+  };
+
+  String.prototype.pluralize = function(number) {
+    if (number === 1) {
+      return this;
+    }
+    return stringSingularToPlural[this] || this + 's';
+  };
+});
+
 const citationItemOrder = [
   'name',
   'birth',
@@ -200,6 +242,14 @@ const USA_STATES = {
 
 const PLACE_PARTS = ['country', 'region1', 'region2', 'city'];
 
+const GENDER = { FEMALE: 1, MALE: 2 };
+
+const SINGULAR_PLURAL_STRINGS = [
+  ['cemetery', 'cemeteries'],
+  ['child', 'children'],
+  ['step-child', 'step-children'],
+];
+
 
 function viewEvents() {
   setPageTitle('Events');
@@ -264,17 +314,7 @@ function getFilePaths() {
   return [url, path, env];
 }
 
-Array.prototype.trueSort = function(callback) {
-  this.sort((a, b) => {
-    return callback(a, b) ? -1 : 0;
-  });
-};
-
-Array.prototype.sortBy = function(callback) {
-  this.sort((a, b) => {
-    return callback(a) < callback(b) ? -1 : 0;
-  });
-};
+function runTests() {} // overwritten in prod version
 
 
 function loadContent() {
@@ -287,7 +327,7 @@ function loadContent() {
   }
 
   if (PATH.match('person/')) {
-    return viewPerson();
+    return ViewPerson.byUrl();
   }
 
   if (PATH == 'events') {
@@ -299,7 +339,7 @@ function loadContent() {
   }
 
   if (PATH.match('search')) {
-    return viewSearch();
+    return SearchResults.byUrl();
   }
 
   if (PATH.match('place')) {
@@ -327,15 +367,18 @@ function loadContent() {
   }
 
   if (PATH.match('artifact') || PATH.match('landmark')) {
-    return viewArtifactOrLandmark();
+    return ViewStoryIndex.byUrl() || ViewStoryArtifactOrLandmark.byUrl()
+      || pageNotFound();
   }
 
   if (PATH.match('cemeter') || PATH.match('newspaper')) {
-    return viewCemeteriesOrNewspapers();
+    return ViewStoryIndex.byUrl() || ViewCemeteryOrNewspaper.byUrl()
+      || pageNotFound();
   }
 
   if (PATH.match('book')) {
-    return viewBook();
+    return ViewStoryIndex.byUrl() || ViewStoryBook.byUrl()
+      || pageNotFound();
   }
 
   return pageNotFound();
@@ -468,26 +511,25 @@ class Timeline {
   }
 
   renderTimeline() {
-    if (this.isPerson) {
-      this.list.forEach(item => {
-        new PersonTimelineItem(item);
-      });
-    } else {
-      this.list.forEach(item => {
-        new TimelineItem(item);
-      });
-    }
+    this.list.forEach(item => {
+      new TimelineItem(item, this.isTest, this.person);
+    });
   }
 }
 
 class TimelineItem {
-  constructor(item, isPerson, isTest) {
+  constructor(item, isTest, person) {
     this.item = item;
-    this.isPerson = isPerson === true;
     this.isTest = isTest === true;
 
-    if (!isTest) {
-      this.renderItem(item);
+    if (person && person !== true) {
+      this.person = person;
+    }
+
+    this.isPerson = person != undefined || item.relationship || item.personal;
+
+    if (!this.isTest) {
+      this.renderItem();
     }
   }
 
@@ -504,7 +546,7 @@ class TimelineItem {
   getItemTitle() {
     if (this.item.event) {
       if (this.item.relationship) {
-        return this.item.title + ' of ' + this.item.relationship;
+        return this.item.title + ' of ' + this.getEventRelationship();
       }
       return this.item.title;
     }
@@ -525,7 +567,7 @@ class TimelineItem {
     if (!this.isPerson) {
       return true;
     }
-    if (!this.item.relationship && this.item.event && this.item.people.length == 1) {
+    if (this.item.personal && this.item.event && this.item.people.length == 1) {
       return false;
     }
     return true;
@@ -579,7 +621,8 @@ class TimelineItem {
     return arr;
   }
 
-  renderItem(item) {
+  renderItem() {
+    const item = this.item;
     const $div = $('<div class="timeline-item">');
     rend($div);
 
@@ -614,7 +657,9 @@ class TimelineItem {
       $col1.append('<p><i>(' + locationNotes + ')</i></p>');
     }
 
-    $col2.append('<p><b>' + this.getItemTitle() + '</b></p>');
+    let title = this.getItemTitle();
+    $div.attr('item-title', title);
+    $col2.append('<p><b>' + title + '</b></p>');
 
     if (this.shouldDisplayPeopleAboveText()) {
       this.renderItemPeople();
@@ -639,6 +684,149 @@ class TimelineItem {
     if (!this.shouldDisplayPeopleAboveText()) {
       this.renderItemPeople();
     }
+  }
+
+  getEventRelationship() {
+    let relationship = this.item.relationship;
+
+    if ((this.item.people || []).length == 0) {
+      return relationship;
+    }
+
+    if (relationship == 'spouse' && this.item.title == 'birth') {
+      return 'future ' + Person.relationshipName(relationship, this.item.people[0]);
+    }
+
+    if (!['parent', 'spouse', 'sibling', 'child'].includes(relationship)
+        || !this.person || this.item.people.length <= 1) {
+      return Person.relationshipName(relationship, this.item.people[0]);
+    }
+
+    let allFamilyMembers = [];
+    let numCategories = 0;
+
+    ['parents', 'siblings', 'spouses', 'children'].forEach(rel => {
+      const theseFamilyMembers = this.item.people.filter(p => {
+        return this.person[rel].map(p => p._id).includes(p._id);
+      });
+
+      if (theseFamilyMembers.length) {
+        numCategories += 1;
+        allFamilyMembers = [...allFamilyMembers, ...theseFamilyMembers];
+      }
+    });
+
+    if (allFamilyMembers.length == 1) {
+      return Person.relationshipName(relationship, allFamilyMembers[0]);
+    }
+
+    if (numCategories > 1) {
+      return 'family members';
+    }
+
+    return relationship.pluralize();
+  }
+}
+
+class ViewPage {
+  constructor(item) {
+    this.item = item;
+  }
+
+  viewSectionSummary() {
+    if (!this.item.summary) {
+      return;
+    }
+    h2('Summary');
+    rend(
+      this.item.summary.split('\n').map(text => '<p>' + text + '</p>').join('')
+    );
+  }
+
+  viewSectionPeople() {
+    if (this.item.people.length == 0) {
+      return;
+    }
+    h2('People');
+    rend($makePeopleList(this.item.people, 'photo'));
+  }
+
+  viewSectionNotes() {
+    if (!this.item.notes) {
+      return;
+    }
+    h2('Notes');
+    rend(
+      '<ul class="bullet"><li>' +
+        this.item.notes.split('\n').join('</li><li>') +
+      '</li></ul>'
+    );
+  }
+
+  viewSectionLinks() {
+    if (this.item.links.length == 0) {
+      return;
+    }
+    h2('Links');
+    rend(this.item.links.map(getFancyLink));
+  }
+
+  viewSectionContent() {
+    if (!this.item.content) {
+      return;
+    }
+    h2('Transcription');
+    rend(formatTranscription(this.item.content));
+  }
+
+  viewSectionList(list, options = {}) {
+    let $ul;
+
+    if (options.bullet) {
+      $ul = $('<ul style="margin-left: 30px;">');
+      rend($ul);
+    }
+
+    list.forEach(item => {
+      let $container;
+
+      if ($ul) {
+        $container = $('<li>').appendTo($ul);
+      } else {
+        $container = $('<div>');
+        rend($container);
+      }
+
+      if (options.divider) {
+        $container.append('<hr style="margin: 20px 0;">');
+      }
+
+      if (options.type == 'stories') {
+        $container.append(linkToStory(item));
+      } else if (options.type == 'sources') {
+        $container.append(linkToSource(item, options.showStory));
+      } else {
+        $container.append(item);
+      }
+
+      if (options.summary && item.summary) {
+        $container.append(
+          '<p style="margin-top: 10px;">' + item.summary + '</p>'
+        );
+      }
+
+      if (options.location && item.location.format) {
+        $container.append(
+          '<p style="margin-top: 10px;">' + item.location.format + '</p>'
+        );
+      }
+
+      if (options.date && item.date.format) {
+        $container.append(
+          '<p style="margin-top: 10px;">' + item.date.format + '</p>'
+        );
+      }
+    });
   }
 }
 
@@ -728,7 +916,11 @@ function linkToStory(story, text) {
 }
 
 function linkToSource(source, text) {
-  text = text || source.title;
+  if (text === true) {
+    text = source.story.title + ' - ' + source.title;
+  } else {
+    text = text || source.title;
+  }
   return localLink('source/' + source._id, text);
 }
 
@@ -794,6 +986,12 @@ function h1(content) {
 
 function h2(content) {
   rend($('<h2>').append(content));
+}
+
+function pg(content) {
+  const $p = $('<p>').append(content);
+  rend($p);
+  return $p;
 }
 
 function bulletList(array, skipRender) {
@@ -928,6 +1126,9 @@ function headerTrail(...args) {
     '<p class="header-trail">' +
       args.map(linkInfo => {
         let [path, text] = [].concat(linkInfo);
+        if (path === false) {
+          return text;
+        }
         return localLink(path, text || path);
       }).join(' ' + RIGHT_ARROW + ' ') +
     '</p>'
@@ -984,15 +1185,23 @@ function areDatesEqual(date1, date2) {
 }
 
 function isDateBeforeDate(date1, date2) {
+  if (date1.date) {
+    date1 = date1.date;
+  }
+
+  if (date2.date) {
+    date2 = date2.date;
+  }
+
   const dateParts1 = [date1.year, date1.month, date1.day];
   const dateParts2 = [date2.year, date2.month, date2.day];
 
   for (let i = 0; i < 3; i++) {
-    if (dateParts2[i] == null) {
+    if (dateParts2[i] == null || dateParts2[i] == 0) {
       return true;
     }
 
-    if (dateParts1[i] == null) {
+    if (dateParts1[i] == null || dateParts1[i] == 0) {
       return false;
     }
 
@@ -1116,550 +1325,6 @@ function createHeaderLinks() {
   ['People', 'Events', 'Sources', 'Places'].forEach(nav => {
     $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');
   });
-}
-
-
-function viewPerson() {
-  let personId = PATH.replace('person/', '');
-  let subPath;
-
-  if (personId.match('/')) {
-    subPath = personId.slice(personId.indexOf('/') + 1);
-    personId = personId.slice(0, personId.indexOf('/'));
-  }
-
-  const person = DATABASE.personRef[personId];
-
-  if (person == null) {
-    setPageTitle('Person Not Found');
-    rend(`<h1>Person not found: ${personId}</h1>`);
-    return;
-  }
-
-  showPersonHeader(person);
-
-  if (subPath) {
-    rend(
-      '<p style="margin-left: 10px; margin-top: 10px;">' +
-        linkToPerson(person, false, '&#10229; back to profile') +
-      '</p>'
-    );
-
-    if (subPath.match('source')) {
-      const sourceId = subPath.replace('source/', '');
-      return viewPersonSource(person, sourceId);
-    }
-
-    return pageNotFound();
-  }
-
-  showPersonProfileSummary(person);
-  showPersonBiographies(person);
-  showPersonFamily(person);
-  showPersonDescendants(person);
-
-  rend('<h2>Tree</h2>');
-  rend('<div class="person-tree">' + personTree(person) + '</div>');
-
-  if (person.links.length) {
-    rend('<h2>Links</h2>');
-    person.links.forEach(nextLink => {
-      rend(getFancyLink(nextLink));
-    });
-  }
-
-  showPersonResearchNotes(person);
-  showPersonArtifacts(person);
-  showPersonTimeline(person);
-
-  if (person.citations.length) {
-    rend('<h2>Citations</h2>');
-    rend($makeCitationList(person.citations));
-  }
-}
-
-function showPersonHeader(person) {
-  let pageTitle = removeSpecialCharacters(person.name);
-
-  if (person.birth || person.death) {
-    pageTitle += ' (' +
-      ((person.birth ? person.birth.date.year : ' ') || ' ') + '-' +
-      ((person.death ? person.death.date.year : ' ') || ' ') + ')';
-  }
-
-  setPageTitle(pageTitle);
-
-  rend(
-    '<div class="person-header">' +
-      '<img src="' + person.profileImage + '">' +
-      '<div class="person-header-content">' +
-        '<h1>' +
-          fixSpecialCharacters(person.name) +
-          (person.star ? '&#160;<img src="images/leaf.png" style="height:40px">' : '') +
-        '</h1>' +
-        personShowHeaderEvent(person, 'B', person.birth) +
-        personShowHeaderEvent(person, 'D', person.death) +
-      '</div>' +
-    '</div>'
-  );
-
-  if (person.private) {
-    rend('<p class="person-summary">Some information is hidden to protect the ' +
-      'privacy of living people.</p>');
-  }
-}
-
-function personShowHeaderEvent(person, abbr, event) {
-  if (person.private || event === undefined) {
-    return '';
-  }
-
-  return (
-    '<div class="person-header-events">' +
-      '<div><b>' + abbr + ':</b></div>' +
-      '<div>' + formatDate(event.date) + '</div>' +
-      (event.location.format ? (
-        '<br>' +
-        '<div>&#160;</div>' +
-        '<div>' + event.location.format + '</div>'
-      ) : '') +
-    '</div>'
-  );
-}
-
-function showPersonProfileSummary(person) {
-  DATABASE.notations.filter(notation => {
-    return notation.title == 'profile summary'
-      && notation.people.includes(person);
-  }).forEach(notation => {
-    notation.text.split('\n').forEach(s => {
-      rend('<p style="margin-top: 20px;">' + s + '</p>');
-    });
-  });
-}
-
-function showPersonBiographies(person) {
-  const bios = DATABASE.sources.filter(source => {
-    return source.people[0] == person && source.tags.biography;
-  });
-
-  if (bios.length == 0) {
-    return;
-  }
-
-  rend('<h2>Biography</h2>');
-
-  bios.forEach((source, i) => {
-    rend(
-      '<div class="cover-background" ' +
-          'style="margin-left: 12px;' + (i > 0 ? 'margin-top:15px' : '') + '">' +
-        '<p>' +
-          '<b>' + source.story.title + '</b>' +
-        '</p>' +
-        '<p style="margin-top: 8px">' +
-          source.content.slice(0, 500) +
-          '... <i>' +
-          localLink('person/' + person.customId + '/source/' + source._id, 'continue reading') +
-          '</i>' +
-        '</p>' +
-      '</div>'
-    );
-  });
-}
-
-function showPersonFamily(person) {
-  rend('<h2>Family</h2>');
-
-  const isRelative = {};
-  const siblings = [...person.siblings];
-
-  person.parents.forEach(rel => isRelative[rel._id] = true);
-  person.children.forEach(rel => isRelative[rel._id] = true);
-
-  ['step-parents', 'step-siblings', 'half-siblings', 'siblings', 'step-children']
-    .forEach(rel => person[rel] = []);
-
-  siblings.forEach(sibling => {
-    if (person.parents.length == 2 && sibling.parents.length == 2
-        && person.parents[0] == sibling.parents[0] && person.parents[1] == sibling.parents[1]) {
-      person.siblings.push(sibling);
-    } else {
-      person['half-siblings'].push(sibling);
-    }
-    isRelative[sibling._id] = true;
-  });
-
-  person.parents.forEach(parent => {
-    parent.spouses.forEach(parent => {
-      if (!isRelative[parent._id]) {
-        person['step-parents'].push(parent);
-        parent.children.forEach(sibling => {
-          if (!isRelative[sibling._id]) {
-            person['step-siblings'].push(sibling);
-          }
-        });
-      }
-    })
-  });
-
-  person.spouses.forEach(spouse => {
-    spouse.children.forEach(child => {
-      if (!isRelative[child._id]) {
-        person['step-children'].push(child);
-      }
-    });
-  });
-
-  ['parents', 'step-parents', 'siblings', 'step-siblings', 'half-siblings', 'spouses',
-    'children', 'step-children'].forEach(relationship => {
-    if (person[relationship].length == 0) {
-      return;
-    }
-
-    const $box = $('<div class="person-family">');
-    $box.append(`<h3>${relationship}:</h3>`);
-    if (relationship == 'siblings' || relationship == 'children') {
-      person[relationship].trueSort((a, b) => {
-        return a.birthSort < b.birthSort;
-      });
-    }
-    $box.append($makePeopleList(person[relationship], 'photo'));
-    rend($box);
-  });
-}
-
-function showPersonDescendants(person) {
-  const addDesc = (person, gen) => {
-    descendants[gen] = descendants[gen] || [];
-    descendants[gen].push(person);
-    person.children.forEach(child => addDesc(child, gen + 1));
-  };
-
-  const descendants = [];
-  addDesc(person, 0);
-
-  if (descendants.length < 3) {
-    return;
-  }
-
-  h2('Descendants');
-
-  descendants.slice(2).forEach((list, gen) => {
-    let relationship = (() => {
-      if (gen == 0) {
-        return 'grandchildren';
-      }
-      if (gen == 1) {
-        return 'great-grandchildren';
-      }
-      return gen + '-great-grandchildren';
-    })();
-
-    if (list.length == 1) {
-      relationship = relationship.replace('ren', '');
-    }
-
-    const $box = $('<div class="person-family descendants">');
-    $box.append(`<h3>${relationship}:</h3>`);
-    $box.append($makePeopleList(list, 'photo'));
-    rend($box);
-  });
-}
-
-function personTree(person, safety, n) {
-  let treeStyle = '';
-
-  if (safety == undefined) {
-    safety = 0;
-  } else {
-    treeStyle = ' style="min-width: 100%;"';
-  }
-
-  if (safety > 20) {
-    console.log('Tree safety exceeded');
-    return '[error]';
-  }
-
-  if (person == null) {
-    return '<div class="treecell unknown">unknown '
-      + ['father', 'mother'][n] + '</div>';
-  }
-
-  // Offset the parents array if the mother is included but not the father.
-  let p1 = 0, p2 = 1;
-  if (person.parents.length == 1
-      && person.parents[0].tags.gender == 'female') {
-    p1 = null;
-    p2 = 0;
-  }
-
-  return (
-    '<table' + treeStyle + '>' +
-      '<tr>' +
-        '<td valign="bottom">' +
-          personTree(person.parents[p1], safety + 1, 0) +
-        '</td>' +
-        '<td valign="bottom">' +
-          personTree(person.parents[p2], safety + 1, 1) +
-        '</td>' +
-      '</tr>' +
-      '<tr>' +
-        '<td colspan="2">' +
-          '<div class="treecell">' +
-            linkToPerson(person, true) +
-          '</div>' +
-        '</td>' +
-      '</tr>' +
-    '</table>'
-  );
-}
-
-function viewPersonSource(person, sourceId) {
-  const source = DATABASE.sourceRef[sourceId];
-
-  if (source == null) {
-    h2('Source not found: ' + sourceId);
-    return;
-  }
-
-  h2('Biography');
-  rend(formatTranscription(source.content));
-
-  h2('About this source');
-
-  [
-    source.story.type + ': ' + linkToStory(source.story),
-    source.title,
-    source.date.format,
-    source.location.format
-  ].filter(s => s).forEach(text => {
-    rend('<p style="margin: 10px 0 0 10px;">' + text + '</p>');
-  });
-
-  if (source.images.length) {
-    h2('Images');
-    source.images.forEach((imageUrl, i) => {
-      rend(makeImage(source, i, 200));
-    });
-  }
-
-  viewSourceSummary(source);
-  viewSourceNotes(source);
-
-  if (source.people.length > 1) {
-    h2('Other people in this source');
-    rend($makePeopleList(source.people.filter(p => p != person), 'photo'));
-  }
-
-  viewSourceLinks(source);
-}
-
-function showPersonResearchNotes(person) {
-  const notations = DATABASE.notations.filter(note => {
-    return note.people.includes(person) && note.tags['research notes'];
-  });
-
-  if (notations.length == 0) {
-    return;
-  }
-
-  h2('Research Notes');
-
-  notations.forEach((notation, i) => {
-    if (i > 0) {
-      rend('<hr>');
-    }
-    rend($notationBlock(notation));
-  });
-}
-
-function showPersonArtifacts(person) {
-  const stories = DATABASE.stories.filter(story => {
-    return story.people.includes(person) && story.type == 'artifact';
-  });
-
-  if (stories.length == 0) {
-    return;
-  }
-
-  h2('Artifacts');
-
-  stories.forEach((story, i) => {
-    artifactBlock(story, {
-      firstItem: i == 0,
-      largeHeader: false,
-      people: story.people.filter(p => p != person),
-    });
-  });
-}
-
-
-function showPersonTimeline(person) {
-  if (person.private) {
-    return;
-  }
-
-  rend(
-    '<h2>Timeline</h2>' +
-    '<div class="timeline-key">' +
-      '<div class="timeline-life">life events</div>' +
-      '<div class="timeline-source">sources</div>' +
-      '<div class="timeline-family">family events</div>' +
-    '</div>'
-  );
-
-  new PersonTimeline(person);
-}
-
-class PersonTimeline extends Timeline {
-  constructor(person, isTest) {
-    super(person, isTest);
-
-    if (!isTest) {
-      this.createEventList();
-      this.sortList();
-      this.renderTimeline();
-    }
-  }
-
-  createEventList() {
-    DATABASE.events.forEach(item => {
-      if (item.people.indexOf(this.person) >= 0) {
-        this.insertItem({
-          ...item,
-          event: true
-        });
-      }
-    });
-
-    DATABASE.sources.forEach(item => {
-      if (item.people.indexOf(this.person) >= 0) {
-        this.insertItem({
-          ...item,
-          source: true
-        });
-      }
-    });
-
-    ['parent', 'sibling', 'spouse', 'child'].forEach(relationship => {
-      this.person[pluralize(relationship)].forEach(relative => {
-        this.addFamilyEventsToList(relative, relationship);
-      });
-    });
-
-    if (!this.person.death || !this.person.death.date) {
-      this.addEmptyDeathEvent();
-    }
-  }
-
-  addFamilyEventsToList(relative, relationship) {
-    DATABASE.events.forEach(item => {
-      if (this.shouldIncludeFamilyEvent(relative, relationship, item)) {
-        this.insertItem({
-          ...item,
-          relationship: relationship,
-          event: true
-        });
-      }
-    });
-  }
-
-  shouldIncludeFamilyEvent(relative, relationship, item) {
-    if (item.people.indexOf(relative) < 0) {
-      return false;
-    }
-
-    // Avoid duplicate timeline entries. Skip if the event has been added for the main person or
-    // for another family member.
-    if (this.list.filter(it => it._id == item._id).length) {
-      return false;
-    }
-
-    const afterPersonsBirth = this.person.birth
-      && (isDateBeforeDate(this.person.birth.date, item.date)
-        || areDatesEqual(this.person.birth.date, item.date));
-
-    // If death date is not available for this person, all events are considered to be "after"
-    // their death.
-    const beforePersonsDeath = !this.person.death
-      || (isDateBeforeDate(item.date, this.person.death.date)
-        || areDatesEqual(item.date, this.person.death.date));
-
-    const duringPersonsLife = afterPersonsBirth && beforePersonsDeath;
-
-    // include parent's death if it happens before person's death.
-    if (relationship == 'parent') {
-      return item.title == 'death' && beforePersonsDeath;
-    }
-
-    // include siblings's birth or death if it happens during person's life.
-    if (relationship == 'sibling') {
-      return (item.title == 'birth' || item.title == 'death') && duringPersonsLife;
-    }
-
-    // always include spouse's birth & death; exclude other spouse events.
-    if (relationship == 'spouse') {
-      return item.title == 'birth' || item.title == 'death';
-    }
-
-    if (relationship == 'child') {
-      // always include child's birth.
-      if (item.title == 'birth') {
-        return true;
-      }
-      // include child's death if it is during person's life or within 5 years after person's
-      // death, OR if the person's death date is not available.
-      if (item.title == 'death') {
-        if (!item.date.year) {
-          return false;
-        }
-        if (!this.person.death) {
-          return true;
-        }
-        return this.person.death.date.year && item.date.year - this.person.death.date.year < 5;
-      }
-      // ignore historical events attached to the child.
-      if (item.tags && item.tags.historical) {
-        return false;
-      }
-      // include other child events if they are during person's life.
-      return beforePersonsDeath;
-    }
-
-    return false;
-  }
-
-  addEmptyDeathEvent() {
-    if (this.person.death) {
-      const item = this.list.filter(item => item._id == this.person.death._id)[0];
-      item.mod = 'added-death-date';
-      item.date = {
-        year: 3000,
-        sort: '3000-00-00',
-        format: 'date unknown',
-      };
-      return;
-    }
-
-    this.insertItem({
-      title: 'death',
-      people: [this.person],
-      date: {
-        year: 3000,
-        sort: '3000-00-00',
-        format: 'date unknown',
-      },
-      location: {},
-      event: true,
-      _id: 'added-death-event',
-    });
-  }
-}
-
-class PersonTimelineItem extends TimelineItem {
-  constructor(item, isTest) {
-    super(item, true, isTest);
-  }
 }
 
 
@@ -1929,40 +1594,880 @@ function placeListShouldAllowViewAll(placePath) {
   return true;
 }
 
+class Person {
+  static find(person) {
+    if (person.name) {
+      return person;
+    }
+    if (!person) {
+      return null;
+    }
 
-function viewSearch() {
-  setPageTitle('Search Results');
+    let strippedID = person.toLowerCase().split('-').join('');
+    return DATABASE.personRef[strippedID];
+  }
 
-  const keywords = PATH.slice(7).toLowerCase().split('+').filter(word => word.length > 0);
-  $('.search-form [name="search"]').val(keywords.join(' '));
+  static new(person, isTest) {
+    if (!person) {
+      return null;
+    }
+    if (person.constructor == Person) {
+      return new Person(person.person, isTest);
+    }
+    if (person.name) {
+      return new Person(person, isTest);
+    }
+    person = Person.find(person);
+    if (person) {
+      return new Person(person, isTest);
+    }
+  }
 
-  if (keywords.length === 0) {
-    rend('<h1>Search Results</h1>');
+  static create(person, isTest) { // phase out
+    return Person.new(person, isTest);
+  }
+
+  static populateList(arr) {
+    arr.forEach(person => {
+      person = Person.find(person);
+    });
+  }
+
+  static relationshipName(relationship, gender) {
+    // can pass either gender or entire person object:
+    gender = (gender || {}).gender || gender;
+
+    const relationships = {
+      'parent': ['mother', 'father'],
+      'step-parent': ['step-mother', 'step-father'],
+      'sibling': ['sister', 'brother'],
+      'half-sibling': ['half-sister', 'half-brother'],
+      'step-sibling': ['step-sister', 'step-brother'],
+      'spouse': ['wife', 'husband'],
+      'child': ['daughter', 'son'],
+      'step-child': ['step-daughter', 'step-son'],
+    };
+
+    if (relationships[relationship]) {
+      return relationships[relationship][gender - 1] || relationship;
+    }
+
+    return relationship;
+  }
+
+  constructor(person, isTest) {
+    this.person = person;
+    this.isTest = isTest;
+    for (let key in person) {
+      this[key] = person[key];
+    }
+  }
+
+  forEachRelationship(callback) {
+    ['parents', 'step-parents', 'siblings', 'step-siblings', 'half-siblings',
+    'spouses', 'children', 'step-children'].forEach(rel => {
+      callback(rel, this[rel]);
+    });
+  }
+
+  getFamily(relationship) {
+    let people = this[relationship];
+
+    if (people == null || people.length == 0) {
+      return [];
+    }
+
+    if (people[0].name === undefined) {
+      people = people.map(Person.find);
+    }
+
+    if (relationship == 'siblings' || relationship == 'children') {
+      people.sortBy(person => person.birthSort);
+    }
+
+    return people;
+  }
+
+  get mother() {
+    return Person.new(this.parents.filter(person => person.gender == GENDER.FEMALE)[0]);
+  }
+
+  get father() {
+    return Person.new(this.parents.filter(person => person.gender == GENDER.MALE)[0]);
+  }
+}
+
+class ViewPerson extends ViewPage {
+  static byUrl() {
+    let [mainPath, personId, ...subPath] = PATH.split('/');
+
+    if (mainPath != 'person') {
+      return false;
+    }
+
+    const person = Person.new(personId);
+
+    if (!person) {
+      return ViewPerson.notFound(personId);
+    }
+
+    new ViewPerson(person, subPath).render();
+  }
+
+  static notFound(personId) {
+    setPageTitle('Person Not Found');
+    h1('Person not found: ' + personId);
     return;
   }
 
-  rend('<h1>Search Results for "' + keywords.join(' ') + '"</h1>');
-  rend('<p style="padding-top:10px;" id="number-of-search-results"></p>');
+  constructor(person, subPath) {
+    super(person);
+    this.person = person;
+    this.subPath = subPath;
+    this.person.populateFamily();
+  }
 
-  new SearchResultsPeople(keywords);
-  new SearchResultsPlaces(keywords);
-  new SearchResultsLandmarks(keywords);
-  new SearchResultsArtifacts(keywords);
-  new SearchResultsDocuments(keywords);
-  new SearchResultsCemeteries(keywords);
-  new SearchResultsNewspapers(keywords);
-  new SearchResultsBooks(keywords);
-  new SearchResultsOtherSources(keywords);
-  new SearchResultsEvents(keywords);
+  render() {
+    this.setPageTitle();
+    this.viewHeader();
 
-  const totalResults = $('.search-result-item').length;
+    if (this.subPath.length) {
+      let showFullProfile = this.viewSubPath();
+      if (!showFullProfile) {
+        return;
+      }
+    }
 
-  $('#number-of-search-results').append(totalResults == 1 ? '1 result' : totalResults +
-    ' results');
+    this.viewProfileSummary();
+    this.viewBiographies();
+    this.viewFamily();
+    this.viewDescendants();
+    this.viewTree();
+    this.viewSectionLinks();
+    this.viewResearchNotes();
+    this.viewArtifacts();
+    this.viewTimeline();
+    this.viewCitations();
+
+    if (this.runTests) {
+      this.runTests(this.person);
+    }
+  }
+
+  setPageTitle() {
+    let pageTitle = removeSpecialCharacters(this.person.name);
+    let birth = this.person.birth;
+    let death = this.person.death;
+
+    if (birth || death) {
+      pageTitle += ' (' +
+        ((birth ? birth.date.year : ' ') || ' ') + '-' +
+        ((death ? death.date.year : ' ') || ' ') + ')';
+    }
+
+    setPageTitle(pageTitle);
+  }
+
+  viewHeader() {
+    let person = this.person;
+
+    rend(
+      '<div class="person-header">' +
+        '<img src="' + person.profileImage + '">' +
+        '<div class="person-header-content">' +
+          '<h1>' +
+            fixSpecialCharacters(person.name) +
+            (person.star ? '&#160;<img src="images/leaf.png" style="height:40px">' : '') +
+          '</h1>' +
+          this.formatHeaderEvent('B', person.birth) +
+          this.formatHeaderEvent('D', person.death) +
+        '</div>' +
+      '</div>'
+    );
+
+    if (this.person.private) {
+      rend('<p class="person-summary">Some information is hidden to ' +
+        'protect the privacy of living people.</p>');
+    }
+  }
+
+  formatHeaderEvent(abbr, event) {
+    if (this.person.private || event === undefined) {
+      return '';
+    }
+
+    return (
+      '<div class="person-header-events">' +
+        '<div><b>' + abbr + ':</b></div>' +
+        '<div>' + formatDate(event.date) + '</div>' +
+        (event.location.format ? (
+          '<br>' +
+          '<div>&#160;</div>' +
+          '<div>' + event.location.format + '</div>'
+        ) : '') +
+      '</div>'
+    );
+  }
+
+  viewSubPath() {
+    if (this.subPath.length == 1 && this.subPath[0] == 'test'
+        && ENV == 'dev') {
+      this.viewTests();
+      return true;
+    }
+
+    rend(
+      '<p style="margin-left: 10px; margin-top: 10px;">' +
+        linkToPerson(this.person, false, '&#10229; back to profile') +
+      '</p>'
+    );
+
+    if (this.subPath.length != 2) {
+      return pageNotFound();
+    }
+
+    if (this.subPath[0] == 'source') {
+      return viewPersonSource(this.person, this.subPath[1]);
+    }
+
+    return pageNotFound();
+  }
+
+  viewProfileSummary() {
+    DATABASE.notations.filter(notation => {
+      return notation.title == 'profile summary'
+        && notation.people.includes(this.person);
+    }).forEach(notation => {
+      notation.text.split('\n').forEach(s => {
+        rend('<p style="margin-top: 20px;">' + s + '</p>');
+      });
+    });
+  }
+
+  viewBiographies() {
+    const bios = DATABASE.sources.filter(source => {
+      return source.people[0] == this.person && source.tags.biography;
+    });
+
+    if (bios.length == 0) {
+      return;
+    }
+
+    h2('Biography');
+
+    bios.forEach((source, i) => {
+      rend(
+        '<div class="cover-background" ' +
+            'style="margin-left: 12px;' + (i > 0 ? 'margin-top:15px' : '') + '">' +
+          '<p>' +
+            '<b>' + source.story.title + '</b>' +
+          '</p>' +
+          '<p style="margin-top: 8px">' +
+            source.content.slice(0, 500) +
+            '... <i>' +
+            localLink('person/' + this.person.customId
+              + '/source/' + source._id, 'continue reading') +
+            '</i>' +
+          '</p>' +
+        '</div>'
+      );
+    });
+  }
+
+  viewFamily() {
+    h2('Family');
+    this.person.forEachRelationship((relationship, relatives) => {
+      if (relatives.length == 0) {
+        return;
+      }
+      const $box = $('<div class="person-family">');
+      $box.append(`<h3>${relationship}:</h3>`);
+      $box.append($makePeopleList(relatives, 'photo'));
+      rend($box);
+    });
+  }
+
+  viewDescendants() {
+    const addDesc = (person, gen) => {
+      descendants[gen] = descendants[gen] || [];
+      descendants[gen].push(person);
+      person.children.forEach(child => addDesc(child, gen + 1));
+    };
+
+    const descendants = [];
+    addDesc(this.person, 0);
+
+    if (descendants.length < 3) {
+      return;
+    }
+
+    h2('Descendants');
+
+    descendants.slice(2).forEach((list, gen) => {
+      let relationship = (() => {
+        if (gen == 0) {
+          return 'grandchildren';
+        }
+        if (gen == 1) {
+          return 'great-grandchildren';
+        }
+        return gen + '-great-grandchildren';
+      })();
+
+      if (list.length == 1) {
+        relationship = relationship.replace('ren', '');
+      }
+
+      const $box = $('<div class="person-family descendants">');
+      $box.append(`<h3>${relationship}:</h3>`);
+      $box.append($makePeopleList(list, 'photo'));
+      rend($box);
+    });
+  }
+
+  viewTree() {
+    h2('Tree');
+    rend('<div class="person-tree">' + personTree(this.person) + '</div>');
+  }
+
+  viewResearchNotes() {
+    const notations = DATABASE.notations.filter(note => {
+      return note.people.includes(this.person) && note.tags['research notes'];
+    });
+
+    if (notations.length == 0) {
+      return;
+    }
+
+    h2('Research Notes');
+
+    notations.forEach((notation, i) => {
+      if (i > 0) {
+        rend('<hr>');
+      }
+      rend($notationBlock(notation));
+    });
+  }
+
+  viewArtifacts() {
+    const stories = DATABASE.stories.filter(story => {
+      return story.people.includes(this.person) && story.type == 'artifact';
+    });
+
+    if (stories.length == 0) {
+      return;
+    }
+
+    h2('Artifacts');
+
+    stories.forEach((story, i) => {
+      artifactBlock(story, {
+        firstItem: i == 0,
+        largeHeader: false,
+        people: story.people.filter(p => p != this.person),
+      });
+    });
+  }
+
+  viewTimeline() {
+    PersonTimeline.show(this.person);
+  }
+
+  viewCitations() {
+    if (this.person.citations.length == 0) {
+      return;
+    }
+    h2('Citations');
+    rend($makeCitationList(this.person.citations));
+  }
 }
 
-class SearchResults {
+function viewPersonSource(person, sourceId) {
+  const source = DATABASE.sourceRef[sourceId];
+
+  if (source == null) {
+    h2('Source not found: ' + sourceId);
+    return;
+  }
+
+  h2('Biography');
+  rend(formatTranscription(source.content));
+
+  h2('About this source');
+
+  [
+    source.story.type + ': ' + linkToStory(source.story),
+    source.title,
+    source.date.format,
+    source.location.format
+  ].filter(s => s).forEach(text => {
+    rend('<p style="margin: 10px 0 0 10px;">' + text + '</p>');
+  });
+
+  if (source.images.length) {
+    h2('Images');
+    source.images.forEach((imageUrl, i) => {
+      rend(makeImage(source, i, 200));
+    });
+  }
+
+  viewSourceSummary(source);
+  viewSourceNotes(source);
+
+  if (source.people.length > 1) {
+    h2('Other people in this source');
+    rend($makePeopleList(source.people.filter(p => p != person), 'photo'));
+  }
+
+  viewSourceLinks(source);
+}
+
+Person.prototype.populateFamily = function() {
+  this.forEachRelationship(rel => {
+    this[rel] = this[rel] || [];
+  });
+
+  const relativeMap = {};
+
+  relativeMap[this._id] = 'root';
+
+  Person.populateList(this.parents);
+  Person.populateList(this.spouses);
+  Person.populateList(this.children);
+
+  this.parents.forEach(parent => {
+    Person.populateList(parent.spouses);
+    Person.populateList(parent.children);
+    relativeMap[parent._id] = 'parent';
+  });
+
+  this.parents.forEach(parent => {
+    parent.spouses.forEach(spouse => {
+      if (!relativeMap[spouse._id]) {
+        if (spouse.death && this.birth
+            && isDateBeforeDate(spouse.death.date, this.birth.date)) {
+          relativeMap[spouse._id] = 'not-step-parent';
+        } else {
+          this['step-parents'].push(spouse);
+          relativeMap[spouse._id] = 'step-parent';
+        }
+      }
+    });
+    parent.children.forEach(sibling => {
+      if (relativeMap[sibling._id]) {
+        return;
+      }
+
+      const fullSiblingsOnly = this.tags['full siblings only']
+        || sibling.tags['full siblings only'];
+
+      if (fullSiblingsOnly || (
+          this.parents.length == 2 && sibling.parents.length == 2
+          && this.parents[0] == sibling.parents[0]
+          && this.parents[1] == sibling.parents[1])) {
+        this['siblings'].push(sibling);
+        relativeMap[sibling._id] = 'sibling';
+      } else {
+        this['half-siblings'].push(sibling);
+        relativeMap[sibling._id] = 'half-sibling';
+      }
+    });
+  });
+
+  this['step-parents'].forEach(parent => {
+    Person.populateList(parent.children);
+    parent.children.forEach(child => {
+      if (!relativeMap[child._id]) {
+        this['step-siblings'].push(child);
+        relativeMap[child._id] = 'step-sibling';
+      }
+    });
+  });
+
+  this.children.forEach(child => {
+    relativeMap[child._id] = 'child';
+  });
+
+  this.spouses.forEach(spouse => {
+    relativeMap[spouse._id] = 'spouse';
+    Person.populateList(spouse.children);
+    spouse.children.forEach(child => {
+      if (!relativeMap[child._id]) {
+        if (this.death && child.birth
+            && isDateBeforeDate(this.death.date, child.birth.date)) {
+          relativeMap[child._id] = 'not-step-child';
+        } else {
+          this['step-children'].push(child);
+          relativeMap[child._id] = 'step-child';
+        }
+      }
+    });
+  });
+};
+
+(() => {
+  ViewPerson.prototype.viewTests = function() {
+    h2('Tests');
+    rend('<div id="person-test-section"></div>');
+
+    this.runTests = getTests(this.person.customId);
+
+    if (!this.runTests) {
+      pg('There are no tests for this person.');
+    }
+  };
+
+  function getTests(personId) {
+    if (personId == 'anthony-hroch') {
+      return personTestsAnthonyHroch;
+    }
+    if (personId == 'hans-johansen') {
+      return personTestsHansHansen;
+    }
+    if (personId == 'peter-winblad') {
+      return personTestsPeterWinblad;
+    }
+    if (personId == 'william-winblad') {
+      return personTestsWilliamWinblad;
+    }
+  }
+
+  function printTest(pass, subtitle) {
+    $('#person-test-section').append('<ul><li class="unit-tests test-passing-'
+      + pass + '">' + subtitle + '</li></ul>');
+  }
+
+  function setTitle2(str) {
+    $('#person-test-section').append('<b>' + str + '</b>').css('margin', '5px');
+  }
+
+  function assertTrue(text, value) {
+    printTest(value === true, text);
+  }
+
+  function personTestsAnthonyHroch(person) {
+    setTitle2('family relationships');
+
+    assertTrue('has 1 step-parent, William Nemechek',
+      person['step-parents'].length == 1
+        && person['step-parents'][0].customId == 'william-nemechek'
+    );
+
+    assertTrue('has 3 step-siblings',
+      person['step-siblings'].length == 3
+    );
+
+    assertTrue('has at least 1 half-sibling, Clarence Nemechek',
+      person['half-siblings'].length >= 1
+        && person['half-siblings'].map(p => p.customId).includes('clarence-nemechek')
+    );
+
+    setTitle2('timeline');
+
+    assertTrue('timeline includes "marriage of mother"',
+      $('.timeline-item.timeline-family[item-title="marriage of mother"]').length == 1
+    );
+
+    assertTrue('timeline includes "death of mother"',
+      $('.timeline-item.timeline-family[item-title="death of mother"]').length == 1
+    );
+
+    assertTrue('(ADD LATER) timeline does not include "birth of step-brother" '
+        + 'because Benny was born before the families merged',
+      $('.timeline-item.timeline-family[item-title="birth of step-brother"]').length == 0
+    );
+
+    assertTrue('timeline includes "birth of half-brother"',
+      $('.timeline-item.timeline-family[item-title="birth of half-brother"]').length == 1
+    );
+
+    assertTrue('timeline includes "death of step-brother"',
+      $('.timeline-item.timeline-family[item-title="death of step-brother"]').length == 1
+    );
+  }
+
+  function personTestsHansHansen(person) {
+    setTitle2('timeline');
+
+    assertTrue('timeline includes "marriage of parents"',
+      $('.timeline-item.timeline-family[item-title="marriage of parents"]').length == 1
+    );
+  }
+
+  function personTestsPeterWinblad(person) {
+    setTitle2('timeline');
+
+    assertTrue('timeline includes "immigration of family members" for spouse and children',
+      $('.timeline-item.timeline-family[item-title="immigration of family members"]').length == 1
+    );
+
+    assertTrue('timeline includes "birth of children" for twins',
+      $('.timeline-item.timeline-family[item-title="birth of children"]').length == 1
+    );
+  }
+
+  function personTestsWilliamWinblad(person) {
+    setTitle2('timeline');
+
+    assertTrue('timeline includes "immigration of father"',
+      $('.timeline-item.timeline-family[item-title="immigration of father"]').length == 1
+    );
+
+    assertTrue('timeline includes "birth of siblings" for twin brother & sister',
+      $('.timeline-item.timeline-family[item-title="birth of siblings"]').length == 1
+    );
+
+    assertTrue('timeline includes "birth of daughter" despite being after his death',
+      $('.timeline-item.timeline-family[item-title="birth of daughter"]').length == 1
+    );
+  }
+})();
+
+class PersonTimeline extends Timeline {
+  static show(person) {
+    if (person.private) {
+      return;
+    }
+
+    rend(
+      '<h2>Timeline</h2>' +
+      '<div class="timeline-key">' +
+        '<div class="timeline-life">life events</div>' +
+        '<div class="timeline-source">sources</div>' +
+        '<div class="timeline-family">family events</div>' +
+      '</div>'
+    );
+
+    new PersonTimeline(person);
+  }
+
+  constructor(person, isTest) {
+    super(person, isTest);
+
+    if (!isTest) {
+      this.createEventList();
+      this.sortList();
+      this.renderTimeline();
+    }
+  }
+
+  createEventList() {
+    DATABASE.events.forEach(item => {
+      if (item.people.map(p => p._id).includes(this.person._id)) {
+        this.insertItem({
+          ...item,
+          event: true
+        });
+      }
+    });
+
+    DATABASE.sources.forEach(item => {
+      if (item.people.map(p => p._id).includes(this.person._id)) {
+        this.insertItem({
+          ...item,
+          source: true
+        });
+      }
+    });
+
+    this.person.forEachRelationship((relationship, relatives) => {
+      relatives.forEach(relative => {
+        this.addFamilyEventsToList(relative, relationship.singularize());
+      });
+    });
+
+    if (!this.person.death || !this.person.death.date) {
+      this.addEmptyDeathEvent();
+    }
+  }
+
+  addFamilyEventsToList(relative, relationship) {
+    DATABASE.events.forEach(item => {
+      if (this.shouldIncludeFamilyEvent(relative, relationship, item)) {
+        this.insertItem({
+          ...item,
+          relationship: relationship,
+          event: true
+        });
+      }
+    });
+  }
+
+  shouldIncludeFamilyEvent(relative, relationship, item) {
+    if (!item.people.map(p => p._id).includes(relative._id)) {
+      return false;
+    }
+
+    // Avoid duplicate timeline entries. Skip if the event has been added for the main person or
+    // for another family member.
+    if (this.list.filter(it => it._id == item._id).length) {
+      return false;
+    }
+
+    const afterPersonsBirth = this.person.birth
+      && (isDateBeforeDate(this.person.birth.date, item.date)
+        || areDatesEqual(this.person.birth.date, item.date));
+
+    // If death date is not available for this person, all events are considered to be "after"
+    // their death.
+    const beforePersonsDeath = !this.person.death
+      || (isDateBeforeDate(item.date, this.person.death.date)
+        || areDatesEqual(item.date, this.person.death.date));
+
+    const duringPersonsLife = afterPersonsBirth && beforePersonsDeath;
+
+    // Include parent's marriage or immigration if it happens during person's life.
+    // Include parent's death if it's before person's death, and even if it's before person's birth.
+    if (relationship == 'parent') {
+      if (['immigration', 'marriage'].includes(item.title)) {
+        return duringPersonsLife;
+      }
+      return item.title == 'death' && beforePersonsDeath;
+    }
+
+    // Include step-parent's death if it's during person's life.
+    if (relationship == 'step-parent') {
+      return item.title == 'death' && duringPersonsLife;
+    }
+
+    // include siblings's birth or death if it happens during person's life.
+    if (relationship.match('sibling')) {
+      return (item.title == 'birth' || item.title == 'death') && duringPersonsLife;
+    }
+
+    // always include spouse's birth & death; exclude other spouse events.
+    if (relationship == 'spouse') {
+      return item.title == 'birth' || item.title == 'death';
+    }
+
+    if (relationship == 'child') {
+      // always include child's birth.
+      if (item.title == 'birth') {
+        return true;
+      }
+      // include child's death if it is during person's life or within 5 years after person's
+      // death, OR if the person's death date is not available.
+      if (item.title == 'death') {
+        if (!item.date.year) {
+          return false;
+        }
+        if (!this.person.death) {
+          return true;
+        }
+        return this.person.death.date.year && item.date.year - this.person.death.date.year < 5;
+      }
+      // ignore historical events attached to the child.
+      if (item.tags && item.tags.historical) {
+        return false;
+      }
+      // include other child events if they are during person's life.
+      return beforePersonsDeath;
+    }
+
+    return false;
+  }
+
+  addEmptyDeathEvent() {
+    if (this.person.death) {
+      const item = this.list.filter(item => item._id == this.person.death._id)[0];
+      item.mod = 'added-death-date';
+      item.date = {
+        year: 3000,
+        sort: '3000-00-00',
+        format: 'date unknown',
+      };
+      return;
+    }
+
+    this.insertItem({
+      title: 'death',
+      people: [this.person],
+      date: {
+        year: 3000,
+        sort: '3000-00-00',
+        format: 'date unknown',
+      },
+      location: {},
+      event: true,
+      _id: 'added-death-event',
+    });
+  }
+}
+
+function personTree(person, safety, parent) {
+  let treeStyle = '';
+
+  if (safety == undefined) {
+    safety = 0;
+  } else {
+    treeStyle = ' style="min-width: 100%;"';
+  }
+
+  if (safety > 20) {
+    console.log('Tree safety exceeded');
+    return '[error]';
+  }
+
+  if (person == null) {
+    return '<div class="treecell unknown">unknown ' + parent + '</div>';
+  }
+
+  return (
+    '<table' + treeStyle + '>' +
+      '<tr>' +
+        '<td valign="bottom">' +
+          personTree(person.father, safety + 1, 'father') +
+        '</td>' +
+        '<td valign="bottom">' +
+          personTree(person.mother, safety + 1, 'mother') +
+        '</td>' +
+      '</tr>' +
+      '<tr>' +
+        '<td colspan="2">' +
+          '<div class="treecell">' +
+            linkToPerson(person, true) +
+          '</div>' +
+        '</td>' +
+      '</tr>' +
+    '</table>'
+  );
+}
+
+class SearchResults extends ViewPage {
+  static byUrl() {
+    setPageTitle('Search Results');
+
+    const keywords = PATH.slice(7).toLowerCase().split('+')
+      .filter(word => word.length > 0);
+
+    $('.search-form [name="search"]').val(keywords.join(' '));
+
+    if (keywords.length === 0) {
+      return h1('Search Results');
+    }
+
+    h1('Search Results for "' + keywords.join(' ') + '"');
+    pg().css('padding-top', '10px').attr('id', 'number-of-search-results');
+
+    new SearchResultsPeople(keywords);
+    new SearchResultsPlaces(keywords);
+    new SearchResultsLandmarks(keywords);
+    new SearchResultsArtifacts(keywords);
+    new SearchResultsDocuments(keywords);
+    new SearchResultsCemeteries(keywords);
+    new SearchResultsNewspapers(keywords);
+    new SearchResultsBooks(keywords);
+    new SearchResultsOtherSources(keywords);
+    new SearchResultsEvents(keywords);
+
+    const totalResults = $('.search-result-item').length;
+
+    $('#number-of-search-results').append(totalResults
+      + ' result'.pluralize(totalResults));
+  }
+
   constructor(keywords, isTest) {
+    super();
     this.keywords = keywords;
     this.isTest = isTest;
     this.resultsList = [];
@@ -2091,77 +2596,133 @@ class SearchResultsPlaces extends SearchResults {
 }
 
 
-class SearchResultsBooks extends SearchResults {
+class SearchResultsArtifacts extends SearchResults {
   constructor(keywords, isTest) {
     super(keywords, isTest);
     this.execute();
   }
 
   getResults() {
-    DATABASE.sources.filter(source => source.type == 'book').forEach(source => {
-      let searchStringSource = ['title', 'notes', 'summary', 'content']
-        .map(attr => source[attr] || '').join(',');
-
-      let searchStringGroup = '';
-
-      if (source.sourceGroup) {
-        searchStringGroup = ['group', 'notes', 'summary', 'content']
-          .map(attr => source.sourceGroup[attr] || '').join(',');
-      } else {
-        searchStringSource += source.group;
-      }
-
-      const matchSource = this.isMatch(searchStringSource);
-      const matchGroup = this.isMatch(searchStringGroup);
-      const matchTotal = this.isMatch(searchStringSource + ',' + searchStringGroup);
-
-      // The group is included if any match was found - whether it's the group, the sub-source,
-      // or if combined properties are required for a match.
-      if (source.sourceGroup && (matchGroup || matchTotal)) {
-        this.add(source.sourceGroup);
-      }
-
-      // The sub-source is included if it matches on its own OR if the combination is required
-      // for a match. The sub-source is excluded if the keywords were only found in the group
-      // properties.
-      if (matchSource || (matchTotal && !matchGroup)) {
-        this.add(source);
-      }
+    this.resultsList = DATABASE.stories
+    .filter(story => story.type == 'artifact').filter(story => {
+      let searchStr = story.title;
+      return this.isMatch(searchStr);
     });
-
-    // Add any source groups that don't contain sub-sources.
-    DATABASE.sourceGroups.filter(source => source.sourceList.length == 0).forEach(source => {
-      let searchString = ['group', 'notes', 'summary', 'content']
-        .map(attr => source[attr] || '').join(',');
-
-      if (this.isMatch(searchString)) {
-        this.add(source);
-      }
-    });
-
-    this.resultsList = removeDuplicatesById(this.resultsList);
   }
 
   sortResults() {
-    this.resultsList.trueSort((a, b) => {
-      if (a.group != b.group) {
-        return a.group < b.group;
-      }
-      return a.isGroupMain || (a.title < b.title && !b.isGroupMain);
-    });
   }
 
   renderResults() {
-    this.title('Books');
+    this.title('Artifacts');
+    this.resultsList.forEach((story, i) => {
+      artifactBlock(story, {
+        firstItem: i == 0,
+        largeHeader: false,
+        people: [],
+      });
+    });
+  }
+}
 
-    let previousBookGroup = null;
-    let justPrintedGroup = false;
+class SearchResultsLandmarks extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
 
-    this.resultsList.forEach((source, i) => {
-      if (previousBookGroup == source.group && source.sourceGroup) {
-        if (justPrintedGroup) {
-          rend('<p style="padding: 5px;">Matching chapters/entries:</p>');
-          justPrintedGroup = false;
+  getResults() {
+    this.resultsList = DATABASE.stories
+    .filter(story => story.type == 'landmark').filter(story => {
+      let searchStr = story.title;
+      return this.isMatch(searchStr);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Landmarks');
+    this.resultsList.forEach(story => {
+      rend('<p style="margin: 15px 0 0 15px;" class="search-result-item">'
+        + linkToStory(story) + '</p>');
+
+      if (story.location.format) {
+        rend('<p style="margin: 2px 0 0 15px;" class="search-result-item">'
+          + story.location.format + '</p>');
+      }
+    });
+  }
+}
+
+
+class SearchResultsBooks extends SearchResults {
+  static newTest(...keywords) {
+    return new SearchResultsBooks(keywords, true);
+  }
+
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.type = 'book';
+    this.execute();
+  }
+
+  getResults() {
+    DATABASE.stories
+    .filter(story => story.type == this.type)
+    .forEach(story => {
+      const searchStringStory = ['title', 'notes', 'summary', 'content']
+        .map(attr => story[attr] || '').join(',');
+
+      let matchStory = this.isMatch(searchStringStory);
+      let addedStory = matchStory;
+
+      const matchingEntries = [];
+
+      if (matchStory) {
+        this.add({ isStory: true, matchingEntries, ...story });
+      }
+
+      story.entries.forEach(source => {
+        const searchStringSource = ['title', 'notes', 'summary', 'content']
+          .map(attr => source[attr] || '').join(',');
+
+        const sourceMatch = this.isMatch(searchStringSource);
+        const matchTotal = !matchStory
+          && this.isMatch(searchStringSource + ',' + searchStringStory);
+
+        if (sourceMatch || matchTotal) {
+          if (!addedStory) {
+            addedStory = true;
+            this.add({ isStory: true, matchingEntries, ...story });
+          }
+          matchingEntries.push(source);
+        }
+      });
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title(this.type.pluralize().capitalize());
+
+    this.resultsList.forEach((story, i) => {
+      if (i > 0) {
+        rend('<hr style="margin-top: 15px;">');
+      }
+
+      pg(linkToStory(story, this.highlight(story.title)))
+        .css('margin', '15px 0 0 5px');
+
+      pg(this.highlight(this.summary)).css('margin', '5px');
+
+      story.matchingEntries.forEach((source, j) => {
+        if (j == 0) {
+          pg('<i>Matching chapters/entries:</i>')
+            .css('margin', '5px').css('color', 'gray');
         }
 
         rend(
@@ -2171,47 +2732,126 @@ class SearchResultsBooks extends SearchResults {
             '</li>' +
           '</ul>'
         );
+      });
+    });
+  }
+}
 
+class SearchResultsCemeteriesOrNewspapers extends SearchResults {
+  constructor(keywords, isTest, sourceType, groupTitle, entryTitle, entrySingular) {
+    super(keywords, isTest);
+    this.sourceType = sourceType;
+    this.groupTitle = groupTitle;
+    this.entryTitle = entryTitle;
+    this.entrySingular = entrySingular;
+    this.groupList = [];
+    this.groupEntryCount = {};
+    this.individualList = [];
+    this.getResults();
+    this.renderGroupResults();
+    this.renderIndividualResults();
+  }
+
+  getResults() {
+    DATABASE.sources.forEach(source => {
+      if (source.type != this.sourceType) {
         return;
       }
 
-      // Could be a new group section or could be the next item in a group that has no
-      // designated "source group".
-      if (i > 0 && previousBookGroup != source.group) {
-        rend('<hr style="margin: 10px 0">');
-      }
-
-      previousBookGroup = source.group;
-      justPrintedGroup = true;
-
-      if (source.isGroupMain) {
-        rend(
-          '<p style="padding: 5px" class="search-result-item">' +
-            linkToSourceGroup(source, this.highlight(source.group)) +
-          '</p>'
-        );
-
-        if (source.summary) {
-          rend(
-            '<p style="padding: 2px;" class="search-result-item">' +
-              '<i>' + source.summary + '</i>' +
-            '</p>'
-          );
+      if (this.isMatch(source.group)) {
+        if (this.groupEntryCount[source.group]) {
+          this.groupEntryCount[source.group] += 1;
+        } else {
+          this.groupEntryCount[source.group] = 1;
+          this.groupList.push(source);
         }
-
-        return;
       }
 
-      let linkText = source.group;
+      let searchString = source.title + source.content;
 
-      if (source.title != 'null') {
-        linkText += ' - ' + source.title;
+      if (this.isMatch(searchString)) {
+        this.individualList.push(source);
       }
+    });
+  }
 
-      // Stand-alone sources are not chapters under a group.
+  renderGroupResults() {
+    if (this.groupList.length == 0) {
+      return;
+    }
+
+    this.title(this.groupTitle);
+
+    this.groupList.forEach(source => {
+      let linkText = this.highlight(source.group);
       rend(
-        '<p style="padding: 5px" class="search-result-item">' +
-          linkToSource(source, this.highlight(linkText)) +
+        '<p style="padding: 5px 10px" class="search-result-item">' +
+          linkToSourceGroup(source, linkText) + '<br>' +
+          source.location.format + '<br>' +
+          this.groupEntryCount[source.group] + ' ' + this.entrySingular +
+          (this.groupEntryCount[source.group] == 1 ? '' : 's') +
+        '</p>'
+      );
+    });
+  }
+
+  renderIndividualResults() {
+    if (this.individualList.length == 0 ) {
+      return;
+    }
+
+    this.title(this.entryTitle);
+
+    this.individualList.forEach(source => {
+      rend(
+        '<p style="padding: 5px 10px" class="search-result-item">' +
+          linkToSource(source, this.highlight(source.title)) + '<br>' +
+          source.group + '<br>' +
+          (source.date.format ? source.date.format + '<br>' : '') +
+          (source.location.format ? source.location.format + '<br>' : '') +
+        '</p>'
+      );
+
+      rend(formatTranscription(this.highlight(source.content)));
+    });
+  }
+}
+
+class SearchResultsCemeteries extends SearchResultsCemeteriesOrNewspapers {
+  constructor(keywords, isTest) {
+    super(keywords, isTest, 'newspaper', 'Newspapers', 'Newspaper Articles', 'article');
+  }
+}
+
+class SearchResultsNewspapers extends SearchResultsCemeteriesOrNewspapers {
+  constructor(keywords, isTest) {
+    super(keywords, isTest, 'grave', 'Cemeteries', 'Graves', 'grave');
+  }
+}
+
+class SearchResultsDocuments extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    this.resultsList = DATABASE.sources.filter(source => {
+      return source.type == 'document' && this.isMatch(source.title + source.content);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Documents');
+    this.resultsList.forEach(source => {
+      let linkText = source.story.title + ' - ' + source.title;
+      linkText = this.highlight(linkText, this.keywords);
+      rend(
+        '<p style="padding: 5px;" class="search-result-item">' +
+          linkToSource(source, linkText) +
         '</p>'
       );
     });
@@ -2313,128 +2953,6 @@ function highlightKeywords(str, keywords, i) {
   return str;
 }
 
-
-class SearchResultsDocuments extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
-
-  getResults() {
-    this.resultsList = DATABASE.sources.filter(source => {
-      return source.type == 'document' && this.isMatch(source.title + source.content);
-    });
-  }
-
-  sortResults() {
-  }
-
-  renderResults() {
-    this.title('Documents');
-    this.resultsList.forEach(source => {
-      let linkText = source.group + ' - ' + source.title;
-      linkText = this.highlight(linkText, this.keywords);
-      rend(
-        '<p style="padding: 5px;" class="search-result-item">' +
-          linkToSource(source, linkText) +
-        '</p>'
-      );
-    });
-  }
-}
-
-class SearchResultsCemeteriesOrNewspapers extends SearchResults {
-  constructor(keywords, isTest, sourceType, groupTitle, entryTitle, entrySingular) {
-    super(keywords, isTest);
-    this.sourceType = sourceType;
-    this.groupTitle = groupTitle;
-    this.entryTitle = entryTitle;
-    this.entrySingular = entrySingular;
-    this.groupList = [];
-    this.groupEntryCount = {};
-    this.individualList = [];
-    this.getResults();
-    this.renderGroupResults();
-    this.renderIndividualResults();
-  }
-
-  getResults() {
-    DATABASE.sources.forEach(source => {
-      if (source.type != this.sourceType) {
-        return;
-      }
-
-      if (this.isMatch(source.group)) {
-        if (this.groupEntryCount[source.group]) {
-          this.groupEntryCount[source.group] += 1;
-        } else {
-          this.groupEntryCount[source.group] = 1;
-          this.groupList.push(source);
-        }
-      }
-
-      let searchString = source.title + source.content;
-
-      if (this.isMatch(searchString)) {
-        this.individualList.push(source);
-      }
-    });
-  }
-
-  renderGroupResults() {
-    if (this.groupList.length == 0) {
-      return;
-    }
-
-    this.title(this.groupTitle);
-
-    this.groupList.forEach(source => {
-      let linkText = this.highlight(source.group);
-      rend(
-        '<p style="padding: 5px 10px" class="search-result-item">' +
-          linkToSourceGroup(source, linkText) + '<br>' +
-          source.location.format + '<br>' +
-          this.groupEntryCount[source.group] + ' ' + this.entrySingular +
-          (this.groupEntryCount[source.group] == 1 ? '' : 's') +
-        '</p>'
-      );
-    });
-  }
-
-  renderIndividualResults() {
-    if (this.individualList.length == 0 ) {
-      return;
-    }
-
-    this.title(this.entryTitle);
-
-    this.individualList.forEach(source => {
-      rend(
-        '<p style="padding: 5px 10px" class="search-result-item">' +
-          linkToSource(source, this.highlight(source.title)) + '<br>' +
-          source.group + '<br>' +
-          (source.date.format ? source.date.format + '<br>' : '') +
-          (source.location.format ? source.location.format + '<br>' : '') +
-        '</p>'
-      );
-
-      rend(formatTranscription(this.highlight(source.content)));
-    });
-  }
-}
-
-class SearchResultsCemeteries extends SearchResultsCemeteriesOrNewspapers {
-  constructor(keywords, isTest) {
-    super(keywords, isTest, 'newspaper', 'Newspapers', 'Newspaper Articles', 'article');
-  }
-}
-
-class SearchResultsNewspapers extends SearchResultsCemeteriesOrNewspapers {
-  constructor(keywords, isTest) {
-    super(keywords, isTest, 'grave', 'Cemeteries', 'Graves', 'grave');
-  }
-}
-
 class SearchResultsOtherSources extends SearchResults {
   constructor(keywords, isTest) {
     super(keywords, isTest);
@@ -2443,10 +2961,10 @@ class SearchResultsOtherSources extends SearchResults {
 
   getResults() {
     this.resultsList = DATABASE.sources.filter(source => {
-      let searchString = ['group', 'title', 'content', 'notes', 'summary']
+      let searchString = ['title', 'content', 'notes', 'summary']
         .map(attr => source[attr] || '').join(',');
-      return !['document', 'newspaper', 'book', 'grave'].includes(source.type)
-        && this.isMatch(searchString);
+      return !['document', 'newspaper', 'book', 'cemetery']
+        .includes(source.story.type) && this.isMatch(searchString);
     });
   }
 
@@ -2464,140 +2982,6 @@ class SearchResultsOtherSources extends SearchResults {
         '</p>'
       );
     });
-  }
-}
-
-
-class SearchResultsArtifacts extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
-
-  getResults() {
-    this.resultsList = DATABASE.stories
-    .filter(story => story.type == 'artifact').filter(story => {
-      let searchStr = story.title;
-      return this.isMatch(searchStr);
-    });
-  }
-
-  sortResults() {
-  }
-
-  renderResults() {
-    this.title('Artifacts');
-    this.resultsList.forEach((story, i) => {
-      artifactBlock(story, {
-        firstItem: i == 0,
-        largeHeader: false,
-        people: [],
-      });
-    });
-  }
-}
-
-class SearchResultsLandmarks extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
-
-  getResults() {
-    this.resultsList = DATABASE.stories
-    .filter(story => story.type == 'landmark').filter(story => {
-      let searchStr = story.title;
-      return this.isMatch(searchStr);
-    });
-  }
-
-  sortResults() {
-  }
-
-  renderResults() {
-    this.title('Landmarks');
-    this.resultsList.forEach(story => {
-      rend('<p style="margin: 15px 0 0 15px;" class="search-result-item">'
-        + linkToStory(story) + '</p>');
-
-      if (story.location.format) {
-        rend('<p style="margin: 2px 0 0 15px;" class="search-result-item">'
-          + story.location.format + '</p>');
-      }
-    });
-  }
-}
-
-
-function viewArtifactOrLandmark() {
-  if (PATH == 'artifacts') {
-    return viewArtifactsIndex();
-  }
-  if (PATH == 'landmarks') {
-    return viewLandmarksIndex();
-  }
-
-  const [storyType, storyId, extraText] = PATH.split('/');
-  const story = DATABASE.storyRef[storyId];
-
-  if (!story || extraText) {
-    return pageNotFound();
-  }
-
-  if (storyType == 'artifact' || storyType == 'landmark') {
-    return viewOneArtifactOrLandmark(storyType, story);
-  }
-
-  return pageNotFound();
-}
-
-function viewArtifactsIndex() {
-  setPageTitle('Artifacts');
-  h1('Artifacts and family heirlooms');
-
-  const artifacts = DATABASE.stories.filter(story => {
-    return story.type == 'artifact' || story.tags.artifact;
-  });
-
-  artifacts.forEach((story, i) => {
-    artifactBlock(story, {
-      largeHeader: true,
-    });
-  });
-}
-
-function viewLandmarksIndex() {
-  setPageTitle('Landmarks');
-  h1('Landmarks and buildings');
-
-  const stories = DATABASE.stories.filter(story => {
-    return story.type == 'landmark';
-  });
-
-  stories.forEach(story => {
-    h2(story.title);
-
-    if (story.summary) {
-      rend('<p style="margin-left: 10px">' + story.summary + '</p>');
-    }
-
-    rend($makePeopleList(story.people, 'photo'));
-  });
-}
-
-function viewOneArtifactOrLandmark(storyType, story) {
-  headerTrail([storyType]);
-  h1(story.title);
-
-  [story.date.format, story.location.format, story.summary].forEach(val => {
-    if (val) {
-      rend('<p style="margin-top: 20px;">' + val + '</p>');
-    }
-  });
-
-  if (story.people.length) {
-    h2('People');
-    rend($makePeopleList(story.people, 'photo'));
   }
 }
 
@@ -2633,160 +3017,6 @@ function artifactBlock(story, specs) {
   }
 
   rend($box);
-}
-
-function viewBook() {
-  if (PATH == 'books') {
-    return viewBooksIndex();
-  }
-
-  ViewStoryBook.byUrl();
-}
-
-function viewBooksIndex() {
-  headerTrail('sources');
-  setPageTitle('Books');
-  h1('Books');
-
-  const books = DATABASE.stories.filter(story => story.type == 'book');
-
-  books.forEach(story => {
-    h2(story.title);
-
-    if (story.summary) {
-      rend('<p style="margin-left: 10px">' + story.summary + '</p>');
-    }
-
-    rend($makePeopleList(story.people, 'photo').css('margin-top', '15px'));
-
-    rend(
-      '<p style="margin: 10px">' +
-        localLink('book/' + story._id, 'read book ' + RIGHT_ARROW) +
-      '</p>'
-    );
-  });
-}
-
-
-function viewCemeteriesOrNewspapers() {
-  if (PATH == 'cemeteries') {
-    return viewCemeteriesNewspapersIndex('Cemeteries', 'cemetery', 'grave');
-  }
-
-  if (PATH.match('cemetery')) {
-    return ViewCemeteryOrNewspaper.byUrl();
-  }
-
-  if (PATH == 'newspapers') {
-    return viewCemeteriesNewspapersIndex('Newspapers', 'newspaper', 'article');
-  }
-
-  if (PATH.match('newspaper')) {
-    return ViewCemeteryOrNewspaper.byUrl();
-  }
-
-  return pageNotFound();
-}
-
-function viewCemeteriesNewspapersIndex(title, storyType, entryName) {
-  const [placeList, storiesByPlace] = getStoriesByPlace(storyType);
-
-  headerTrail('sources');
-  setPageTitle(title);
-  h1(title);
-
-  placeList.forEach(place => {
-    h2(place);
-    storiesByPlace[place].forEach(story => {
-      let numEntries;
-
-      if (storyType == 'cemetery') {
-        numEntries = getNumberOfGravesInCemetery(story);
-      } else {
-        numEntries = story.entries.length;
-      }
-
-      rend(
-        '<p style="padding: 15px 0 0 5px;">' +
-          localLink(storyType + '/' + story._id, story.title) +
-          (story.location.format ? '<br>' : '') + story.location.format +
-          '<br>' + numEntries + ' ' + pluralize(entryName, numEntries) +
-        '</p>'
-      );
-    });
-  });
-}
-
-function getStoriesByPlace(storyType) {
-  const placeList = [];
-  const storiesByPlace = { Other: [] };
-  const stories = DATABASE.stories.filter(s => s.type == storyType);
-
-  stories.forEach(story => {
-    let placeName = 'Other';
-    if (story.location.country == 'United States' && story.location.region1) {
-      placeName = USA_STATES[story.location.region1];
-    }
-    if (storiesByPlace[placeName] == undefined) {
-      placeList.push(placeName);
-      storiesByPlace[placeName] = [];
-    }
-    storiesByPlace[placeName].push(story);
-  });
-
-  placeList.sort();
-
-  if (storiesByPlace.Other.length) {
-    placeList.push('Other');
-  }
-
-  return [placeList, storiesByPlace];
-}
-
-function getNumberOfGravesInCemetery(story) {
-  let count = 0;
-
-  story.entries.forEach(source => {
-    count += source.people.length || 1;
-  });
-
-  return count;
-}
-
-function showListOfGraves(sources) {
-  sources.forEach((source, i) => {
-    const $box = $('<div style="margin: 20px 10px;">');
-
-    $box.append('<p>' + linkToSource(source) + '</p>');
-
-    if (source.summary) {
-      $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
-    }
-
-    rend($box);
-  });
-}
-
-function showListOfArticles(sources) {
-  sources.forEach((source, i) => {
-    if (i > 0) {
-      rend('<hr>');
-    }
-
-    const $box = $('<div style="margin: 20px 10px;">');
-
-    $box.append('<p>' + linkToSource(source) + '</p>');
-
-    if (source.date.format) {
-      $box.append('<p style="margin-top: 5px">' + source.date.format + '</p>');
-    }
-
-    if (source.summary) {
-      $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
-    }
-
-    rend($box);
-  });
 }
 
 
@@ -2852,7 +3082,7 @@ function routeSources() {
   }
 
   if (PATH.match('source/')) {
-    return ViewOneSource.byUrl();
+    return ViewSource.byUrl();
   }
 
   const categoryPath = PATH.slice(8);
@@ -3137,7 +3367,7 @@ function showSourceList(sourceList, showLocation, showDate, showStory) {
   });
 }
 
-class ViewOneSource {
+class ViewSource extends ViewPage {
   static byUrl() {
     const sourceId = PATH.replace('source/', '');
 
@@ -3148,10 +3378,11 @@ class ViewOneSource {
       return;
     }
 
-    new ViewOneSource(source).render();
+    new ViewSource(source).render();
   }
 
   constructor(source) {
+    super(source);
     this.source = source;
     this.story = source.story;
     this.type = source.story.type;
@@ -3161,12 +3392,13 @@ class ViewOneSource {
     this.setTitle();
     this.headerTrail();
     this.viewTitles();
-    this.viewSummary();
+    this.viewSectionSummary();
     this.viewImages();
-    this.viewContent();
-    this.viewPeople();
-    this.viewNotes();
-    this.viewLinks();
+    this.viewSectionContent();
+    this.viewSectionPeople();
+    this.viewStories();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
     this.otherEntries();
   }
 
@@ -3179,14 +3411,17 @@ class ViewOneSource {
   }
 
   headerTrail() {
-    if (this.type == 'cemetery') {
-      return headerTrail('sources', 'cemeteries',
-        ['cemetery/' + this.story._id, this.story.title]);
+    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
+      return headerTrail(
+        'sources',
+        pluralize(this.type),
+        [this.type + '/' + this.story._id, this.story.title]
+      );
     }
 
-    if (this.type == 'newspaper') {
-      return headerTrail('sources', 'newspapers',
-        ['newspaper/' + this.story._id, this.story.title]);
+    if (this.type == 'document' && this.story.title.match('Census USA')) {
+      return headerTrail('sources', ['sources/censusUSA', 'Census USA'],
+        [false, this.source.date.year]);
     }
 
     return headerTrail('sources');
@@ -3194,41 +3429,36 @@ class ViewOneSource {
 
   viewTitles() {
     if (this.type == 'cemetery') {
-      rend('<p>' + this.story.location.format + '</p>');
-      rend('<p><br></p>');
+      pg(this.story.location.format);
+      pg('<br>');
       h1(this.source.title);
       return;
     }
 
     if (this.type == 'newspaper') {
       h1(this.source.title);
-      rend('<p>newspaper article</p>');
-      rend('<p>' + this.story.location.format + '</p>');
-      rend('<p>' + this.source.date.format + '</p>');
+      pg('newspaper article');
+      pg(this.story.location.format);
+      pg(this.source.date.format);
       return;
     }
 
     if (this.type == 'document') {
-      h1('Document');
+      if (this.story.title.match('Census USA')) {
+        h1(this.source.title);
+        pg(this.story.type);
+      } else {
+        h1('Document');
+        pg(this.source.title);
+      }
     } else {
       h1('Source');
-      rend('<p>' + this.story.type + '</p>');
+      pg(this.story.type);
+      pg(this.source.title);
     }
 
-    rend('<p>' + this.source.title + '</p>');
-    rend('<p>' + this.source.date.format || source.story.date.format + '</p>');
-    rend('<p>' + this.source.location.format || source.story.location.format + '</p>');
-  }
-
-  viewSummary() {
-    if (!this.source.summary) {
-      return;
-    }
-    h2('Summary');
-    rend(
-      this.source.summary.split('\n')
-      .map(text => '<p>' + text + '</p>').join('')
-    );
+    pg(this.source.date.format || this.story.date.format);
+    pg(this.source.location.format || this.story.location.format);
   }
 
   viewImages() {
@@ -3252,43 +3482,46 @@ class ViewOneSource {
     });
   }
 
-  viewContent() {
-    if (!this.source.content) {
+  viewStories() {
+    if (this.source.stories.length == 0) {
       return;
     }
-    h2('Transcription');
-    rend(formatTranscription(this.source.content));
-  }
-
-  viewPeople() {
-    if (!this.source.people.length) {
-      return;
-    }
-    h2('People');
-    rend($makePeopleList(this.source.people, 'photo'));
-  }
-
-  viewNotes() {
-    if (!this.source.notes) {
-      return;
-    }
-    h2('Notes');
-    rend(
-      '<ul class="bullet"><li>' +
-        this.source.notes.split('\n').join('</li><li>') +
-      '</li></ul>'
-    );
-  }
-
-  viewLinks() {
-    if (!this.source.links.length) {
-      return;
-    }
-    h2('Links');
-    rend(this.source.links.map(getFancyLink));
+    h2('See Also');
+    this.viewSectionList(this.source.stories, {
+      type: 'stories',
+      bullet: true,
+      divider: false,
+      summary: true,
+      location: true,
+      date: true,
+    });
   }
 
   otherEntries() {
+    if (this.type == 'document' && this.story.title.match('Census USA')) {
+      const neighbors = this.story.entries.filter(source => {
+        return source.location.format == this.source.location.format;
+      });
+
+      if (neighbors.length == 0) {
+        return;
+      }
+
+      h2('Neighbors');
+      pg('Other households in <b>' + this.source.location.format + '</b> in '
+        + this.source.date.year + '.').css('margin-bottom', '10px');
+      this.viewSectionList(neighbors, {
+        type: 'sources',
+        showStory: false,
+        bullet: true,
+        divider: false,
+        summary: true,
+        location: false,
+        date: false,
+      });
+      return;
+    }
+
     if (!['newspaper', 'cemetery'].includes(this.type)) {
       return;
     }
@@ -3303,16 +3536,157 @@ class ViewOneSource {
 
     if (this.type == 'cemetery') {
       entries.sortBy(source => source.title);
-      showListOfGraves(entries);
+      ViewCemeteryOrNewspaper.showListOfGraves(entries);
     } else {
       entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
-      showListOfArticles(entries);
+      ViewCemeteryOrNewspaper.showListOfArticles(entries);
     }
   }
 }
 
-class ViewStory {
+class ViewStoryIndex extends ViewPage {
+  static byUrl() {
+    if (['artifacts', 'books', 'cemeteries', 'landmarks', 'newspapers']
+        .includes(PATH)) {
+      new ViewStoryIndex(PATH).render();
+      return true;
+    }
+    return false;
+  }
+
+  constructor(storyType) {
+    super();
+    this.type = storyType.singularize();
+    this.mainTitle = storyType.capitalize();
+    this.stories = this.getStories();
+    this.entryName = this.getEntryName();
+  }
+
+  getStories() {
+    if (this.type == 'artifact') {
+      return DATABASE.stories.filter(story => {
+        return story.type == 'artifact' || story.tags.artifact;
+      });
+    }
+    return DATABASE.stories.filter(story => {
+      return story.type == this.type;
+    });
+  }
+
+  getEntryName() {
+    if (this.type == 'cemetery') {
+      return 'grave';
+    }
+    if (this.type == 'newspaper') {
+      return 'article';
+    }
+  }
+
+  render() {
+    this.headerTrail();
+    this.setPageTitle();
+    this.viewTitle();
+    this.viewStories();
+  }
+
+  headerTrail() {
+    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
+      headerTrail('sources');
+    }
+  }
+
+  setPageTitle() {
+    setPageTitle(this.mainTitle);
+  }
+
+  viewTitle() {
+    if (this.type == 'artifact') {
+      return h1('Artifacts and family heirlooms');
+    }
+    if (this.type == 'landmark') {
+      return h1('Landmarks and buildings');
+    }
+    h1(this.mainTitle);
+  }
+
+  viewStories() {
+    if (['cemetery', 'newspaper'].includes(this.type)) {
+      return this.viewCemeteriesNewspapers();
+    }
+
+    this.viewSectionList(this.stories, {
+      type: 'stories',
+      bullet: false,
+      divider: true,
+      summary: true,
+      location: true,
+      date: true,
+    });
+  }
+
+  viewCemeteriesNewspapers() {
+    const [placeList, storiesByPlace] = this.getStoriesByPlace();
+
+    placeList.forEach(place => {
+      h2(place);
+      storiesByPlace[place].forEach(story => {
+        pg(linkToStory(story)).css('margin', '15px 0 0 5px');
+        pg(story.location.format).css('margin-left', '5px');
+
+        let numEntries;
+
+        if (this.type == 'cemetery') {
+          numEntries = ViewStoryIndex.getNumberOfGravesInCemetery(story);
+        } else {
+          numEntries = story.entries.length;
+        }
+
+        pg(numEntries + ' ' + this.entryName.pluralize(numEntries))
+          .css('margin-left', '5px');
+      });
+    });
+  }
+
+  getStoriesByPlace() {
+    const placeList = [];
+    const storiesByPlace = { Other: [] };
+    const stories = DATABASE.stories.filter(s => s.type == this.type);
+
+    stories.forEach(story => {
+      let placeName = 'Other';
+      if (story.location.country == 'United States' && story.location.region1) {
+        placeName = USA_STATES[story.location.region1];
+      }
+      if (storiesByPlace[placeName] == undefined) {
+        placeList.push(placeName);
+        storiesByPlace[placeName] = [];
+      }
+      storiesByPlace[placeName].push(story);
+    });
+
+    placeList.sort();
+
+    if (storiesByPlace.Other.length) {
+      placeList.push('Other');
+    }
+
+    return [placeList, storiesByPlace];
+  }
+
+  static getNumberOfGravesInCemetery(story) {
+    let count = 0;
+
+    story.entries.forEach(source => {
+      count += source.people.length || 1;
+    });
+
+    return count;
+  }
+}
+
+class ViewStory extends ViewPage {
   constructor(story) {
+    super(story);
     this.story = story;
     this.type = story.type;
     this.entries = story.entries;
@@ -3321,6 +3695,10 @@ class ViewStory {
   headerTrail() {
     if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
       return headerTrail('sources', pluralize(this.type));
+    }
+
+    if (['artifact', 'landmark'].includes(this.type)) {
+      return headerTrail(pluralize(this.type));
     }
 
     return headerTrail('sources');
@@ -3336,32 +3714,35 @@ class ViewStory {
     });
   }
 
-  viewPeople() {
-    if (!this.story.people.length) {
+  viewSources() {
+    const sources = DATABASE.sources.filter(source => {
+      return source.stories.includes(this.story);
+    });
+    if (sources.length == 0) {
       return;
     }
-    h2('People');
-    rend($makePeopleList(this.story.people, 'photo'));
+    h2('Sources');
+    sources.forEach(source => {
+      rend('<p style="margin: 10px">' + linkToSource(source, true) + '</p>');
+    });
   }
 
-  viewNotes() {
-    if (!this.story.notes) {
+  viewExcerpts() {
+    const excerpts = this.story.notations.filter(notation => {
+      return notation.title == 'excerpt';
+    });
+    if (excerpts.length == 0) {
       return;
     }
-    h2('Notes');
-    rend(
-      '<ul class="bullet"><li>' +
-        this.story.notes.split('\n').join('</li><li>') +
-      '</li></ul>'
-    );
-  }
-
-  viewLinks() {
-    if (!this.story.links.length) {
-      return;
-    }
-    h2('Links');
-    rend(this.story.links.map(getFancyLink));
+    h2('Excerpts');
+    excerpts.forEach((notation, i) => {
+      if (i > 0) {
+        rend('<hr style="margin: 20px 0;">');
+      }
+      pg(notation.text).css('margin-top', '20px');
+      pg('from ' + linkToSource(notation.source, true))
+        .css('margin', '10px 0 0 30px');
+    });
   }
 }
 
@@ -3375,6 +3756,7 @@ class ViewCemeteryOrNewspaper extends ViewStory {
     }
 
     new ViewCemeteryOrNewspaper(story).render();
+    return true;
   }
 
   constructor(story) {
@@ -3382,7 +3764,7 @@ class ViewCemeteryOrNewspaper extends ViewStory {
 
     if (this.type == 'cemetery') {
       this.entries.sortBy(source => source.title);
-    } else if (this.storyType == 'newspaper') {
+    } else if (this.type == 'newspaper') {
       this.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
     }
   }
@@ -3395,21 +3777,60 @@ class ViewCemeteryOrNewspaper extends ViewStory {
 
     rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
 
-    this.viewPeople();
+    this.viewSectionPeople();
     this.viewImages();
-    this.viewNotes();
-    this.viewLinks();
+    this.viewSectionContent();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
+    this.viewSources();
+    this.viewExcerpts();
     this.showEntries();
   }
 
   showEntries() {
     if (this.type == 'cemetery') {
       h2('Graves');
-      showListOfGraves(this.entries)
+      ViewCemeteryOrNewspaper.showListOfGraves(this.entries)
     } else {
       h2('Articles');
-      showListOfArticles(this.entries);
+      ViewCemeteryOrNewspaper.showListOfArticles(this.entries);
     }
+  }
+
+  static showListOfGraves(sources) {
+    sources.forEach((source, i) => {
+      const $box = $('<div style="margin: 20px 10px;">');
+
+      $box.append('<p>' + linkToSource(source) + '</p>');
+
+      if (source.summary) {
+        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
+      }
+
+      rend($box);
+    });
+  }
+
+  static showListOfArticles(sources) {
+    sources.forEach((source, i) => {
+      if (i > 0) {
+        rend('<hr>');
+      }
+
+      const $box = $('<div style="margin: 20px 10px;">');
+
+      $box.append('<p>' + linkToSource(source) + '</p>');
+
+      if (source.date.format) {
+        $box.append('<p style="margin-top: 5px">' + source.date.format + '</p>');
+      }
+
+      if (source.summary) {
+        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
+      }
+
+      rend($box);
+    });
   }
 }
 
@@ -3423,6 +3844,7 @@ class ViewStoryBook extends ViewStory {
     }
 
     new ViewStoryBook(story).render();
+    return true;
   }
 
   render() {
@@ -3437,10 +3859,13 @@ class ViewStoryBook extends ViewStory {
       }
     });
 
-    this.viewPeople();
+    this.viewSectionPeople();
     this.viewImages();
-    this.viewNotes();
-    this.viewLinks();
+    this.viewSectionContent();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
+    this.viewSources();
+    this.viewExcerpts();
     this.showEntries();
   }
 
@@ -3448,25 +3873,56 @@ class ViewStoryBook extends ViewStory {
     h2('Chapters');
 
     if (this.entries.length == 0) {
-      rend('<p style="margin: 15px 10px;"><i>None</i></p>');
+      pg('<i>None</i>').css('margin', '15px 10px');
       return;
     }
 
-    this.entries.forEach((source, i) => {
-      if (i > 0) {
-        rend('<hr style="margin: 30px 0;">');
-      }
-
-      const $box = $('<div style="margin: 20px 10px;">');
-
-      $box.append('<p>' + linkToSource(source) + '</p>');
-
-      if (source.summary) {
-        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
-      }
-
-      rend($box);
+    this.viewSectionList(this.entries, {
+      type: 'sources',
+      showStory: false,
+      bullet: true,
+      divider: false,
+      summary: true,
     });
+  }
+}
+
+class ViewStoryArtifactOrLandmark extends ViewStory {
+  static byUrl() {
+    const [storyType, storyId, extraText] = PATH.split('/');
+    const story = DATABASE.storyRef[storyId];
+
+    if (storyType != 'artifact' && storyType != 'landmark') {
+      return false;
+    }
+
+    if (!story || extraText) {
+      return pageNotFound();
+    }
+
+    new ViewStoryArtifactOrLandmark(story).render();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  render() {
+    this.headerTrail();
+
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
+    rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
+
+    this.viewSectionPeople();
+    this.viewImages();
+    this.viewSectionContent();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
+    this.viewSources();
+    this.viewExcerpts();
   }
 }
 

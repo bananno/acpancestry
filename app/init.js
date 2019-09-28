@@ -25,3 +25,5 @@ function getFilePaths() {
 
   return [url, path, env];
 }
+
+function runTests() {} // overwritten in prod version
