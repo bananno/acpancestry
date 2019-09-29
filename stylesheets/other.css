@@ -64,58 +64,6 @@
   cursor: pointer;
 }
 
-/* TIMELINE */
-
-.timeline-item,
-.timeline-key div {
-  margin: 5px;
-  border-radius: 5px;
-  border: 1px solid black;
-}
-
-.timeline-item {
-  padding: 0px 5px;
-}
-
-.timeline-key div {
-  display: inline-block;
-  padding: 5px;
-}
-
-.timeline-key .timeline-life,
-.timeline-item.timeline-life {
-  background-color: #e3ebf9;
-}
-
-.timeline-key .timeline-source,
-.timeline-item.timeline-source {
-  background-color: #fff;
-}
-
-.timeline-key .timeline-family,
-.timeline-item.timeline-family {
-  background-color: #ddd;
-}
-
-.timeline-item .column {
-  vertical-align: text-top;
-  padding: 5px;
-}
-
-@media screen and (min-width: 650px) {
-  .timeline-item .column {
-    display: inline-block;
-  }
-
-  .timeline-item .column1 {
-    width: 250px;
-  }
-
-  .timeline-item .column2 {
-    width: calc(100% - 250px);
-  }
-}
-
 /* ICON LINKS */
 
 .icon-link {
@@ -168,31 +116,6 @@ ul.people-list li {
   height: 30px;
   vertical-align: middle;
   margin-right: 5px;
-}
-
-.person-tree {
-  width: 100%;
-  overflow: scroll;
-}
-
-.person-summary {
-  margin-top: 20px;
-}
-
-.person-tree .treecell {
-  margin: 3px;
-  padding: 5px;
-  border: 1px solid black;
-  text-align: center;
-  background-color: #fcfcfc;
-}
-
-.person-tree .treecell.unknown {
-  opacity: 0.3;
-}
-
-.person-tree a {
-  text-decoration: none;
 }
 
 .person-family {

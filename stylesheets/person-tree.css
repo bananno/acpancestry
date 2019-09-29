@@ -1,0 +1,24 @@
+.person-tree {
+  width: 100%;
+  overflow: scroll;
+}
+
+.person-summary {
+  margin-top: 20px;
+}
+
+.person-tree .treecell {
+  margin: 3px;
+  padding: 5px;
+  border: 1px solid black;
+  text-align: center;
+  background-color: #fcfcfc;
+}
+
+.person-tree .treecell.unknown {
+  opacity: 0.3;
+}
+
+.person-tree a {
+  text-decoration: none;
+}

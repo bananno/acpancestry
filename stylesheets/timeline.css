@@ -1,0 +1,49 @@
+.timeline-item,
+.timeline-key div {
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid black;
+}
+
+.timeline-item {
+  padding: 0px 5px;
+}
+
+.timeline-key div {
+  display: inline-block;
+  padding: 5px;
+}
+
+.timeline-key .timeline-life,
+.timeline-item.timeline-life {
+  background-color: #e3ebf9;
+}
+
+.timeline-key .timeline-source,
+.timeline-item.timeline-source {
+  background-color: #fff;
+}
+
+.timeline-key .timeline-family,
+.timeline-item.timeline-family {
+  background-color: #ddd;
+}
+
+.timeline-item .column {
+  vertical-align: text-top;
+  padding: 5px;
+}
+
+@media screen and (min-width: 650px) {
+  .timeline-item .column {
+    display: inline-block;
+  }
+
+  .timeline-item .column1 {
+    width: 250px;
+  }
+
+  .timeline-item .column2 {
+    width: calc(100% - 250px);
+  }
+}
