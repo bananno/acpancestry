@@ -3,13 +3,15 @@ function localLink(target, text, newTab) {
     + (newTab ? ' target="_blank"' : '') + '>' + text + '</a>';
 }
 
-function linkToPerson(person, leaf, text, keywords) {
+function linkToPerson(person, includeLeaf, text, keywords) {
   text = text || fixSpecialCharacters(person.name);
   if (keywords) {
     text = highlightKeywords(text, keywords);
   }
-  return localLink('person/' + person.customId, text
-    + (leaf && person.star ? '&#160;<span class="person-leaf"></span>' : ''));
+  if (includeLeaf && person.leaf) {
+    text += '&#160;<span class="person-leaf-link leaf-' + person.leaf + '"></span>';
+  }
+  return localLink('person/' + person.customId, text);
 }
 
 function linkToStory(story, text) {

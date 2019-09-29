@@ -77,8 +77,7 @@ class ViewPerson extends ViewPage {
         '<img src="' + person.profileImage + '">' +
         '<div class="person-header-content">' +
           '<h1>' +
-            fixSpecialCharacters(person.name) +
-            (person.star ? '&#160;<img src="images/leaf.png" style="height:40px">' : '') +
+            fixSpecialCharacters(person.name) + this.headerLeaf() +
           '</h1>' +
           this.formatHeaderEvent('B', person.birth) +
           this.formatHeaderEvent('D', person.death) +
@@ -90,6 +89,13 @@ class ViewPerson extends ViewPage {
       rend('<p class="person-summary">Some information is hidden to ' +
         'protect the privacy of living people.</p>');
     }
+  }
+
+  headerLeaf() {
+    if (!this.person.leaf) {
+      return '';
+    }
+    return '<div class="person-leaf-header leaf-' + this.person.leaf + '"></div>';
   }
 
   formatHeaderEvent(abbr, event) {

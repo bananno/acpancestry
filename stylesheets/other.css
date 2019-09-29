@@ -280,11 +280,27 @@ table.event-list th {
   text-decoration: underline;
 }
 
-.person-leaf {
-  display: inline-block;
-  background-image: url(../images/leaf.png);
-  background-size: 20px;
+.leaf-1 {
+  background-image: url(../images/leaf-oak.png);
   background-repeat: no-repeat;
+}
+
+.leaf-2 {
+  background-image: url(../images/leaf-maple.png);
+  background-repeat: no-repeat;
+}
+
+.person-leaf-header {
+  display: inline-block;
+  background-size: 45px;
+  height: 40px;
+  width: 45px;
+  margin-left: 5px;
+}
+
+.person-leaf-link {
+  display: inline-block;
+  background-size: 20px;
   height: 20px;
   width: 23px;
 }
