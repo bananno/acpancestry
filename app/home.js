@@ -1,22 +1,30 @@
 class ViewHome extends ViewPage {
   static byUrl() {
-    new ViewHome();
+    new ViewHome().render();
   }
 
   constructor() {
     super();
+  }
 
+  render() {
     setPageTitle();
     h1(SITE_TITLE);
 
+    this.viewFeatured();
+    this.viewPhotos();
+    this.viewTopics();
+    this.viewBrowse();
+  }
+
+  viewFeatured() {
     h2('featured');
     rend($makePeopleList(DATABASE.people.filter(person => person.tags.featured), 'photo'));
 
-    [
-      ['USA/MN/Pipestone%20County/Ruthton', 'Ruthton, Minnesota'],
-    ].forEach(([path, name]) => rend($makeIconLink('places/' + path, name, 'images/map-icon.svg')));
-
-    DATABASE.stories.filter(s => s.tags.featured).forEach(story => {
+    DATABASE.stories
+    .filter(story => story.tags.featured)
+    .sortBy(story => story.type)
+    .forEach(story => {
       let path, icon, image;
       if (story.type == 'cemetery') {
         path = story.type + '/' + story._id;
@@ -24,6 +32,8 @@ class ViewHome extends ViewPage {
       } else if (story.type == 'newspaper') {
         path = story.type + '/' + story._id;
         image = 'images/newspaper-icon.jpg';
+      } else if (story.type == 'place') {
+        return Place.$iconLink(story.location, { text: story.title, render: true });
       } else {
         return;
       }
@@ -37,7 +47,9 @@ class ViewHome extends ViewPage {
         '</p>'
       );
     });
+  }
 
+  viewPhotos() {
     h2('photos');
     DATABASE.sources.filter(s => s.story.title == 'Photo').forEach(source => {
       if (source.images.length) {
@@ -48,7 +60,9 @@ class ViewHome extends ViewPage {
         );
       }
     });
+  }
 
+  viewTopics() {
     h2('topics');
     bulletList([
       ['landmarks', 'landmarks and buildings'],
@@ -58,7 +72,9 @@ class ViewHome extends ViewPage {
       ['topic/immigration', 'immigration'],
       ['topic/disease', 'disease'],
     ].map(([path, text]) => localLink(path, text)));
+  }
 
+  viewBrowse() {
     h2('browse');
     bulletList([localLink('year/1904', 'browse by year')]);
   }

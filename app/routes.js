@@ -25,7 +25,7 @@ function loadContent() {
   }
 
   if (PATH.match('place')) {
-    return viewPlaces();
+    return ViewPlace.byUrl() || pageNotFound();
   }
 
   if (PATH == 'test' && ENV == 'dev') {
