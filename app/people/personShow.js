@@ -239,7 +239,8 @@ class ViewPerson extends ViewPage {
 
   viewResearchNotes() {
     const notations = DATABASE.notations.filter(note => {
-      return note.people.includes(this.person) && note.tags['research notes'];
+      return Person.isInList(note.people, this.person)
+        && note.tags['research notes'];
     });
 
     if (notations.length == 0) {

@@ -59,6 +59,11 @@ class Person {
     return relationship;
   }
 
+  static isInList(list, person) {
+    person = person._id || person;
+    return list.map(p => p._id || p).includes(person);
+  }
+
   constructor(person, isTest) {
     this.person = person;
     this.isTest = isTest;
