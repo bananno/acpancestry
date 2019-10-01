@@ -64,6 +64,42 @@ class Person {
     return list.map(p => p._id || p).includes(person);
   }
 
+  static age(startDate, endDate) {
+    if (!startDate || !endDate) {
+      return null;
+    }
+    startDate = startDate.date || startDate;
+    endDate = endDate.date || endDate;
+    let age = { year: 0, month: 0, day: 0 };
+
+    age.year = endDate.year - startDate.year;
+    age.month = endDate.month - startDate.month;
+    age.day = endDate.day - startDate.day;
+
+    if (age.day < 0) {
+      age.day += 31;
+      age.month -= 1;
+    }
+
+    if (age.month < 0) {
+      age.month += 12;
+      age.year -= 1;
+    }
+
+    if (age.year > 1) {
+      age.day = 0;
+      if (age.year > 5) {
+        age.month = 0;
+      }
+    }
+
+    return ['year', 'month', 'day'].map(part => {
+      if (age[part]) {
+        return age[part] + ' ' + part.pluralize(age[part]);
+      }
+    }).filter(p => p).join(', ');
+  }
+
   constructor(person, isTest) {
     this.person = person;
     this.isTest = isTest;
@@ -95,6 +131,12 @@ class Person {
     }
 
     return people;
+  }
+
+  ageAt(date) {
+    if (this.birth && this.death) {
+      return Person.age(this.birth.date, this.death.date);
+    }
   }
 
   get mother() {

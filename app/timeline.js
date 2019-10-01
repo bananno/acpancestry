@@ -88,6 +88,15 @@ class TimelineItem {
       if (this.item.relationship) {
         return this.item.title + ' of ' + this.getEventRelationship();
       }
+
+      if (this.item.title == 'death' && this.person) {
+        let age = this.person.ageAt(this.item.date);
+        if (age) {
+          return 'death (age ' + age + ')';
+        }
+        return 'death';
+      }
+
       return this.item.title;
     }
 
