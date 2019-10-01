@@ -1,0 +1,35 @@
+/* HEADER & FOOTER */
+
+header {
+  padding: 10px;
+  background-color: black;
+  color: white;
+}
+
+header button {
+  background-color: white;
+  color: black;
+}
+
+footer {
+  padding: 10px;
+  background-color: black;
+  font-size: 15px;
+  color: gray;
+  text-align: center;
+  font-style: italic;
+}
+
+/* MAIN TITLE */
+
+header h1, header h1 a {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-size: 25px;
+  margin-right: 20px;
+}
+
+header li a:hover {
+  border-color: #7ace42;
+}

@@ -3,11 +3,10 @@
   margin: 0;
   font-family: "Lucida Grande", Helvetica, Arial, sans-serif;
   box-sizing: border-box;
+  border-collapse: collapse;
 }
 
-body {
-  width: 100%;
-}
+/* PAGE BACKGROUND */
 
 body, .cover-background {
   background-color: #f0f0f0;
@@ -22,9 +21,7 @@ body, .cover-background {
   }
 }
 
-table {
-  border-collapse: collapse;
-}
+/* LINKS */
 
 a, .fake-link {
   color: #00B7FF;
@@ -36,10 +33,33 @@ a:hover, .fake-link:hover {
   cursor: pointer;
 }
 
+/* BULLET LISTS */
+
 ul.bullet {
   margin-left: 20px;
 }
 
 ul.bullet li {
   margin-top: 5px;
+}
+
+/* HEADER TAGS */
+
+#page-content h1 {
+  font-size: 32px;
+}
+
+#page-content h2 {
+  margin: 30px 0 10px 0;
+  padding: 0 0 5px 10px;
+  border-bottom: 2px solid black;
+  font-size: 24px;
+}
+
+/* OTHER */
+
+.error {
+  color: red;
+  font-weight: bold;
+  font-size: 20px;
 }

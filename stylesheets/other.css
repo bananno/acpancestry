@@ -1,25 +1,4 @@
-/* PAGE CONTENT */
-
-#page-content {
-  margin-bottom: 30px;
-  padding: 30px 20px;
-  width: 100%;
-  max-width: 1000px;
-  margin: auto;
-}
-
-#page-content h1 {
-  font-size: 32px;
-}
-
-#page-content h2 {
-  margin: 30px 0 10px 0;
-  padding: 0 0 5px 10px;
-  border-bottom: 2px solid black;
-  font-size: 24px;
-}
-
-/* PERSON HEADER */
+/* PERSON HEADER SECTION */
 
 .person-header img {
   max-height: 80px;
@@ -101,12 +80,6 @@ ul.people-list li {
 }
 
 /* OTHER */
-
-.error {
-  color: red;
-  font-weight: bold;
-  font-size: 20px;
-}
 
 .fancy-link {
   margin-top: 5px;

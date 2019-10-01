@@ -1,0 +1,41 @@
+html,
+body {
+  height: 100%;
+  position: relative;
+}
+
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+#body-container {
+  min-height: 100vh;
+  overflow: hidden;
+  display: block;
+  position: relative;
+  padding-bottom: 100px;
+}
+
+#page-content {
+  margin-bottom: 30px;
+  padding: 30px 20px;
+  width: 100%;
+  max-width: 1000px;
+  margin: auto;
+}
+
+header, footer {
+  width: 100%;
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+}
+
+@media screen and (max-width: 600px) {
+  footer {
+    display: none;
+  }
+}
