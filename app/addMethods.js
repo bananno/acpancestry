@@ -10,6 +10,11 @@ Array.prototype.trueSort = function(callback) {
   });
 };
 
+Array.prototype.random = function() {
+  let n = Math.round(Math.random() * (this.length - 1));
+  return this[n];
+}
+
 String.prototype.capitalize = function() {
   return this.slice(0, 1).toUpperCase() + this.slice(1);
 };

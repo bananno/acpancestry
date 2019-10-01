@@ -4,6 +4,7 @@ function setupLayout() {
   $(document).on('click', '#main-navigation .close-me', closeSideMenu);
   $(document).on('click', '#menu-backdrop', closeSideMenu);
   createHeaderLinks();
+  addFooterQuote();
 }
 
 function openSideMenu() {
@@ -23,4 +24,9 @@ function createHeaderLinks() {
   ['People', 'Events', 'Sources', 'Places'].forEach(nav => {
     $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');
   });
+}
+
+function addFooterQuote() {
+  const quotes = DATABASE.notations.filter(n => n.tags['featured quote']);
+  $('#page-footer').append(quotes.random().text);
 }

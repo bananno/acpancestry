@@ -1,3 +1,5 @@
+/* HEADER & FOOTER */
+
 #page-header {
   padding: 10px;
   background-color: black;
@@ -8,6 +10,16 @@
 #page-header button {
   background-color: white;
   color: black;
+}
+
+#page-footer {
+  width: 100%;
+  padding: 10px;
+  background-color: black;
+  font-size: 15px;
+  color: gray;
+  text-align: center;
+  font-style: italic;
 }
 
 /* MAIN TITLE */
