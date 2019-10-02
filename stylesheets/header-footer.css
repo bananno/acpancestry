@@ -1,14 +1,7 @@
-/* HEADER & FOOTER */
-
 header {
   padding: 10px;
   background-color: black;
   color: white;
-}
-
-header button {
-  background-color: white;
-  color: black;
 }
 
 footer {
@@ -20,16 +13,12 @@ footer {
   font-style: italic;
 }
 
-/* MAIN TITLE */
-
-header h1, header h1 a {
+header h1,
+header h1 a,
+header h1 a:hover {
   display: inline-block;
   color: white;
   text-decoration: none;
   font-size: 25px;
   margin-right: 20px;
-}
-
-header li a:hover {
-  border-color: #7ace42;
 }

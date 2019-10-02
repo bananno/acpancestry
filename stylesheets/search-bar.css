@@ -1,0 +1,17 @@
+#search-form {
+  display: inline-block;
+  margin-left: 100px;
+}
+
+#search-form input,
+#search-form button {
+  padding: 5px;
+  border-radius: 8px;
+  border: 2px solid black;
+}
+
+#search-form button {
+  cursor: pointer;
+  background-color: white;
+  color: black;
+}

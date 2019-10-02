@@ -5,7 +5,7 @@ class SearchResults extends ViewPage {
     const keywords = PATH.slice(7).toLowerCase().split('+')
       .filter(word => word.length > 0);
 
-    $('.search-form [name="search"]').val(keywords.join(' '));
+    $('#search-form [name="search"]').val(keywords.join(' '));
 
     if (keywords.length === 0) {
       return h1('Search Results');

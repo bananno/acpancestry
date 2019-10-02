@@ -94,4 +94,8 @@
   #main-navigation li a {
     border-bottom: 3px solid black;
   }
+
+  #main-navigation li a:hover {
+    border-color: #7ace42;
+  }
 }
