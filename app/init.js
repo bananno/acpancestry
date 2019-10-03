@@ -26,4 +26,4 @@ function getFilePaths() {
   return [url, path, env];
 }
 
-function runTests() {} // overwritten in prod version
+function runTests() {} // overwritten in dev version

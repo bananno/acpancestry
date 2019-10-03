@@ -32,6 +32,10 @@ function loadContent() {
     return viewTests();
   }
 
+  if (PATH.match('audit') && ENV == 'dev') {
+    return ViewAudit.byUrl() || pageNotFound();
+  }
+
   if (PATH.match('image/')) {
     return viewImage();
   }

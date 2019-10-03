@@ -24,6 +24,13 @@ function createHeaderLinks() {
   ['People', 'Events', 'Sources', 'Places'].forEach(nav => {
     $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');
   });
+
+  if (ENV == 'dev') {
+    ['Test', 'Audit'].forEach(nav => {
+      $list.append('<li>' + localLink(nav.toLowerCase(), nav.slice(0, 1))
+        + '</li>');
+    });
+  }
 }
 
 function addFooterQuote() {
