@@ -133,6 +133,10 @@ class Person {
     return people;
   }
 
+  ageAtDeath() {
+    return this.ageAt(this.death);
+  }
+
   ageAt(date) {
     if (this.birth && this.death) {
       return Person.age(this.birth.date, this.death.date);

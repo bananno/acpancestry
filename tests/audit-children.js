@@ -45,17 +45,7 @@ class ViewAuditChildren extends ViewAudit {
   render() {
     h1('Audit: all children listed');
     for (let group in this.list) {
-      h2(group);
-      const $ul = $('<ul>');
-      rend($ul);
-      this.list[group].forEach(person => {
-        rend(
-          $('<div>')
-          .css('display', 'inline-block')
-          .css('width', '400px')
-          .append(linkToPerson(person))
-        );
-      });
+      this.showGroupsOfPeople(group);
     }
   }
 }
