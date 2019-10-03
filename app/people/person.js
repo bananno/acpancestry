@@ -59,6 +59,18 @@ class Person {
     return relationship;
   }
 
+  static sortListByAncestorDegree(peopleList) {
+    peopleList.sortBy(person => {
+      if (!person.leaf) {
+        return '2';
+      }
+      if (person.degree < 10) {
+        return '1-0' + person.degree;
+      }
+      return '1-' + person.degree;
+    });
+  }
+
   static isInList(list, person) {
     person = person._id || person;
     return list.map(p => p._id || p).includes(person);

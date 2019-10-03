@@ -82,6 +82,7 @@ class SearchResultsPeople extends SearchResults {
   }
 
   sortResults() {
+    Person.sortListByAncestorDegree(this.resultsList);
   }
 
   renderResults() {

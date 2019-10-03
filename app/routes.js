@@ -72,8 +72,10 @@ function loadContent() {
 
 function viewPeople() {
   setPageTitle('People');
-  rend('<h1>All People</h1>');
-  rend($makePeopleList(DATABASE.people, 'photo'));
+  h1('All People');
+  const peopleList = [...DATABASE.people];
+  Person.sortListByAncestorDegree(peopleList);
+  rend($makePeopleList(peopleList, 'photo'));
 }
 
 function viewTests() {
