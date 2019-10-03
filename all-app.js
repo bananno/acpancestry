@@ -1,3 +1,105 @@
+class ViewPage {
+  constructor(item) {
+    this.item = item;
+  }
+
+  viewSectionSummary() {
+    if (!this.item.summary) {
+      return;
+    }
+    h2('Summary');
+    rend(
+      this.item.summary.split('\n').map(text => '<p>' + text + '</p>').join('')
+    );
+  }
+
+  viewSectionPeople() {
+    if (this.item.people.length == 0) {
+      return;
+    }
+    h2('People');
+    rend($makePeopleList(this.item.people, 'photo'));
+  }
+
+  viewSectionNotes() {
+    if (!this.item.notes) {
+      return;
+    }
+    h2('Notes');
+    rend(
+      '<ul class="bullet"><li>' +
+        this.item.notes.split('\n').join('</li><li>') +
+      '</li></ul>'
+    );
+  }
+
+  viewSectionLinks() {
+    if (this.item.links.length == 0) {
+      return;
+    }
+    h2('Links');
+    rend(this.item.links.map(getFancyLink));
+  }
+
+  viewSectionContent() {
+    if (!this.item.content) {
+      return;
+    }
+    h2('Transcription');
+    rend(formatTranscription(this.item.content));
+  }
+
+  viewSectionList(list, options = {}) {
+    let $ul;
+
+    if (options.bullet) {
+      $ul = $('<ul style="margin-left: 30px;">');
+      rend($ul);
+    }
+
+    list.forEach(item => {
+      let $container;
+
+      if ($ul) {
+        $container = $('<li>').appendTo($ul);
+      } else {
+        $container = $('<div>');
+        rend($container);
+      }
+
+      if (options.divider) {
+        $container.append('<hr style="margin: 20px 0;">');
+      }
+
+      if (options.type == 'stories') {
+        $container.append(linkToStory(item));
+      } else if (options.type == 'sources') {
+        $container.append(linkToSource(item, options.showStory));
+      } else {
+        $container.append(item);
+      }
+
+      if (options.summary && item.summary) {
+        $container.append(
+          '<p style="margin-top: 10px;">' + item.summary + '</p>'
+        );
+      }
+
+      if (options.location && item.location.format) {
+        $container.append(
+          '<p style="margin-top: 10px;">' + item.location.format + '</p>'
+        );
+      }
+
+      if (options.date && item.date.format) {
+        $container.append(
+          '<p style="margin-top: 10px;">' + item.date.format + '</p>'
+        );
+      }
+    });
+  }
+}
+
 
 function viewAbout() {
   const about = PATH.replace('about/', '');
@@ -50,16 +152,21 @@ function viewAboutPersonProfile() {
 }
 
 Array.prototype.sortBy = function(callback) {
-  this.sort((a, b) => {
+  return this.sort((a, b) => {
     return callback(a) < callback(b) ? -1 : 0;
   });
 };
 
 Array.prototype.trueSort = function(callback) {
-  this.sort((a, b) => {
+  return this.sort((a, b) => {
     return callback(a, b) ? -1 : 0;
   });
 };
+
+Array.prototype.random = function() {
+  let n = Math.round(Math.random() * (this.length - 1));
+  return this[n];
+}
 
 String.prototype.capitalize = function() {
   return this.slice(0, 1).toUpperCase() + this.slice(1);
@@ -286,6 +393,89 @@ function eventBlock(event) {
   return $div;
 }
 
+class ViewHome extends ViewPage {
+  static byUrl() {
+    new ViewHome().render();
+  }
+
+  constructor() {
+    super();
+  }
+
+  render() {
+    setPageTitle();
+    h1(SITE_TITLE);
+
+    this.viewFeatured();
+    this.viewPhotos();
+    this.viewTopics();
+    this.viewBrowse();
+  }
+
+  viewFeatured() {
+    h2('featured');
+    rend($makePeopleList(DATABASE.people.filter(person => person.tags.featured), 'photo'));
+
+    DATABASE.stories
+    .filter(story => story.tags.featured)
+    .sortBy(story => story.type)
+    .forEach(story => {
+      let path, icon, image;
+      if (story.type == 'cemetery') {
+        path = story.type + '/' + story._id;
+        image = 'images/map-icon.svg';
+      } else if (story.type == 'newspaper') {
+        path = story.type + '/' + story._id;
+        image = 'images/newspaper-icon.jpg';
+      } else if (story.type == 'place') {
+        return Place.$iconLink(story.location, { text: story.title, render: true });
+      } else {
+        return;
+      }
+      rend($makeIconLink(path, story.title, image));
+    });
+
+    DATABASE.sources.filter(s => s.tags.featured).forEach(source => {
+      rend(
+        '<p style="margin: 10px">' +
+          linkToSource(source, source.story.title + ' - ' + source.title) +
+        '</p>'
+      );
+    });
+  }
+
+  viewPhotos() {
+    h2('photos');
+    DATABASE.sources.filter(s => s.story.title == 'Photo').forEach(source => {
+      if (source.images.length) {
+        rend(
+          localLink('source/' + source._id, '<img src="' + source.images[0] +
+          '" style="height: 100px; max-width: 300px; margin: 5px;" title="' +
+          source.title + '">')
+        );
+      }
+    });
+  }
+
+  viewTopics() {
+    h2('topics');
+    bulletList([
+      ['landmarks', 'landmarks and buildings'],
+      ['artifacts', 'artifacts and family heirlooms'],
+      ['topic/brickwalls', 'brick walls and mysteries'],
+      ['topic/military', 'military'],
+      ['topic/immigration', 'immigration'],
+      ['topic/disease', 'disease'],
+      ['topic/families', 'largest families'],
+    ].map(([path, text]) => localLink(path, text)));
+  }
+
+  viewBrowse() {
+    h2('browse');
+    bulletList([localLink('year/1904', 'browse by year')]);
+  }
+}
+
 
 const [ORIGIN, PATH, ENV] = getFilePaths();
 
@@ -314,12 +504,12 @@ function getFilePaths() {
   return [url, path, env];
 }
 
-function runTests() {} // overwritten in prod version
+function runTests() {} // overwritten in dev version
 
 
 function loadContent() {
   if (PATH == '') {
-    return viewMain();
+    return ViewHome.byUrl();
   }
 
   if (PATH == 'people') {
@@ -343,11 +533,15 @@ function loadContent() {
   }
 
   if (PATH.match('place')) {
-    return viewPlaces();
+    return ViewPlace.byUrl() || pageNotFound();
   }
 
   if (PATH == 'test' && ENV == 'dev') {
     return viewTests();
+  }
+
+  if (PATH.match('audit') && ENV == 'dev') {
+    return ViewAudit.byUrl() || pageNotFound();
   }
 
   if (PATH.match('image/')) {
@@ -384,68 +578,12 @@ function loadContent() {
   return pageNotFound();
 }
 
-function viewMain() {
-  setPageTitle();
-  h1(SITE_TITLE);
-
-  h2('featured');
-  rend($makePeopleList(DATABASE.people.filter(person => person.tags.featured), 'photo'));
-
-  [
-    ['USA/MN/Pipestone%20County/Ruthton', 'Ruthton, Minnesota'],
-  ].forEach(([path, name]) => rend($makeIconLink('places/' + path, name, 'images/map-icon.svg')));
-
-  DATABASE.stories.filter(s => s.tags.featured).forEach(story => {
-    let path, icon;
-    if (story.type == 'cemetery') {
-      path = story.type + '/' + story._id;
-      image = 'images/map-icon.svg';
-    } else if (story.type == 'newspaper') {
-      path = story.type + '/' + story._id;
-      image = 'images/newspaper-icon.jpg';
-    } else {
-      return;
-    }
-    rend($makeIconLink(path, story.title, image));
-  });
-
-  DATABASE.sources.filter(s => s.tags.featured).forEach(source => {
-    rend(
-      '<p style="margin: 10px">' +
-        linkToSource(source, source.story.title + ' - ' + source.title) +
-      '</p>'
-    );
-  });
-
-  h2('photos');
-  DATABASE.sources.filter(s => s.story.title == 'Photo').forEach(source => {
-    if (source.images.length) {
-      rend(
-        localLink('source/' + source._id, '<img src="' + source.images[0] +
-        '" style="height: 100px; max-width: 300px; margin: 5px;" title="' +
-        source.title + '">')
-      );
-    }
-  });
-
-  h2('topics');
-  bulletList([
-    ['landmarks', 'landmarks and buildings'],
-    ['artifacts', 'artifacts and family heirlooms'],
-    ['topic/brickwalls', 'brick walls and mysteries'],
-    ['topic/military', 'military'],
-    ['topic/immigration', 'immigration'],
-    ['topic/disease', 'disease'],
-  ].map(([path, text]) => localLink(path, text)));
-
-  h2('browse');
-  bulletList([localLink('year/1904', 'browse by year')]);
-}
-
 function viewPeople() {
   setPageTitle('People');
-  rend('<h1>All People</h1>');
-  rend($makePeopleList(DATABASE.people, 'photo'));
+  h1('All People');
+  const peopleList = [...DATABASE.people];
+  Person.sortListByAncestorDegree(peopleList);
+  rend($makePeopleList(peopleList, 'photo'));
 }
 
 function viewTests() {
@@ -548,6 +686,15 @@ class TimelineItem {
       if (this.item.relationship) {
         return this.item.title + ' of ' + this.getEventRelationship();
       }
+
+      if (this.item.title == 'death' && this.person) {
+        let age = this.person.ageAt(this.item.date);
+        if (age) {
+          return 'death (age ' + age + ')';
+        }
+        return 'death';
+      }
+
       return this.item.title;
     }
 
@@ -728,108 +875,6 @@ class TimelineItem {
   }
 }
 
-class ViewPage {
-  constructor(item) {
-    this.item = item;
-  }
-
-  viewSectionSummary() {
-    if (!this.item.summary) {
-      return;
-    }
-    h2('Summary');
-    rend(
-      this.item.summary.split('\n').map(text => '<p>' + text + '</p>').join('')
-    );
-  }
-
-  viewSectionPeople() {
-    if (this.item.people.length == 0) {
-      return;
-    }
-    h2('People');
-    rend($makePeopleList(this.item.people, 'photo'));
-  }
-
-  viewSectionNotes() {
-    if (!this.item.notes) {
-      return;
-    }
-    h2('Notes');
-    rend(
-      '<ul class="bullet"><li>' +
-        this.item.notes.split('\n').join('</li><li>') +
-      '</li></ul>'
-    );
-  }
-
-  viewSectionLinks() {
-    if (this.item.links.length == 0) {
-      return;
-    }
-    h2('Links');
-    rend(this.item.links.map(getFancyLink));
-  }
-
-  viewSectionContent() {
-    if (!this.item.content) {
-      return;
-    }
-    h2('Transcription');
-    rend(formatTranscription(this.item.content));
-  }
-
-  viewSectionList(list, options = {}) {
-    let $ul;
-
-    if (options.bullet) {
-      $ul = $('<ul style="margin-left: 30px;">');
-      rend($ul);
-    }
-
-    list.forEach(item => {
-      let $container;
-
-      if ($ul) {
-        $container = $('<li>').appendTo($ul);
-      } else {
-        $container = $('<div>');
-        rend($container);
-      }
-
-      if (options.divider) {
-        $container.append('<hr style="margin: 20px 0;">');
-      }
-
-      if (options.type == 'stories') {
-        $container.append(linkToStory(item));
-      } else if (options.type == 'sources') {
-        $container.append(linkToSource(item, options.showStory));
-      } else {
-        $container.append(item);
-      }
-
-      if (options.summary && item.summary) {
-        $container.append(
-          '<p style="margin-top: 10px;">' + item.summary + '</p>'
-        );
-      }
-
-      if (options.location && item.location.format) {
-        $container.append(
-          '<p style="margin-top: 10px;">' + item.location.format + '</p>'
-        );
-      }
-
-      if (options.date && item.date.format) {
-        $container.append(
-          '<p style="margin-top: 10px;">' + item.date.format + '</p>'
-        );
-      }
-    });
-  }
-}
-
 
 function viewYear() {
   const year = parseInt(PATH.replace('year/', '') || 0);
@@ -900,13 +945,15 @@ function localLink(target, text, newTab) {
     + (newTab ? ' target="_blank"' : '') + '>' + text + '</a>';
 }
 
-function linkToPerson(person, leaf, text, keywords) {
+function linkToPerson(person, includeLeaf, text, keywords) {
   text = text || fixSpecialCharacters(person.name);
   if (keywords) {
     text = highlightKeywords(text, keywords);
   }
-  return localLink('person/' + person.customId, text
-    + (leaf && person.star ? '&#160;<span class="person-leaf"></span>' : ''));
+  if (includeLeaf && person.leaf) {
+    text += '&#160;<span class="person-leaf-link leaf-' + person.leaf + '"></span>';
+  }
+  return localLink('person/' + person.customId, text);
 }
 
 function linkToStory(story, text) {
@@ -1306,6 +1353,7 @@ function setupLayout() {
   $(document).on('click', '#main-navigation .close-me', closeSideMenu);
   $(document).on('click', '#menu-backdrop', closeSideMenu);
   createHeaderLinks();
+  addFooterQuote();
 }
 
 function openSideMenu() {
@@ -1325,273 +1373,18 @@ function createHeaderLinks() {
   ['People', 'Events', 'Sources', 'Places'].forEach(nav => {
     $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');
   });
-}
 
-
-function viewPlaces() {
-  const placePath = getURLPathPlaces();
-
-  let [placeList, items] = getItemsByPlace(placePath);
-
-  placeList = editPlaceNames(placePath, placeList);
-
-  showPageTitleAndHeader(placePath);
-
-  if (items.length == 0) {
-    rend('<p style="margin-top: 10px;">There is no information available for this place.</p>');
-  } else if (placePath.length == 4) {
-    viewPlacesItemList(items, true);
-  } else if (placePath.length && placePath[placePath.length - 1].path == 'all') {
-    viewPlacesItemList(items, false);
-  } else {
-    viewPlacesIndex(placePath, placeList);
-  }
-}
-
-function getURLPathPlaces() {
-  if (PATH == 'places') {
-    return [];
-  }
-
-  let places = PATH.replace('places/', '').split('/').map(place => {
-    let placeFix = place.replace(/\%20/g, ' ').replace(/\+/g, ' ');
-    return {
-      path: place,
-      true: placeFix,
-      text: placeFix,
-    };
-  });
-
-  if (places.length == 0) {
-    return [];
-  }
-
-  if (places[0].text == 'United States' || places[0].text == 'USA') {
-    places[0].path = 'USA';
-    places[0].text = 'United States';
-    places[0].true = 'United States';
-
-    if (places.length > 1) {
-      if (USA_STATES[places[1].text]) {
-        places[1].text = USA_STATES[places[1].text];
-      }
-    }
-  }
-
-  return places;
-}
-
-function showPageTitleAndHeader(placePath) {
-  if (placePath.length == 0) {
-    setPageTitle('Places');
-    rend('<h1>Places</h1>');
-    return;
-  }
-
-  let mostSpecificPlace = placePath[placePath.length - 1].text;
-  let showAll = false;
-
-  if (mostSpecificPlace == 'all') {
-    mostSpecificPlace = placePath[placePath.length - 2].text;
-    showAll = true;
-  }
-
-  setPageTitle(mostSpecificPlace);
-
-  let tempPath = 'places';
-  let links = [localLink('places', 'Places')];
-
-  for (let i = 0; i < placePath.length - 1; i++) {
-    tempPath += '/' + placePath[i].path;
-    links.push(localLink(tempPath, placePath[i].text));
-  }
-
-  rend('<p class="header-trail">' + links.join(' &#8594; ') + '</p>');
-
-  rend('<h1>' + mostSpecificPlace + (showAll ? ' - all' : '') + '</h1>');
-}
-
-
-function viewPlacesItemList(itemList, hideLocation) {
-
-  // view list of stories/sources in given location - REPAIR LATER
-  return;
-
-  [['Cemeteries', 'grave', 'grave'],
-  ['Newspapers', 'newspaper', 'article']].forEach(([sectionTitle, sourceType, entryName]) => {
-    const groupList = createListOfNewspapersOrCemeteries(sourceType, itemList)[1];
-    let needHeader = true;
-
-    for (let groupName in groupList) {
-      if (needHeader) {
-        rend('<h2>' + sectionTitle + '</h2>');
-        needHeader = false;
-      }
-
-      const rootSource = groupList[groupName][0];
-      const numItems = groupList[groupName].length;
-
-      rend(sourceListitemCemeteryOrNewspaper(rootSource, entryName, numItems, hideLocation));
-    }
-  });
-
-  const otherItems = itemList.filter(item => item.type != 'grave' && item.type != 'newspaper');
-
-  if (otherItems.length) {
-    rend('<h2>Other</h2>');
-  }
-
-  otherItems.forEach(item => {
-    if (item.group) {
-      viewPlacesItemSource(item);
-    } else {
-      viewPlacesItemEvent(item);
-    }
-  });
-}
-
-function viewPlacesItemSource(source) {
-  rend(
-    '<p style="margin-top: 10px;">' +
-    linkToSource(source, source.type + ' - ' + source.group + ' - ' + source.title) +
-    '</p>'
-  );
-}
-
-function viewPlacesItemEvent(event) {
-  rend(
-    '<p style="margin-top: 10px;">' +
-      event.title + ' - ' +
-      event.people.map(person => linkToPerson(person)).join(', ') +
-    '</p>'
-  );
-}
-
-
-const placeLevels = ['country', 'region1', 'region2', 'city'];
-
-function getItemsByPlace(placePath) {
-  const placeList = [];
-  const foundPlaceAlready = [];
-  const mostSpecificLevel = placeLevels[placePath.length];
-
-  const listOfItemsOnly = mostSpecificLevel == 'city'
-    || (placePath.length && placePath[placePath.length - 1].path == 'all');
-
-  const items = [...DATABASE.events, ...DATABASE.sources].filter((item, t) => {
-    if (!placeMatch(item.location, placePath)) {
-      return false;
-    }
-
-    if (listOfItemsOnly) {
-      return true;
-    }
-
-    const itemPlace = item.location[mostSpecificLevel] || 'other';
-
-    if (!foundPlaceAlready[itemPlace]) {
-      placeList.push({
-        path: itemPlace,
-        text: itemPlace,
-      });
-      foundPlaceAlready[itemPlace] = true;
-    }
-
-    return true;
-  });
-
-  return [placeList, items];
-}
-
-function placeMatch(itemLocation, placePath) {
-  for (let i = 0; i < placePath.length; i++) {
-    let levelName = placeLevels[i];
-    let itemPlace = itemLocation[levelName];
-    let placeName = placePath[i].true;
-
-    if (placeName == 'other') {
-      if (itemPlace == null || itemPlace == '') {
-        continue;
-      }
-    }
-
-    if (placeName == 'all') {
-      return true;
-    }
-
-    if (itemPlace == placeName) {
-      continue;
-    }
-
-    return false;
-  }
-
-  return true;
-}
-
-function editPlaceNames(placePath, placeList) {
-  let otherText = 'other';
-
-  if (placePath.length == 0) {
-    otherText = 'location not specified';
-    placeList = placeList.map(place => {
-      if (place.path == 'United States') {
-        place.path = 'USA';
-      }
-      return place;
+  if (ENV == 'dev') {
+    ['Test', 'Audit'].forEach(nav => {
+      $list.append('<li>' + localLink(nav.toLowerCase(), nav.slice(0, 1))
+        + '</li>');
     });
-  } else if (placePath.length == 1 && placePath[0].path == 'USA') {
-    otherText = 'state not specified';
-    placeList = placeList.map(place => {
-      place.text = USA_STATES[place.text] || 'other';
-      return place;
-    });
-  } else if (placePath.length == 2 && placePath[0].path == 'USA') {
-    otherText = 'county not specified';
   }
-
-  placeList.sort((a, b) => {
-    let [str1, str2] = [b.text.toLowerCase(), a.text.toLowerCase()];
-    const swap = (str1 > str2 || str1 == 'other') && str2 != 'other';
-    return swap ? -1 : 1;
-  });
-
-  if (placeList.length && placeList[placeList.length - 1].text == 'other') {
-    placeList[placeList.length - 1].text = otherText;
-  }
-
-  return placeList;
 }
 
-
-function viewPlacesIndex(placePath, placeList) {
-  let path = ['places', ...(placePath.map(place => place.path))].join('/') + '/';
-
-  if (placeListShouldAllowViewAll(placePath)) {
-    rend(
-      '<p style="padding-top: 5px;">' +
-        localLink(path + 'all', 'view all') +
-      '</p>'
-    );
-  }
-
-  placeList.forEach(place => {
-    rend(
-      '<p style="padding-top: 5px;">' +
-        localLink(path + place.path, place.text) +
-      '</p>'
-    );
-  });
-}
-
-function placeListShouldAllowViewAll(placePath) {
-  if (placePath.length == 0) {
-    return false;
-  }
-  if (placePath.length == 1 && placePath[0].path == 'USA') {
-    return false;
-  }
-  return true;
+function addFooterQuote() {
+  const quotes = DATABASE.notations.filter(n => n.tags['featured quote']);
+  $('#page-footer').append(quotes.random().text);
 }
 
 class Person {
@@ -1655,6 +1448,59 @@ class Person {
     return relationship;
   }
 
+  static sortListByAncestorDegree(peopleList) {
+    peopleList.sortBy(person => {
+      if (!person.leaf) {
+        return '2';
+      }
+      if (person.degree < 10) {
+        return '1-0' + person.degree;
+      }
+      return '1-' + person.degree;
+    });
+  }
+
+  static isInList(list, person) {
+    person = person._id || person;
+    return list.map(p => p._id || p).includes(person);
+  }
+
+  static age(startDate, endDate) {
+    if (!startDate || !endDate) {
+      return null;
+    }
+    startDate = startDate.date || startDate;
+    endDate = endDate.date || endDate;
+    let age = { year: 0, month: 0, day: 0 };
+
+    age.year = endDate.year - startDate.year;
+    age.month = endDate.month - startDate.month;
+    age.day = endDate.day - startDate.day;
+
+    if (age.day < 0) {
+      age.day += 31;
+      age.month -= 1;
+    }
+
+    if (age.month < 0) {
+      age.month += 12;
+      age.year -= 1;
+    }
+
+    if (age.year > 1) {
+      age.day = 0;
+      if (age.year > 5) {
+        age.month = 0;
+      }
+    }
+
+    return ['year', 'month', 'day'].map(part => {
+      if (age[part]) {
+        return age[part] + ' ' + part.pluralize(age[part]);
+      }
+    }).filter(p => p).join(', ');
+  }
+
   constructor(person, isTest) {
     this.person = person;
     this.isTest = isTest;
@@ -1686,6 +1532,16 @@ class Person {
     }
 
     return people;
+  }
+
+  ageAtDeath() {
+    return this.ageAt(this.death);
+  }
+
+  ageAt(date) {
+    if (this.birth && this.death) {
+      return Person.age(this.birth.date, this.death.date);
+    }
   }
 
   get mother() {
@@ -1776,8 +1632,7 @@ class ViewPerson extends ViewPage {
         '<img src="' + person.profileImage + '">' +
         '<div class="person-header-content">' +
           '<h1>' +
-            fixSpecialCharacters(person.name) +
-            (person.star ? '&#160;<img src="images/leaf.png" style="height:40px">' : '') +
+            fixSpecialCharacters(person.name) + this.headerLeaf() +
           '</h1>' +
           this.formatHeaderEvent('B', person.birth) +
           this.formatHeaderEvent('D', person.death) +
@@ -1789,6 +1644,13 @@ class ViewPerson extends ViewPage {
       rend('<p class="person-summary">Some information is hidden to ' +
         'protect the privacy of living people.</p>');
     }
+  }
+
+  headerLeaf() {
+    if (!this.person.leaf) {
+      return '';
+    }
+    return '<div class="person-leaf-header leaf-' + this.person.leaf + '"></div>';
   }
 
   formatHeaderEvent(abbr, event) {
@@ -1932,7 +1794,8 @@ class ViewPerson extends ViewPage {
 
   viewResearchNotes() {
     const notations = DATABASE.notations.filter(note => {
-      return note.people.includes(this.person) && note.tags['research notes'];
+      return Person.isInList(note.people, this.person)
+        && note.tags['research notes'];
     });
 
     if (notations.length == 0) {
@@ -2433,554 +2296,396 @@ function personTree(person, safety, parent) {
   );
 }
 
-class SearchResults extends ViewPage {
-  static byUrl() {
-    setPageTitle('Search Results');
 
-    const keywords = PATH.slice(7).toLowerCase().split('+')
-      .filter(word => word.length > 0);
+function viewPlaces() {
+  const placePath = getURLPathPlaces();
 
-    $('.search-form [name="search"]').val(keywords.join(' '));
+  let [placeList, items] = getItemsByPlace(placePath);
 
-    if (keywords.length === 0) {
-      return h1('Search Results');
-    }
+  placeList = editPlaceNames(placePath, placeList);
 
-    h1('Search Results for "' + keywords.join(' ') + '"');
-    pg().css('padding-top', '10px').attr('id', 'number-of-search-results');
+  showPageTitleAndHeader(placePath);
 
-    new SearchResultsPeople(keywords);
-    new SearchResultsPlaces(keywords);
-    new SearchResultsLandmarks(keywords);
-    new SearchResultsArtifacts(keywords);
-    new SearchResultsDocuments(keywords);
-    new SearchResultsCemeteries(keywords);
-    new SearchResultsNewspapers(keywords);
-    new SearchResultsBooks(keywords);
-    new SearchResultsOtherSources(keywords);
-    new SearchResultsEvents(keywords);
+  if (items.length == 0) {
+    rend('<p style="margin-top: 10px;">There is no information available for this place.</p>');
+  } else if (placePath.length == 4) {
+    viewPlacesItemList(items, true);
+  } else if (placePath.length && placePath[placePath.length - 1].path == 'all') {
+    viewPlacesItemList(items, false);
+  } else {
+    viewPlacesIndex(placePath, placeList);
+  }
+}
 
-    const totalResults = $('.search-result-item').length;
-
-    $('#number-of-search-results').append(totalResults
-      + ' result'.pluralize(totalResults));
+function getURLPathPlaces() {
+  if (PATH == 'places') {
+    return [];
   }
 
-  constructor(keywords, isTest) {
-    super();
-    this.keywords = keywords;
-    this.isTest = isTest;
-    this.resultsList = [];
+  let places = PATH.replace('places/', '').split('/').map(place => {
+    let placeFix = place.replace(/\%20/g, ' ').replace(/\+/g, ' ');
+    return {
+      path: place,
+      true: placeFix,
+      text: placeFix,
+    };
+  });
+
+  if (places.length == 0) {
+    return [];
   }
 
-  execute() {
-    this.getResults();
+  if (places[0].text == 'United States' || places[0].text == 'USA') {
+    places[0].path = 'USA';
+    places[0].text = 'United States';
+    places[0].true = 'United States';
 
-    if (this.resultsList.length == 0) {
-      return;
-    }
-
-    this.sortResults();
-
-    if (!this.isTest) {
-      this.renderResults();
+    if (places.length > 1) {
+      if (USA_STATES[places[1].text]) {
+        places[1].text = USA_STATES[places[1].text];
+      }
     }
   }
 
-  isMatch(text) {
-    return doesStrMatchKeywords(text, this.keywords);
-  }
-
-  add(obj) {
-    this.resultsList.push(obj);
-  }
-
-  highlight(text) {
-    return highlightKeywords(text, this.keywords);
-  }
-
-  title(text) {
-    rend('<h2>' + text + '</h2>');
-  }
+  return places;
 }
 
-class SearchResultsPeople extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
+function showPageTitleAndHeader(placePath) {
+  if (placePath.length == 0) {
+    setPageTitle('Places');
+    rend('<h1>Places</h1>');
+    return;
   }
 
-  getResults() {
-    this.resultsList = DATABASE.people.filter(person => {
-      return this.isMatch(person.name);
-    });
+  let mostSpecificPlace = placePath[placePath.length - 1].text;
+  let showAll = false;
+
+  if (mostSpecificPlace == 'all') {
+    mostSpecificPlace = placePath[placePath.length - 2].text;
+    showAll = true;
   }
 
-  sortResults() {
+  setPageTitle(mostSpecificPlace);
+
+  let tempPath = 'places';
+  let links = [localLink('places', 'Places')];
+
+  for (let i = 0; i < placePath.length - 1; i++) {
+    tempPath += '/' + placePath[i].path;
+    links.push(localLink(tempPath, placePath[i].text));
   }
 
-  renderResults() {
-    this.title('People');
-    rend($makePeopleList(this.resultsList, 'photo', this.keywords));
-  }
-}
+  rend('<p class="header-trail">' + links.join(' &#8594; ') + '</p>');
 
-class SearchResultsPlaces extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
-
-  getResults() {
-    // clean this up please
-
-    const placeMarker = {};
-    this.resultsList = [...DATABASE.sources, ...DATABASE.events].map(item => {
-      if (!item.location) {
-        return null;
-      }
-
-      const placeNameLinkArr = [];
-      const placeNameDisplayArr = [];
-
-      for (let r = 0; r < 4; r++) {
-        let part = PLACE_PARTS[r];
-
-        if (!item.location[part]) {
-          continue;
-        }
-
-        let nextPartTextLink = item.location[part];
-        let nextPartTextDisplay = nextPartTextLink;
-
-        if (item.location.country == 'United States') {
-          if (part == 'country') {
-            nextPartTextLink = 'USA';
-            nextPartTextDisplay = 'USA';
-          } else if (part == 'region1') {
-            nextPartTextDisplay = USA_STATES[nextPartTextDisplay];
-          }
-        }
-
-        placeNameLinkArr.push(nextPartTextLink);
-        placeNameDisplayArr.push(nextPartTextDisplay);
-
-        let searchablePlaceName = placeNameDisplayArr.join(' ');
-
-        if (placeMarker[searchablePlaceName]) {
-          return null;
-        }
-
-        if (this.isMatch(searchablePlaceName)) {
-          placeMarker[searchablePlaceName] = true;
-          return [placeNameLinkArr, placeNameDisplayArr];
-        }
-      }
-
-      return null;
-    }).filter(p => p);
-  }
-
-  sortResults() {
-  }
-
-  renderResults() {
-    this.title('Places');
-    this.resultsList.forEach(([placePath, placeText]) => {
-      const path = 'places/' + placePath.join('/');
-      const text = this.highlight(placeText.reverse().join(', '));
-      // rend('<p>' + localLink(path, text) + '</p>');
-      rend($makeIconLink('places/' + path, text, 'images/map-icon.svg'))
-    });
-  }
+  rend('<h1>' + mostSpecificPlace + (showAll ? ' - all' : '') + '</h1>');
 }
 
 
-class SearchResultsArtifacts extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
+function viewPlacesItemList(itemList, hideLocation) {
 
-  getResults() {
-    this.resultsList = DATABASE.stories
-    .filter(story => story.type == 'artifact').filter(story => {
-      let searchStr = story.title;
-      return this.isMatch(searchStr);
-    });
-  }
+  // view list of stories/sources in given location - REPAIR LATER
+  return;
 
-  sortResults() {
-  }
+  [['Cemeteries', 'grave', 'grave'],
+  ['Newspapers', 'newspaper', 'article']].forEach(([sectionTitle, sourceType, entryName]) => {
+    const groupList = createListOfNewspapersOrCemeteries(sourceType, itemList)[1];
+    let needHeader = true;
 
-  renderResults() {
-    this.title('Artifacts');
-    this.resultsList.forEach((story, i) => {
-      artifactBlock(story, {
-        firstItem: i == 0,
-        largeHeader: false,
-        people: [],
-      });
-    });
-  }
-}
-
-class SearchResultsLandmarks extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
-
-  getResults() {
-    this.resultsList = DATABASE.stories
-    .filter(story => story.type == 'landmark').filter(story => {
-      let searchStr = story.title;
-      return this.isMatch(searchStr);
-    });
-  }
-
-  sortResults() {
-  }
-
-  renderResults() {
-    this.title('Landmarks');
-    this.resultsList.forEach(story => {
-      rend('<p style="margin: 15px 0 0 15px;" class="search-result-item">'
-        + linkToStory(story) + '</p>');
-
-      if (story.location.format) {
-        rend('<p style="margin: 2px 0 0 15px;" class="search-result-item">'
-          + story.location.format + '</p>');
-      }
-    });
-  }
-}
-
-
-class SearchResultsBooks extends SearchResults {
-  static newTest(...keywords) {
-    return new SearchResultsBooks(keywords, true);
-  }
-
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.type = 'book';
-    this.execute();
-  }
-
-  getResults() {
-    DATABASE.stories
-    .filter(story => story.type == this.type)
-    .forEach(story => {
-      const searchStringStory = ['title', 'notes', 'summary', 'content']
-        .map(attr => story[attr] || '').join(',');
-
-      let matchStory = this.isMatch(searchStringStory);
-      let addedStory = matchStory;
-
-      const matchingEntries = [];
-
-      if (matchStory) {
-        this.add({ isStory: true, matchingEntries, ...story });
+    for (let groupName in groupList) {
+      if (needHeader) {
+        rend('<h2>' + sectionTitle + '</h2>');
+        needHeader = false;
       }
 
-      story.entries.forEach(source => {
-        const searchStringSource = ['title', 'notes', 'summary', 'content']
-          .map(attr => source[attr] || '').join(',');
+      const rootSource = groupList[groupName][0];
+      const numItems = groupList[groupName].length;
 
-        const sourceMatch = this.isMatch(searchStringSource);
-        const matchTotal = !matchStory
-          && this.isMatch(searchStringSource + ',' + searchStringStory);
-
-        if (sourceMatch || matchTotal) {
-          if (!addedStory) {
-            addedStory = true;
-            this.add({ isStory: true, matchingEntries, ...story });
-          }
-          matchingEntries.push(source);
-        }
-      });
-    });
-  }
-
-  sortResults() {
-  }
-
-  renderResults() {
-    this.title(this.type.pluralize().capitalize());
-
-    this.resultsList.forEach((story, i) => {
-      if (i > 0) {
-        rend('<hr style="margin-top: 15px;">');
-      }
-
-      pg(linkToStory(story, this.highlight(story.title)))
-        .css('margin', '15px 0 0 5px');
-
-      pg(this.highlight(this.summary)).css('margin', '5px');
-
-      story.matchingEntries.forEach((source, j) => {
-        if (j == 0) {
-          pg('<i>Matching chapters/entries:</i>')
-            .css('margin', '5px').css('color', 'gray');
-        }
-
-        rend(
-          '<ul style="margin-left: 30px;">' +
-            '<li style="margin: 5px;">' +
-              linkToSource(source, this.highlight(source.title)) +
-            '</li>' +
-          '</ul>'
-        );
-      });
-    });
-  }
-}
-
-class SearchResultsCemeteriesOrNewspapers extends SearchResults {
-  constructor(keywords, isTest, sourceType, groupTitle, entryTitle, entrySingular) {
-    super(keywords, isTest);
-    this.sourceType = sourceType;
-    this.groupTitle = groupTitle;
-    this.entryTitle = entryTitle;
-    this.entrySingular = entrySingular;
-    this.groupList = [];
-    this.groupEntryCount = {};
-    this.individualList = [];
-    this.getResults();
-    this.renderGroupResults();
-    this.renderIndividualResults();
-  }
-
-  getResults() {
-    DATABASE.sources.forEach(source => {
-      if (source.type != this.sourceType) {
-        return;
-      }
-
-      if (this.isMatch(source.group)) {
-        if (this.groupEntryCount[source.group]) {
-          this.groupEntryCount[source.group] += 1;
-        } else {
-          this.groupEntryCount[source.group] = 1;
-          this.groupList.push(source);
-        }
-      }
-
-      let searchString = source.title + source.content;
-
-      if (this.isMatch(searchString)) {
-        this.individualList.push(source);
-      }
-    });
-  }
-
-  renderGroupResults() {
-    if (this.groupList.length == 0) {
-      return;
+      rend(sourceListitemCemeteryOrNewspaper(rootSource, entryName, numItems, hideLocation));
     }
+  });
 
-    this.title(this.groupTitle);
+  const otherItems = itemList.filter(item => item.type != 'grave' && item.type != 'newspaper');
 
-    this.groupList.forEach(source => {
-      let linkText = this.highlight(source.group);
-      rend(
-        '<p style="padding: 5px 10px" class="search-result-item">' +
-          linkToSourceGroup(source, linkText) + '<br>' +
-          source.location.format + '<br>' +
-          this.groupEntryCount[source.group] + ' ' + this.entrySingular +
-          (this.groupEntryCount[source.group] == 1 ? '' : 's') +
-        '</p>'
-      );
-    });
+  if (otherItems.length) {
+    rend('<h2>Other</h2>');
   }
 
-  renderIndividualResults() {
-    if (this.individualList.length == 0 ) {
-      return;
+  otherItems.forEach(item => {
+    if (item.group) {
+      viewPlacesItemSource(item);
+    } else {
+      viewPlacesItemEvent(item);
     }
-
-    this.title(this.entryTitle);
-
-    this.individualList.forEach(source => {
-      rend(
-        '<p style="padding: 5px 10px" class="search-result-item">' +
-          linkToSource(source, this.highlight(source.title)) + '<br>' +
-          source.group + '<br>' +
-          (source.date.format ? source.date.format + '<br>' : '') +
-          (source.location.format ? source.location.format + '<br>' : '') +
-        '</p>'
-      );
-
-      rend(formatTranscription(this.highlight(source.content)));
-    });
-  }
+  });
 }
 
-class SearchResultsCemeteries extends SearchResultsCemeteriesOrNewspapers {
-  constructor(keywords, isTest) {
-    super(keywords, isTest, 'newspaper', 'Newspapers', 'Newspaper Articles', 'article');
-  }
+function viewPlacesItemSource(source) {
+  rend(
+    '<p style="margin-top: 10px;">' +
+    linkToSource(source, source.type + ' - ' + source.group + ' - ' + source.title) +
+    '</p>'
+  );
 }
 
-class SearchResultsNewspapers extends SearchResultsCemeteriesOrNewspapers {
-  constructor(keywords, isTest) {
-    super(keywords, isTest, 'grave', 'Cemeteries', 'Graves', 'grave');
-  }
-}
-
-class SearchResultsDocuments extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
-
-  getResults() {
-    this.resultsList = DATABASE.sources.filter(source => {
-      return source.type == 'document' && this.isMatch(source.title + source.content);
-    });
-  }
-
-  sortResults() {
-  }
-
-  renderResults() {
-    this.title('Documents');
-    this.resultsList.forEach(source => {
-      let linkText = source.story.title + ' - ' + source.title;
-      linkText = this.highlight(linkText, this.keywords);
-      rend(
-        '<p style="padding: 5px;" class="search-result-item">' +
-          linkToSource(source, linkText) +
-        '</p>'
-      );
-    });
-  }
+function viewPlacesItemEvent(event) {
+  rend(
+    '<p style="margin-top: 10px;">' +
+      event.title + ' - ' +
+      event.people.map(person => linkToPerson(person)).join(', ') +
+    '</p>'
+  );
 }
 
 
-class SearchResultsEvents extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
-  }
+const placeLevels = ['country', 'region1', 'region2', 'city'];
 
-  getResults() {
-    this.resultsList = DATABASE.events.filter(event => {
-      const searchItems = [event.title, event.location.format, event.notes];
-      return this.isMatch(searchItems.join(' '));
-    });
-  }
+function getItemsByPlace(placePath) {
+  const placeList = [];
+  const foundPlaceAlready = [];
+  const mostSpecificLevel = placeLevels[placePath.length];
 
-  sortResults() {
-  }
+  const listOfItemsOnly = mostSpecificLevel == 'city'
+    || (placePath.length && placePath[placePath.length - 1].path == 'all');
 
-  renderResults() {
-    this.title('Events');
-
-    this.resultsList.forEach(event => {
-      const lines = [];
-      let line1 = this.highlight(event.title);
-
-      const people = event.people.map(person => person.name);
-
-      if (['birth', 'death', 'birth and death', 'marriage'].indexOf(event.title) >= 0) {
-        line1 += ' - ' + people.join(' & ');
-      } else {
-        lines.push(people.join(', '));
-      }
-
-      lines.push(this.highlight(event.location.format));
-      lines.push(this.highlight(event.date.format));
-      lines.push(this.highlight(event.notes));
-
-      rend(
-        '<p class="search-result-item" style="padding-top: 10px">' + line1 + '</p>' +
-        lines.map(str => {
-          if (str == null || str == '') {
-            return '';
-          }
-          return (
-            '<p style="padding-top: 2px">' + str + '</p>'
-          );
-        }).join('')
-      );
-    });
-  }
-}
-
-
-function doesStrMatchKeywords(str, keywords) {
-  str = str.toLowerCase();
-
-  for (let i = 0; i < keywords.length; i++) {
-    if (str.match(keywords[i]) == null) {
+  const items = [...DATABASE.events, ...DATABASE.sources].filter((item, t) => {
+    if (!placeMatch(item.location, placePath)) {
       return false;
     }
+
+    if (listOfItemsOnly) {
+      return true;
+    }
+
+    const itemPlace = item.location[mostSpecificLevel] || 'other';
+
+    if (!foundPlaceAlready[itemPlace]) {
+      placeList.push({
+        path: itemPlace,
+        text: itemPlace,
+      });
+      foundPlaceAlready[itemPlace] = true;
+    }
+
+    return true;
+  });
+
+  return [placeList, items];
+}
+
+function placeMatch(itemLocation, placePath) {
+  for (let i = 0; i < placePath.length; i++) {
+    let levelName = placeLevels[i];
+    let itemPlace = itemLocation[levelName];
+    let placeName = placePath[i].true;
+
+    if (placeName == 'other') {
+      if (itemPlace == null || itemPlace == '') {
+        continue;
+      }
+    }
+
+    if (placeName == 'all') {
+      return true;
+    }
+
+    if (itemPlace == placeName) {
+      continue;
+    }
+
+    return false;
   }
 
   return true;
 }
 
-function highlightKeywords(str, keywords, i) {
-  if (str == null || str.length == 0) {
-    return str;
-  }
+function editPlaceNames(placePath, placeList) {
+  let otherText = 'other';
 
-  if (i == null) {
-    keywords = keywords.sort((a, b) => {
-      return b.length - a.length;
+  if (placePath.length == 0) {
+    otherText = 'location not specified';
+    placeList = placeList.map(place => {
+      if (place.path == 'United States') {
+        place.path = 'USA';
+      }
+      return place;
     });
-    i = 0;
+  } else if (placePath.length == 1 && placePath[0].path == 'USA') {
+    otherText = 'state not specified';
+    placeList = placeList.map(place => {
+      place.text = USA_STATES[place.text] || 'other';
+      return place;
+    });
+  } else if (placePath.length == 2 && placePath[0].path == 'USA') {
+    otherText = 'county not specified';
   }
 
-  if (i >= keywords.length) {
-    return str;
+  placeList.sort((a, b) => {
+    let [str1, str2] = [b.text.toLowerCase(), a.text.toLowerCase()];
+    const swap = (str1 > str2 || str1 == 'other') && str2 != 'other';
+    return swap ? -1 : 1;
+  });
+
+  if (placeList.length && placeList[placeList.length - 1].text == 'other') {
+    placeList[placeList.length - 1].text = otherText;
   }
 
-  let p1 = str.toLowerCase().indexOf(keywords[i]);
-
-  if (p1 == -1) {
-    return highlightKeywords(str, keywords, i + 1);
-  }
-
-  let p2 = p1 + keywords[i].length;
-
-  return highlightKeywords(str.slice(0, p1), keywords, i + 1) +
-    '<span class="highlight-search-result">' + str.slice(p1, p2) + '</span>' +
-    highlightKeywords(str.slice(p2), keywords, i);
-
-  return str;
+  return placeList;
 }
 
-class SearchResultsOtherSources extends SearchResults {
-  constructor(keywords, isTest) {
-    super(keywords, isTest);
-    this.execute();
+class Place {
+  static getLinkPath(place) {
+    let parts = ['places'];
+
+    if (place.country == 'United States') {
+      parts.push('USA');
+    } else {
+      parts.push(place.country);
+    }
+
+    parts = [...parts, place.region1, place.region2, place.city];
+
+    return parts.filter(s => s).join('/');
   }
 
-  getResults() {
-    this.resultsList = DATABASE.sources.filter(source => {
-      let searchString = ['title', 'content', 'notes', 'summary']
-        .map(attr => source[attr] || '').join(',');
-      return !['document', 'newspaper', 'book', 'cemetery']
-        .includes(source.story.type) && this.isMatch(searchString);
+  static $iconLink(place, options = {}) {
+    let path = Place.getLinkPath(place);
+
+    let text = options.text || 'place...';
+
+    const $icon = $makeIconLink(path, text, 'images/map-icon.svg');
+
+    if (options.render) {
+      rend($icon);
+    }
+
+    return $icon;
+  }
+}
+
+
+function viewPlacesIndex(placePath, placeList) {
+  let path = ['places', ...(placePath.map(place => place.path))].join('/') + '/';
+
+  if (placeListShouldAllowViewAll(placePath)) {
+    rend(
+      '<p style="padding-top: 5px;">' +
+        localLink(path + 'all', 'view all') +
+      '</p>'
+    );
+  }
+
+  placeList.forEach(place => {
+    rend(
+      '<p style="padding-top: 5px;">' +
+        localLink(path + place.path, place.text) +
+      '</p>'
+    );
+  });
+}
+
+function placeListShouldAllowViewAll(placePath) {
+  if (placePath.length == 0) {
+    return false;
+  }
+  if (placePath.length == 1 && placePath[0].path == 'USA') {
+    return false;
+  }
+  return true;
+}
+
+class ViewPlace extends ViewPage {
+  static byUrl() {
+    let [base, country, region1, region2, city, extra] = PATH.split('/');
+
+    if (base != 'places' || extra) {
+      return false;
+    }
+
+    if (country == 'USA') {
+      country = 'United States';
+      if (region2) {
+        region2 = region2.replace('%20', ' ');
+      }
+    }
+
+    const place = { country, region1, region2, city };
+    const story = ViewPlace.findStory(place);
+
+    new ViewPlace(place, story).render();
+
+    return true;
+  }
+
+  static findStory(place) {
+    return DATABASE.stories.filter(story => {
+      return story.type == 'place' && story.location
+        && !['country', 'region1', 'region2', 'city'].some(part => {
+          return story.location[part] != place[part];
+        });
+    })[0];
+  }
+
+  static new(place, story) {
+    return new ViewPlace(place, story);
+  }
+
+  constructor(place = {}, story) {
+    super(story);
+    this.story = story;
+    this.place = place;
+    for (let key in place) {
+      this[key] = place[key];
+    }
+    this.placePath = [this.country, this.region1, this.region2,
+      this.city].filter(s => s);
+
+    this.stories = DATABASE.stories.filter(story => {
+      return !['country', 'region1', 'region2', 'city'].some(part => {
+        return this[part] != story.location[part];
+      });
     });
   }
 
-  sortResults() {
+  render() {
+    setPageTitle('Places');
+    this.headerTrail();
+    this.viewTitle();
+    this.viewStories('Landmarks', 'landmark');
+    this.viewStories('Cemeteries', 'cemetery');
+    this.viewStories('Newspapers', 'newspaper');
   }
 
-  renderResults() {
-    this.title('Other Sources');
-    this.resultsList.forEach(source => {
-      let linkText = source.group + ' - ' + source.title;
-      linkText = this.highlight(linkText);
-      rend(
-        '<p style="padding: 5px;" class="search-result-item">' +
-          linkToSource(source, linkText) +
-        '</p>'
-      );
+  headerTrail() {
+    let tempPath = 'places';
+    let links = [['places', 'Places']];
+
+    this.placePath.forEach(part => {
+      tempPath += '/' + part;
+      links.push([tempPath, part]);
+    });
+
+    headerTrail(...links.slice(0, links.length - 1));
+  }
+
+  viewTitle() {
+    if (this.story) {
+      h1(this.story.title);
+    } else {
+      h1(this.placePath.reverse().join(', '));
+    }
+  }
+
+  viewStories(name, type) {
+    const stories = this.stories.filter(story => story.type == type);
+
+    if (stories.length == 0) {
+      return;
+    }
+
+    h2(name);
+
+    stories.forEach(story => {
+      pg(linkToStory(story));
     });
   }
 }
@@ -3544,6 +3249,559 @@ class ViewSource extends ViewPage {
   }
 }
 
+class SearchResults extends ViewPage {
+  static byUrl() {
+    setPageTitle('Search Results');
+
+    const keywords = PATH.slice(7).toLowerCase().split('+')
+      .filter(word => word.length > 0);
+
+    $('#search-form [name="search"]').val(keywords.join(' '));
+
+    if (keywords.length === 0) {
+      return h1('Search Results');
+    }
+
+    h1('Search Results for "' + keywords.join(' ') + '"');
+    pg().css('padding-top', '10px').attr('id', 'number-of-search-results');
+
+    new SearchResultsPeople(keywords);
+    new SearchResultsPlaces(keywords);
+    new SearchResultsLandmarks(keywords);
+    new SearchResultsArtifacts(keywords);
+    new SearchResultsDocuments(keywords);
+    new SearchResultsCemeteries(keywords);
+    new SearchResultsNewspapers(keywords);
+    new SearchResultsBooks(keywords);
+    new SearchResultsOtherSources(keywords);
+    new SearchResultsEvents(keywords);
+
+    const totalResults = $('.search-result-item').length;
+
+    $('#number-of-search-results').append(totalResults
+      + ' result'.pluralize(totalResults));
+  }
+
+  constructor(keywords, isTest) {
+    super();
+    this.keywords = keywords;
+    this.isTest = isTest;
+    this.resultsList = [];
+  }
+
+  execute() {
+    this.getResults();
+
+    if (this.resultsList.length == 0) {
+      return;
+    }
+
+    this.sortResults();
+
+    if (!this.isTest) {
+      this.renderResults();
+    }
+  }
+
+  isMatch(text) {
+    return doesStrMatchKeywords(text, this.keywords);
+  }
+
+  add(obj) {
+    this.resultsList.push(obj);
+  }
+
+  highlight(text) {
+    return highlightKeywords(text, this.keywords);
+  }
+
+  title(text) {
+    rend('<h2>' + text + '</h2>');
+  }
+}
+
+class SearchResultsPeople extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    this.resultsList = DATABASE.people.filter(person => {
+      return this.isMatch(person.name);
+    });
+  }
+
+  sortResults() {
+    Person.sortListByAncestorDegree(this.resultsList);
+  }
+
+  renderResults() {
+    this.title('People');
+    rend($makePeopleList(this.resultsList, 'photo', this.keywords));
+  }
+}
+
+
+class SearchResultsArtifacts extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    this.resultsList = DATABASE.stories
+    .filter(story => story.type == 'artifact').filter(story => {
+      let searchStr = story.title;
+      return this.isMatch(searchStr);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Artifacts');
+    this.resultsList.forEach((story, i) => {
+      artifactBlock(story, {
+        firstItem: i == 0,
+        largeHeader: false,
+        people: [],
+      });
+    });
+  }
+}
+
+class SearchResultsLandmarks extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    this.resultsList = DATABASE.stories
+    .filter(story => story.type == 'landmark').filter(story => {
+      let searchStr = story.title;
+      return this.isMatch(searchStr);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Landmarks');
+    this.resultsList.forEach(story => {
+      rend('<p style="margin: 15px 0 0 15px;" class="search-result-item">'
+        + linkToStory(story) + '</p>');
+
+      if (story.location.format) {
+        rend('<p style="margin: 2px 0 0 15px;" class="search-result-item">'
+          + story.location.format + '</p>');
+      }
+    });
+  }
+}
+
+
+class SearchResultsBooks extends SearchResults {
+  static newTest(...keywords) {
+    return new SearchResultsBooks(keywords, true);
+  }
+
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.type = 'book';
+    this.execute();
+  }
+
+  getResults() {
+    DATABASE.stories
+    .filter(story => story.type == this.type)
+    .forEach(story => {
+      const searchStringStory = ['title', 'notes', 'summary', 'content']
+        .map(attr => story[attr] || '').join(',');
+
+      let matchStory = this.isMatch(searchStringStory);
+      let addedStory = matchStory;
+
+      const matchingEntries = [];
+
+      if (matchStory) {
+        this.add({ isStory: true, matchingEntries, ...story });
+      }
+
+      story.entries.forEach(source => {
+        const searchStringSource = ['title', 'notes', 'summary', 'content']
+          .map(attr => source[attr] || '').join(',');
+
+        const sourceMatch = this.isMatch(searchStringSource);
+        const matchTotal = !matchStory
+          && this.isMatch(searchStringSource + ',' + searchStringStory);
+
+        if (sourceMatch || matchTotal) {
+          if (!addedStory) {
+            addedStory = true;
+            this.add({ isStory: true, matchingEntries, ...story });
+          }
+          matchingEntries.push(source);
+        }
+      });
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title(this.type.pluralize().capitalize());
+
+    this.resultsList.forEach((story, i) => {
+      if (i > 0) {
+        rend('<hr style="margin-top: 15px;">');
+      }
+
+      pg(linkToStory(story, this.highlight(story.title)))
+        .css('margin', '15px 0 0 5px');
+
+      pg(this.highlight(this.summary)).css('margin', '5px');
+
+      story.matchingEntries.forEach((source, j) => {
+        if (j == 0) {
+          pg('<i>Matching chapters/entries:</i>')
+            .css('margin', '5px').css('color', 'gray');
+        }
+
+        rend(
+          '<ul style="margin-left: 30px;">' +
+            '<li style="margin: 5px;">' +
+              linkToSource(source, this.highlight(source.title)) +
+            '</li>' +
+          '</ul>'
+        );
+      });
+    });
+  }
+}
+
+class SearchResultsCemeteriesOrNewspapers extends SearchResults {
+  constructor(keywords, isTest, sourceType, groupTitle, entryTitle, entrySingular) {
+    super(keywords, isTest);
+    this.sourceType = sourceType;
+    this.groupTitle = groupTitle;
+    this.entryTitle = entryTitle;
+    this.entrySingular = entrySingular;
+    this.groupList = [];
+    this.groupEntryCount = {};
+    this.individualList = [];
+    this.getResults();
+    this.renderGroupResults();
+    this.renderIndividualResults();
+  }
+
+  getResults() {
+    DATABASE.sources.forEach(source => {
+      if (source.type != this.sourceType) {
+        return;
+      }
+
+      if (this.isMatch(source.group)) {
+        if (this.groupEntryCount[source.group]) {
+          this.groupEntryCount[source.group] += 1;
+        } else {
+          this.groupEntryCount[source.group] = 1;
+          this.groupList.push(source);
+        }
+      }
+
+      let searchString = source.title + source.content;
+
+      if (this.isMatch(searchString)) {
+        this.individualList.push(source);
+      }
+    });
+  }
+
+  renderGroupResults() {
+    if (this.groupList.length == 0) {
+      return;
+    }
+
+    this.title(this.groupTitle);
+
+    this.groupList.forEach(source => {
+      let linkText = this.highlight(source.group);
+      rend(
+        '<p style="padding: 5px 10px" class="search-result-item">' +
+          linkToSourceGroup(source, linkText) + '<br>' +
+          source.location.format + '<br>' +
+          this.groupEntryCount[source.group] + ' ' + this.entrySingular +
+          (this.groupEntryCount[source.group] == 1 ? '' : 's') +
+        '</p>'
+      );
+    });
+  }
+
+  renderIndividualResults() {
+    if (this.individualList.length == 0 ) {
+      return;
+    }
+
+    this.title(this.entryTitle);
+
+    this.individualList.forEach(source => {
+      rend(
+        '<p style="padding: 5px 10px" class="search-result-item">' +
+          linkToSource(source, this.highlight(source.title)) + '<br>' +
+          source.group + '<br>' +
+          (source.date.format ? source.date.format + '<br>' : '') +
+          (source.location.format ? source.location.format + '<br>' : '') +
+        '</p>'
+      );
+
+      rend(formatTranscription(this.highlight(source.content)));
+    });
+  }
+}
+
+class SearchResultsCemeteries extends SearchResultsCemeteriesOrNewspapers {
+  constructor(keywords, isTest) {
+    super(keywords, isTest, 'newspaper', 'Newspapers', 'Newspaper Articles', 'article');
+  }
+}
+
+class SearchResultsNewspapers extends SearchResultsCemeteriesOrNewspapers {
+  constructor(keywords, isTest) {
+    super(keywords, isTest, 'grave', 'Cemeteries', 'Graves', 'grave');
+  }
+}
+
+class SearchResultsDocuments extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    this.resultsList = DATABASE.sources.filter(source => {
+      return source.type == 'document' && this.isMatch(source.title + source.content);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Documents');
+    this.resultsList.forEach(source => {
+      let linkText = source.story.title + ' - ' + source.title;
+      linkText = this.highlight(linkText, this.keywords);
+      rend(
+        '<p style="padding: 5px;" class="search-result-item">' +
+          linkToSource(source, linkText) +
+        '</p>'
+      );
+    });
+  }
+}
+
+
+class SearchResultsEvents extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    this.resultsList = DATABASE.events.filter(event => {
+      const searchItems = [event.title, event.location.format, event.notes];
+      return this.isMatch(searchItems.join(' '));
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Events');
+
+    this.resultsList.forEach(event => {
+      const lines = [];
+      let line1 = this.highlight(event.title);
+
+      const people = event.people.map(person => person.name);
+
+      if (['birth', 'death', 'birth and death', 'marriage'].indexOf(event.title) >= 0) {
+        line1 += ' - ' + people.join(' & ');
+      } else {
+        lines.push(people.join(', '));
+      }
+
+      lines.push(this.highlight(event.location.format));
+      lines.push(this.highlight(event.date.format));
+      lines.push(this.highlight(event.notes));
+
+      rend(
+        '<p class="search-result-item" style="padding-top: 10px">' + line1 + '</p>' +
+        lines.map(str => {
+          if (str == null || str == '') {
+            return '';
+          }
+          return (
+            '<p style="padding-top: 2px">' + str + '</p>'
+          );
+        }).join('')
+      );
+    });
+  }
+}
+
+
+function doesStrMatchKeywords(str, keywords) {
+  str = str.toLowerCase();
+
+  for (let i = 0; i < keywords.length; i++) {
+    if (str.match(keywords[i]) == null) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function highlightKeywords(str, keywords, i) {
+  if (str == null || str.length == 0) {
+    return str;
+  }
+
+  if (i == null) {
+    keywords = keywords.sort((a, b) => {
+      return b.length - a.length;
+    });
+    i = 0;
+  }
+
+  if (i >= keywords.length) {
+    return str;
+  }
+
+  let p1 = str.toLowerCase().indexOf(keywords[i]);
+
+  if (p1 == -1) {
+    return highlightKeywords(str, keywords, i + 1);
+  }
+
+  let p2 = p1 + keywords[i].length;
+
+  return highlightKeywords(str.slice(0, p1), keywords, i + 1) +
+    '<span class="highlight-search-result">' + str.slice(p1, p2) + '</span>' +
+    highlightKeywords(str.slice(p2), keywords, i);
+
+  return str;
+}
+
+class SearchResultsOtherSources extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    this.resultsList = DATABASE.sources.filter(source => {
+      let searchString = ['title', 'content', 'notes', 'summary']
+        .map(attr => source[attr] || '').join(',');
+      return !['document', 'newspaper', 'book', 'cemetery']
+        .includes(source.story.type) && this.isMatch(searchString);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Other Sources');
+    this.resultsList.forEach(source => {
+      let linkText = source.group + ' - ' + source.title;
+      linkText = this.highlight(linkText);
+      rend(
+        '<p style="padding: 5px;" class="search-result-item">' +
+          linkToSource(source, linkText) +
+        '</p>'
+      );
+    });
+  }
+}
+
+class SearchResultsPlaces extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    // clean this up please
+
+    const placeMarker = {};
+    this.resultsList = [...DATABASE.sources, ...DATABASE.events].map(item => {
+      if (!item.location) {
+        return null;
+      }
+
+      const placeNameLinkArr = [];
+      const placeNameDisplayArr = [];
+
+      for (let r = 0; r < 4; r++) {
+        let part = PLACE_PARTS[r];
+
+        if (!item.location[part]) {
+          continue;
+        }
+
+        let nextPartTextLink = item.location[part];
+        let nextPartTextDisplay = nextPartTextLink;
+
+        if (item.location.country == 'United States') {
+          if (part == 'country') {
+            nextPartTextLink = 'USA';
+            nextPartTextDisplay = 'USA';
+          } else if (part == 'region1') {
+            nextPartTextDisplay = USA_STATES[nextPartTextDisplay];
+          }
+        }
+
+        placeNameLinkArr.push(nextPartTextLink);
+        placeNameDisplayArr.push(nextPartTextDisplay);
+
+        let searchablePlaceName = placeNameDisplayArr.join(' ');
+
+        if (placeMarker[searchablePlaceName]) {
+          return null;
+        }
+
+        if (this.isMatch(searchablePlaceName)) {
+          placeMarker[searchablePlaceName] = true;
+          return [placeNameLinkArr, placeNameDisplayArr];
+        }
+      }
+
+      return null;
+    }).filter(p => p);
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Places');
+    this.resultsList.forEach(([placePath, placeText]) => {
+      const path = 'places/' + placePath.join('/');
+      const text = this.highlight(placeText.reverse().join(', '));
+      // rend('<p>' + localLink(path, text) + '</p>');
+      rend($makeIconLink(path, text, 'images/map-icon.svg'))
+    });
+  }
+}
+
 class ViewStoryIndex extends ViewPage {
   static byUrl() {
     if (['artifacts', 'books', 'cemeteries', 'landmarks', 'newspapers']
@@ -3945,6 +4203,10 @@ function viewTopic() {
     return viewTopicBrickwalls();
   }
 
+  if (topic == 'families') {
+    return viewTopicLargestFamilies.new();
+  }
+
   return pageNotFound();
 }
 
@@ -4034,6 +4296,38 @@ function viewTopicImmigration() {
     sort: true,
     render: true
   });
+}
+
+class viewTopicLargestFamilies extends ViewPage {
+  static new() {
+    new viewTopicLargestFamilies().render();
+  }
+
+  constructor() {
+    super();
+  }
+
+  render() {
+    setPageTitle('Largest Families');
+    h1('Largest Families');
+
+    let byNumber = [];
+
+    DATABASE.people.forEach(person => {
+      let i = person.children.length;
+      byNumber[i] = byNumber[i] || [];
+      byNumber[i].push(person);
+    });
+
+    byNumber.forEach((list, i) => {
+      h2(i);
+      if (list && list.length) {
+        pg(list.length);
+      } else {
+        pg(0);
+      }
+    })
+  }
 }
 
 function viewTopicMilitary() {
