@@ -4,6 +4,10 @@ class ViewAudit extends ViewPage {
       new ViewAudit().render();
       return true;
     }
+    if (PATH == 'audit/children') {
+      new ViewAuditChildren().render();
+      return true;
+    }
   }
 
   constructor() {
@@ -12,5 +16,11 @@ class ViewAudit extends ViewPage {
 
   render() {
     h1('Audit');
+
+    [
+      ['children', 'children'],
+    ].forEach(([path, text]) => {
+      pg(localLink('audit/' + path, text));
+    });
   }
 }
