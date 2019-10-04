@@ -278,3 +278,22 @@ function $notationBlock(notation, alwaysShowPeople) {
   }
   return $div;
 }
+
+function $quoteBlock(options) {
+  const $quote = $('<div class="quote-block">' +
+    '<div class="left"></div>' +
+    '<div class="main cover-background"></div>' +
+    '<div class="right"></div>' +
+    '</div>');
+
+  const $main = $quote.find('.main');
+
+  $main.append($('<p class="quotation">').append(options.text));
+  $main.append($('<p class="credit">').append(options.credit));
+
+  if (options.css) {
+    $quote.css(options.css);
+  }
+
+  return $quote;
+}

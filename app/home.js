@@ -71,6 +71,7 @@ class ViewHome extends ViewPage {
       ['topic/military', 'military'],
       ['topic/immigration', 'immigration'],
       ['topic/disease', 'disease'],
+      ['topic/big-families', 'big families'],
     ].map(([path, text]) => localLink(path, text)));
   }
 

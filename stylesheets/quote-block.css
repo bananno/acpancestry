@@ -1,0 +1,36 @@
+.quote-block {
+}
+
+.quote-block div {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.quote-block .left,
+.quote-block .right {
+  width: 50px;
+  height: 50px;
+  background-image: url("/images/quotes.png");
+  background-size: 100%;
+  background-repeat: no-repeat;
+}
+
+.quote-block .right {
+  -webkit-transform: rotate(180deg);
+  transform: rotate(180deg);
+  vertical-align: bottom;
+}
+
+.quote-block .main {
+  width: calc(100% - 100px);
+  padding: 0 10px;
+}
+
+.quote-block .quotation {
+  font-style: italic;
+}
+
+.quote-block .credit {
+  margin-top: 5px;
+  text-align: right;
+}

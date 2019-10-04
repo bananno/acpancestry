@@ -155,6 +155,18 @@ class Person {
     }
   }
 
+  numberOfChildren() {
+    if (this.tags['all children listed'] || this.tags['no children']) {
+      return this.children.length;
+    }
+
+    if (this.tags['number of children']) {
+      return parseInt(this.tags['number of children']);
+    }
+
+    return null;
+  }
+
   get mother() {
     return Person.new(this.parents.filter(person => person.gender == GENDER.FEMALE)[0]);
   }

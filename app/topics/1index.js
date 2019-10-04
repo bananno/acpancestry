@@ -17,5 +17,9 @@ function viewTopic() {
     return viewTopicBrickwalls();
   }
 
+  if (topic == 'big-families') {
+    return viewTopicBigFamilies.new();
+  }
+
   return pageNotFound();
 }
