@@ -157,6 +157,9 @@ class Person {
 
   numberOfChildren() {
     if (this.tags['all children listed'] || this.tags['no children']) {
+      if (this.tags['children not shared']) {
+        return null;
+      }
       return this.children.length;
     }
 

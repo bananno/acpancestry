@@ -16,6 +16,7 @@ class ViewAudit extends ViewPage {
 
   constructor() {
     super();
+    setPageTitle('Audit');
   }
 
   render() {

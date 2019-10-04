@@ -43,15 +43,22 @@ function processDatabase() {
 }
 
 function getProcessedPerson(person) {
+  person.tags = person.tags || {};
+
   ['parents', 'spouses', 'children'].forEach(relationship => {
+    let originalLength = person[relationship].length;
+
     person[relationship] = person[relationship].map(otherPerson => {
       return DATABASE.personRef[otherPerson];
     });
 
     person[relationship] = removeNullValues(person[relationship]);
+
+    if (originalLength != person[relationship].length) {
+      person.tags[relationship + ' not shared'] = true;
+    }
   });
 
-  person.tags = person.tags || {};
   person.links = person.links || [];
   person.citations = [];
   person.profileImage = person.profileImage || 'images/generic-profile-picture.png';

@@ -9,16 +9,24 @@ class ViewAuditChildren extends ViewAudit {
     this.list = {
       'ancestors - incomplete': [],
       'ancestors - complete': [],
+      'ancestors - not all are shared': [],
       'has no children': [],
       'ignore': [],
       'other - complete': [],
       'other - incomplete': [],
+      'other - not all are shared': [],
     };
 
     DATABASE.people.forEach(person => {
       let personList = (() => {
         if (person.private) {
           return 'ignore';
+        }
+        if (person.tags['children not shared']) {
+          if (person.leaf) {
+            return 'ancestors - not all are shared';
+          }
+          return 'other - not all are shared';
         }
         if (person.tags['all children listed']) {
           if (person.leaf) {
