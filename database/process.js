@@ -61,7 +61,11 @@ function getProcessedPerson(person) {
 
   person.links = person.links || [];
   person.citations = [];
-  person.profileImage = person.profileImage || 'images/generic-profile-picture.png';
+
+  if (!person.profileImage) {
+    person.profileImage = 'images/profile-'
+      + (['female', 'male'][person.gender - 1] || 'generic') + '.png';
+  }
 
   return person;
 }

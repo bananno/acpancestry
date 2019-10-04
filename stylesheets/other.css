@@ -27,8 +27,8 @@
 }
 
 .icon-link img {
-  max-height: 30px;
-  max-width: 30px;
+  height: 30px;
+  width: 30px;
   border-radius: 30px;
   vertical-align: top;
   margin-right: 10px;
