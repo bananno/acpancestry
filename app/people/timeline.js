@@ -10,6 +10,7 @@ class PersonTimeline extends Timeline {
         '<div class="timeline-life">life events</div>' +
         '<div class="timeline-source">sources</div>' +
         '<div class="timeline-family">family events</div>' +
+        '<div class="timeline-historical">historical events</div>' +
       '</div>'
     );
 
@@ -28,19 +29,22 @@ class PersonTimeline extends Timeline {
 
   createEventList() {
     DATABASE.events.forEach(item => {
-      if (item.people.map(p => p._id).includes(this.person._id)) {
+      if (Person.isInList(item.people, this.person)) {
+        let isHistorical = item.tags['special historical'];
         this.insertItem({
-          ...item,
-          event: true
+          event: true,
+          personal: !isHistorical,
+          historical: isHistorical,
+          ...item
         });
       }
     });
 
     DATABASE.sources.forEach(item => {
-      if (item.people.map(p => p._id).includes(this.person._id)) {
+      if (Person.isInList(item.people, this.person)) {
         this.insertItem({
-          ...item,
-          source: true
+          source: true,
+          ...item
         });
       }
     });
@@ -69,7 +73,8 @@ class PersonTimeline extends Timeline {
   }
 
   shouldIncludeFamilyEvent(relative, relationship, item) {
-    if (!item.people.map(p => p._id).includes(relative._id)) {
+    if (!item.people.map(p => p._id).includes(relative._id)
+        || item.tags['special historical']) {
       return false;
     }
 

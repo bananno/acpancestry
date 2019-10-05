@@ -185,13 +185,17 @@ class RunTests {
   fakeEvent(event = {}) {
     event._id = event._id || makeRandomId();
     event.people = event.people || [];
+    event.tags = event.tags || [];
+
     DATABASE.events.push(event);
     return event;
   }
 
   fakeStory(story = {}) {
     story._id = story._id || makeRandomId();
+    story.title = story.title || 'story-' + story._id;
     story.people = story.people || [];
+
     DATABASE.stories.push(story);
     return story;
   }
@@ -200,6 +204,8 @@ class RunTests {
     source._id = source._id || makeRandomId();
     source.people = source.people || [];
     source.stories = source.stories || [];
+    source.tags = source.tags || [];
+
     DATABASE.sources.push(source);
     return source;
   }

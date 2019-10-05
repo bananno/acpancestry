@@ -313,9 +313,9 @@ test(t => {
 
   testEvent.title = 'historical event';
   testEvent.date.year = 1950;
-  testEvent.tags = { historical: true };
+  testEvent.tags = { 'special historical': true };
   timeline = new PersonTimeline(testPerson1, true);
-  t.assertFalse('exclude historical child events even if during person\'s life',
+  t.assertFalse('exclude "special historical" child events even if during person\'s life',
     timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
   );
   testEvent.tags = {};

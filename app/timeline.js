@@ -80,6 +80,12 @@ class TimelineItem {
     if (this.item.relationship) {
       return 'timeline-family';
     }
+    if (this.item.historical) {
+      return 'timeline-historical';
+    }
+    if (this.item.tags['historical'] || this.item.tags['special historical']) {
+      return 'timeline-historical';
+    }
     return 'timeline-life';
   }
 
@@ -116,8 +122,13 @@ class TimelineItem {
     if (!this.isPerson) {
       return true;
     }
-    if (this.item.personal && this.item.event && this.item.people.length == 1) {
-      return false;
+    if (this.isPerson && this.item.event) {
+      if (this.item.historical) {
+        return false;
+      }
+      if (this.item.personal && this.item.people.length == 1) {
+        return false;
+      }
     }
     return true;
   }

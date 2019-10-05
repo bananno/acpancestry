@@ -170,6 +170,10 @@ class Person {
     return null;
   }
 
+  isInList(list) {
+    return Person.isInList(list, this);
+  }
+
   get mother() {
     return Person.new(this.parents.filter(person => person.gender == GENDER.FEMALE)[0]);
   }

@@ -29,6 +29,11 @@
   background-color: #ddd;
 }
 
+.timeline-key .timeline-historical,
+.timeline-item.timeline-historical {
+  background-color: #fcf4dc;
+}
+
 .timeline-item .column {
   vertical-align: text-top;
   padding: 5px;

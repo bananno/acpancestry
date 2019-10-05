@@ -142,8 +142,9 @@ class ViewPerson extends ViewPage {
 
   viewProfileSummary() {
     DATABASE.notations.filter(notation => {
-      return notation.title == 'profile summary'
-        && notation.people.includes(this.person);
+      return this.person.isInList(notation.people)
+        && (notation.title == 'profile summary'
+          || notation.tags['profile summary']);
     }).forEach(notation => {
       notation.text.split('\n').forEach(s => {
         rend('<p style="margin-top: 20px;">' + s + '</p>');
@@ -239,8 +240,7 @@ class ViewPerson extends ViewPage {
 
   viewResearchNotes() {
     const notations = DATABASE.notations.filter(note => {
-      return Person.isInList(note.people, this.person)
-        && note.tags['research notes'];
+      return this.person.isInList(note.people) && note.tags['research notes'];
     });
 
     if (notations.length == 0) {
