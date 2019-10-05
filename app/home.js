@@ -64,7 +64,8 @@ class ViewHome extends ViewPage {
 
   viewTopics() {
     h2('topics');
-    bulletList([
+
+    const basicTopicList = [
       ['landmarks', 'landmarks and buildings'],
       ['artifacts', 'artifacts and family heirlooms'],
       ['topic/brickwalls', 'brick walls and mysteries'],
@@ -72,7 +73,13 @@ class ViewHome extends ViewPage {
       ['topic/immigration', 'immigration'],
       ['topic/disease', 'disease'],
       ['topic/big-families', 'big families'],
-    ].map(([path, text]) => localLink(path, text)));
+    ].map(([path, text]) => localLink(path, text));
+
+    const storyTopicList = DATABASE.stories
+      .filter(story => story.type == 'topic')
+      .map(story => linkToStory(story, story.title.toLowerCase()));
+
+    bulletList([...basicTopicList, ...storyTopicList]);
   }
 
   viewBrowse() {

@@ -26,5 +26,7 @@ class ViewTopic extends ViewPage {
       viewTopicBigFamilies.new();
       return true;
     }
+
+    return ViewStoryTopic.byId(topic);
   }
 }

@@ -1,4 +1,13 @@
 class ViewStory extends ViewPage {
+  static byId(storyId) {
+    const story = DATABASE.storyRef[storyId];
+
+    if (story) {
+      new ViewStory(story);
+      return true;
+    }
+  }
+
   constructor(story) {
     super(story);
     this.story = story;
@@ -236,6 +245,29 @@ class ViewStoryArtifactOrLandmark extends ViewStory {
     this.viewSectionNotes();
     this.viewSectionLinks();
     this.viewSources();
+    this.viewExcerpts();
+  }
+}
+
+class ViewStoryTopic extends ViewStory {
+  static byId(storyId) {
+    const story = DATABASE.storyRef[storyId];
+
+    if (!story) {
+      return false;
+    }
+
+    new ViewStoryTopic(story).render();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  render() {
+    setPageTitle(this.story.title);
+    h1(this.story.title);
     this.viewExcerpts();
   }
 }
