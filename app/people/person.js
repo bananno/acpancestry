@@ -31,6 +31,10 @@ class Person {
     return Person.new(person, isTest);
   }
 
+  static filter(callback) {
+    return DATABASE.people.filter(callback);
+  }
+
   static populateList(arr) {
     arr.forEach(person => {
       person = Person.find(person);

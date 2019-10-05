@@ -31,6 +31,8 @@ class Timeline {
       this.sortList(specs.sortFunction);
     }
 
+    this.keys = specs.keys;
+
     if (specs.render) {
       this.renderTimeline();
     }
@@ -51,9 +53,22 @@ class Timeline {
   }
 
   renderTimeline() {
+    this.showKeys();
     this.list.forEach(item => {
       new TimelineItem(item, this.isTest, this.person);
     });
+  }
+
+  showKeys() {
+    if (!this.keys) {
+      return;
+    }
+    const $div = $('<div class="timeline-key">');
+    for (let key in this.keys) {
+      $div.append('<div class="timeline-' + key + '">' + this.keys[key]
+        + '</div>');
+    }
+    rend($div);
   }
 }
 
@@ -119,6 +134,9 @@ class TimelineItem {
   }
 
   shouldShowPeople() {
+    if (this.item.tags['historical']) {
+      return false;
+    }
     if (!this.isPerson) {
       return true;
     }

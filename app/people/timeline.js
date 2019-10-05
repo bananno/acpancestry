@@ -4,25 +4,24 @@ class PersonTimeline extends Timeline {
       return;
     }
 
-    rend(
-      '<h2>Timeline</h2>' +
-      '<div class="timeline-key">' +
-        '<div class="timeline-life">life events</div>' +
-        '<div class="timeline-source">sources</div>' +
-        '<div class="timeline-family">family events</div>' +
-        '<div class="timeline-historical">historical events</div>' +
-      '</div>'
-    );
-
     new PersonTimeline(person);
   }
 
   constructor(person, isTest) {
-    super(person, isTest);
+    super(person, isTest, {
+      keys: {
+        'life': 'life events',
+        'source': 'sources',
+        'family': 'family events',
+        'historical': 'historical events',
+      },
+    });
 
     if (!isTest) {
       this.createEventList();
       this.sortList();
+
+      h2('Timeline');
       this.renderTimeline();
     }
   }
