@@ -297,3 +297,11 @@ function $quoteBlock(options) {
 
   return $quote;
 }
+
+function pad0(number, length) {
+  number = '' + number;
+  while (number.length < length) {
+    number = '0' + number;
+  }
+  return number;
+}

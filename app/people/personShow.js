@@ -286,7 +286,7 @@ class ViewPerson extends ViewPage {
       return;
     }
     h2('Citations');
-    rend($makeCitationList(this.person.citations));
+    Citation.renderList(this.person.citations);
   }
 }
 
