@@ -30,11 +30,23 @@ test(t => {
   t.setTitle('search results');
   t.setTitle2('books');
 
+  /*
+    Search results structure:
+    1. All applicable stories are added to the resultsList.
+    2. Each story is given a matchingEntries list attribute. All of its
+        matching entries are added to that list.
+  */
+
   search = SearchResultsBooks.newTest('history');
   t.assertArrayEqualById('include story, exclude its entries, if the story ' +
-      'name is the only match',
+      'name is the only match (part 1)',
     [bookStory1],
     search.resultsList,
+  );
+  t.assertEqual('include story, exclude its entries, if the story ' +
+      'name is the only match (part 2)',
+    [],
+    search.resultsList[0].matchingEntries,
   );
 
   search = SearchResultsBooks.newTest('revolution');
@@ -45,9 +57,15 @@ test(t => {
   );
 
   search = SearchResultsBooks.newTest('jane');
-  t.assertArrayEqualById('include non-matching story if any of its entries match',
+  t.assertArrayEqualById('include non-matching story if any of its entries ' +
+      'match (part 1)',
     [bookStory1],
     search.resultsList,
+  );
+  t.assertArrayEqualById('include non-matching story if any of its entries ' +
+      'match (part 2)',
+    [bookSource2],
+    search.resultsList[0].matchingEntries,
   );
 
   search = SearchResultsBooks.newTest('revolution', 'john');

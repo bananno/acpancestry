@@ -56,6 +56,8 @@ class SearchResultsBooks extends SearchResults {
         rend('<hr style="margin-top: 15px;">');
       }
 
+      rend('<div style="display: none;" class="search-result-item">');
+
       pg(linkToStory(story, this.highlight(story.title)))
         .css('margin', '15px 0 0 5px');
 
