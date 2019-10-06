@@ -154,7 +154,8 @@ class ViewPerson extends ViewPage {
 
   viewBiographies() {
     const bios = DATABASE.sources.filter(source => {
-      return source.people[0] == this.person && source.tags.biography;
+      return source.tags.biography && source.people.length
+        && source.people[0]._id == this.person._id;
     });
 
     if (bios.length == 0) {
@@ -298,6 +299,8 @@ function viewPersonSource(person, sourceId) {
     return;
   }
 
+  const viewer = new ViewSource(source);
+
   h2('Biography');
   rend(formatTranscription(source.content));
 
@@ -319,13 +322,14 @@ function viewPersonSource(person, sourceId) {
     });
   }
 
-  viewSourceSummary(source);
-  viewSourceNotes(source);
+  viewer.viewSectionSummary();
+  viewer.viewSectionNotes();
 
   if (source.people.length > 1) {
     h2('Other people in this source');
-    rend($makePeopleList(source.people.filter(p => p != person), 'photo'));
+    const otherPeople = source.people.filter(p => p._id != person._id);
+    rend($makePeopleList(otherPeople, 'photo'));
   }
 
-  viewSourceLinks(source);
+  viewer.viewSectionLinks();
 }
