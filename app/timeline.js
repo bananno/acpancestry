@@ -83,6 +83,8 @@ class TimelineItem {
 
     this.isPerson = person != undefined || item.relationship || item.personal;
 
+    this.tags = this.item.tags || {};
+
     if (!this.isTest) {
       this.renderItem();
     }
@@ -98,7 +100,7 @@ class TimelineItem {
     if (this.item.historical) {
       return 'timeline-historical';
     }
-    if (this.item.tags['historical'] || this.item.tags['special historical']) {
+    if (this.tags['historical'] || this.tags['special historical']) {
       return 'timeline-historical';
     }
     return 'timeline-life';
@@ -134,7 +136,7 @@ class TimelineItem {
   }
 
   shouldShowPeople() {
-    if (this.item.tags['historical']) {
+    if (this.tags['historical']) {
       return false;
     }
     if (!this.isPerson) {
