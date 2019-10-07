@@ -6,10 +6,19 @@ class SearchResultsEvents extends SearchResults {
   }
 
   getResults() {
-    this.resultsList = DATABASE.events.filter(event => {
+    this.resultsListStories = DATABASE.stories
+    .filter(story => story.type == 'event')
+    .filter(story => {
+      const searchItems = [story.title, story.summary];
+      return this.isMatch(searchItems.join(' '));
+    });
+
+    this.resultsListRegular = DATABASE.events.filter(event => {
       const searchItems = [event.title, event.location.format, event.notes];
       return this.isMatch(searchItems.join(' '));
     });
+
+    this.resultsList = [...this.resultsListStories, ...this.resultsListRegular];
   }
 
   sortResults() {
@@ -17,8 +26,18 @@ class SearchResultsEvents extends SearchResults {
 
   renderResults() {
     this.title('Events');
+    this.showStoryEvents();
+    this.showRegularEvents();
+  }
 
-    this.resultsList.forEach(event => {
+  showStoryEvents() {
+    this.resultsListStories.forEach(story => {
+      pg(linkToStory(story));
+    });
+  }
+
+  showRegularEvents() {
+    this.resultsListRegular.forEach(event => {
       const lines = [];
       let line1 = this.highlight(event.title);
 

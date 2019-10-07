@@ -271,3 +271,27 @@ class ViewStoryTopic extends ViewStory {
     this.viewExcerpts();
   }
 }
+
+class ViewStoryEvent extends ViewStory {
+  static byUrl() {
+    const storyId = PATH.replace('event/', '');
+    const story = DATABASE.storyRef[storyId];
+
+    if (!story) {
+      return false;
+    }
+
+    new ViewStoryEvent(story).render();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  render() {
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+    this.viewExcerpts();
+  }
+}

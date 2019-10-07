@@ -67,6 +67,10 @@ function loadContent() {
       || pageNotFound();
   }
 
+  if (PATH.match('event')) {
+    return ViewStoryEvent.byUrl() || pageNotFound();
+  }
+
   return pageNotFound();
 }
 
