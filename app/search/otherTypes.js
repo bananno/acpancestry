@@ -19,7 +19,7 @@ class SearchResultsOtherSources extends SearchResults {
   renderResults() {
     this.title('Other Sources');
     this.resultsList.forEach(source => {
-      let linkText = source.group + ' - ' + source.title;
+      let linkText = source.story.title + ' - ' + source.title;
       linkText = this.highlight(linkText);
       rend(
         '<p style="padding: 5px;" class="search-result-item">' +

@@ -67,6 +67,16 @@ class ViewStory extends ViewPage {
         .css('margin', '10px 0 0 30px');
     });
   }
+
+  viewSectionSources() {
+    if (this.story.sources.length == 0) {
+      return;
+    }
+    h2('Sources');
+    this.story.sources.forEach(source => {
+      pg(linkToSource(source, true)).css('margin', '10px 5px');
+    });
+  }
 }
 
 class ViewCemeteryOrNewspaper extends ViewStory {
@@ -292,6 +302,15 @@ class ViewStoryEvent extends ViewStory {
   render() {
     setPageTitle(this.story.title);
     h1(this.story.title);
+
+    ['date', 'location'].forEach(attr => {
+      if (this.story[attr] && this.story[attr].format) {
+        pg(this.story[attr].format).css('margin', '5px');
+      }
+    });
+
+    this.viewSectionPeople();
+    this.viewSectionSources();
     this.viewExcerpts();
   }
 }
