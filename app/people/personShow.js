@@ -185,6 +185,13 @@ class ViewPerson extends ViewPage {
 
   viewFamily() {
     h2('Family');
+
+    if (this.person.tags['show family incomplete']) {
+      pg('<i>Note: This person had additional family member(s) that are not ' +
+        'in the list because they are not in the database yet.</i>')
+      .css('margin', '10px');
+    }
+
     this.person.forEachRelationship((relationship, relatives) => {
       if (relatives.length == 0) {
         return;
