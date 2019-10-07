@@ -2,8 +2,8 @@ function viewTopicMilitary() {
   const veterans = DATABASE.people.filter(person => person.tags.veteran);
   const americanRevolution = veterans.filter(person => person.tags.war == 'American Revolution');
   const civilWar = veterans.filter(person => person.tags.war == 'CSA');
-  const wwii = veterans.filter(person => person.tags.war == 'WWII');
   const wwi = veterans.filter(person => person.tags.war == 'WWI');
+  const wwii = veterans.filter(person => person.tags.war == 'WWII');
   const otherVeterans = veterans.filter(person => {
     return !['American Revolution', 'CSA', 'WWI', 'WWII'].includes(person.tags.war);
   });
@@ -53,13 +53,11 @@ function viewTopicMilitary() {
   h2('Civil War veterans');
   rend($makePeopleList(civilWar, 'photo'));
 
+  h2('World War I veterans');
+  rend($makePeopleList(wwi, 'photo'));
+
   h2('World War II veterans');
   rend($makePeopleList(wwii, 'photo'));
-
-  if (wwi.length) {
-    h2('World War I veterans');
-    rend($makePeopleList(wwi, 'photo'));
-  }
 
   if (otherVeterans.length) {
     h2('Other wars');
