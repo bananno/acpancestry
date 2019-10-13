@@ -32,8 +32,8 @@ class ViewStory extends ViewPage {
       return;
     }
     h2('Images');
-    this.story.images.forEach((imageUrl, i) => {
-      rend(makeImage(this.story, i, 100, 100).css('margin', '10px 5px 0 5px'));
+    this.story.images.forEach(image => {
+      rend(Image.make(image, 100, 100).css('margin', '10px 5px 0 5px'));
     });
   }
 

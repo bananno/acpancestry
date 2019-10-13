@@ -247,7 +247,7 @@ class TimelineItem {
 
     if (item.source) {
       if (item.images.length) {
-        $col1.append(makeImage(item, 0, 100, 100));
+        $col1.append(Image.make(item.images[0], 100, 100));
       }
 
       $col2.append(

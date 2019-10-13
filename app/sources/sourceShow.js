@@ -108,8 +108,8 @@ class ViewSource extends ViewPage {
 
     let measure = this.type == 'cemetery' ? 200 : null;
 
-    this.source.images.forEach((imageUrl, i) => {
-      rend(makeImage(this.source, i, measure).css('margin-right', '5px'));
+    this.source.images.forEach(image => {
+      rend(Image.make(image, measure).css('margin-right', '5px'));
     });
   }
 

@@ -324,9 +324,7 @@ function viewPersonSource(person, sourceId) {
 
   if (source.images.length) {
     h2('Images');
-    source.images.forEach((imageUrl, i) => {
-      rend(makeImage(source, i, 200));
-    });
+    source.images.forEach(image => rend(Image.make(image, 200)));
   }
 
   viewer.viewSectionSummary();

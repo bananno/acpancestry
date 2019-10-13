@@ -195,6 +195,7 @@ class RunTests {
     story._id = story._id || makeRandomId();
     story.title = story.title || 'story-' + story._id;
     story.people = story.people || [];
+    story.images = story.images || [];
 
     DATABASE.stories.push(story);
     return story;
@@ -202,9 +203,10 @@ class RunTests {
 
   fakeSource(source = {}) {
     source._id = source._id || makeRandomId();
-    source.people = source.people || [];
-    source.stories = source.stories || [];
-    source.tags = source.tags || [];
+
+    ['people', 'stories', 'tags', 'images'].forEach(attr => {
+      source[attr] = source[attr] || [];
+    });
 
     DATABASE.sources.push(source);
     return source;

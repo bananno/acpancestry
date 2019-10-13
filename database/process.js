@@ -3,6 +3,7 @@ function processDatabase() {
   DATABASE.personRef = {};
   DATABASE.storyRef = {};
   DATABASE.sourceRef = {};
+  DATABASE.imageRef = {};
 
   DATABASE.people.forEach(person => {
     DATABASE.personRef[person._id] = person;
@@ -19,6 +20,13 @@ function processDatabase() {
 
   DATABASE.sources.forEach(source => {
     DATABASE.sourceRef[source._id] = source;
+  });
+
+  [...DATABASE.stories, ...DATABASE.sources].forEach(item => {
+    item.images.forEach(image => {
+      DATABASE.imageRef[image._id] = image;
+      DATABASE.imageRef[image._id].origin = item;
+    });
   });
 
   DATABASE.people = DATABASE.people.map(getProcessedPerson);

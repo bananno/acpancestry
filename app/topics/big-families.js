@@ -69,7 +69,7 @@ class viewTopicBigFamilies extends ViewPage {
       'on far left) would later marry Harrison Clifton, himself from a ' +
       'family of 9 children, and have 13 children. ';
 
-    rend(makeImage(source, 0));
+    rend(Image.make(source.images[0]));
 
     rend(
       $('<div style="margin: 10px 0;">')
@@ -91,7 +91,7 @@ class viewTopicBigFamilies extends ViewPage {
       .append(linkToSource(source, '<i>(see more about this photo)</i>'))
     );
 
-    rend(makeImage(source, 0));
+    rend(Image.make(source.images[0]));
   }
 
   showLists() {

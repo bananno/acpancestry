@@ -37,7 +37,7 @@ function loadContent() {
   }
 
   if (PATH.match('image/')) {
-    return viewImage();
+    return ViewImage.byUrl() || pageNotFound();
   }
 
   if (PATH.match('topic/')) {
