@@ -337,6 +337,8 @@ const SINGULAR_PLURAL_STRINGS = [
   ['step-child', 'step-children'],
 ];
 
+const RIGHT_ARROW = '&#8594;';
+
 
 function viewEvents() {
   setPageTitle('Events');
@@ -429,12 +431,14 @@ class ViewHome extends ViewPage {
     DATABASE.sources.filter(s => s.story.title == 'Photo').forEach(source => {
       if (source.images.length) {
         rend(
-          localLink('source/' + source._id, '<img src="' + source.images[0] +
+          linkToSource(source, '<img src="' + source.images[0].url +
           '" style="height: 100px; max-width: 300px; margin: 5px;" title="' +
           source.title + '">')
         );
       }
     });
+    pg(localLink('photos', 'see more photos ' + RIGHT_ARROW))
+      .css('margin', '10px');
   }
 
   viewTopics() {
@@ -532,7 +536,7 @@ function loadContent() {
   }
 
   if (PATH.match('image/')) {
-    return viewImage();
+    return ViewImage.byUrl() || pageNotFound();
   }
 
   if (PATH.match('topic/')) {
@@ -564,6 +568,10 @@ function loadContent() {
 
   if (PATH.match('event')) {
     return ViewStoryEvent.byUrl() || pageNotFound();
+  }
+
+  if (PATH.match('photo')) {
+    return ViewPhotos.byUrl() || pageNotFound();
   }
 
   return pageNotFound();
@@ -836,7 +844,7 @@ class TimelineItem {
 
     if (item.source) {
       if (item.images.length) {
-        $col1.append(makeImage(item, 0, 100, 100));
+        $col1.append(Image.make(item.images[0], 100, 100));
       }
 
       $col2.append(
@@ -1034,8 +1042,6 @@ function getFancyLink(link) {
     '</div>'
   );
 }
-
-const RIGHT_ARROW = '&#8594;';
 
 function setPageTitle(title) {
   if (title && ('' + title).length) {
@@ -1343,57 +1349,108 @@ function pad0(number, length) {
   return number;
 }
 
-
-function makeImage(sourceOrStory, imageNumber, maxHeight, maxWidth) {
-  const imageAddress = sourceOrStory.images[imageNumber];
-  const linkAddress = 'image/' + sourceOrStory._id + '/' + imageNumber;
-
-  const $imageViewer = $(
-    '<div class="image-viewer">' +
-      localLink(linkAddress, '<img src="' + imageAddress + '">click to enlarge', true) +
-    '</div>'
-  );
-
-  if (maxHeight) {
-    $imageViewer.find('img').css('max-height', maxHeight + 'px');
+class Image {
+  static find(image) {
+    if (image._id) {
+      return image;
+    }
+    return DATABASE.imageRef[image];
   }
 
-  if (maxWidth) {
-    $imageViewer.find('img').css('max-width', maxWidth + 'px');
-  } else {
-    $imageViewer.find('img').css('max-width', '100%');
-  }
+  static make(image, maxHeight, maxWidth) {
+    image = Image.find(image);
 
-  return $imageViewer;
+    const linkAddress = 'image/' + image._id;
+
+    const $imageViewer = $(
+      '<div class="image-viewer">' +
+        localLink(linkAddress, '<img src="' + image.url + '">click to enlarge', true) +
+      '</div>'
+    );
+
+    if (maxHeight) {
+      $imageViewer.find('img').css('max-height', maxHeight + 'px');
+    }
+
+    if (maxWidth) {
+      $imageViewer.find('img').css('max-width', maxWidth + 'px');
+    } else {
+      $imageViewer.find('img').css('max-width', '100%');
+    }
+
+    return $imageViewer;
+  }
 }
 
-function viewImage() {
-  const [sourceId, imageNumber] = PATH.replace('image/', '').split('/');
+class ViewImage extends ViewPage {
+  static byUrl() {
+    const imageId = PATH.replace('image/', '');
+    const image = Image.find(imageId);
 
-  setPageTitle('Image');
+    if (!image) {
+      return false;
+    }
 
-  $('body').html('');
+    setPageTitle('Image');
 
-  $('body').css({
-    'background': 'none',
-    'background-color': 'black',
-    'margin': '10px',
-  });
+    $('body').html('');
 
-  const sourceOrStory = DATABASE.sourceRef[sourceId]
-    || DATABASE.storyRef[sourceId];
+    $('body').css({
+      'background': 'none',
+      'background-color': 'black',
+      'margin': '10px',
+    });
 
-  const $image = $('<img>')
-    .prop('src', sourceOrStory.images[imageNumber])
-    .addClass('full-screen-image pre-zoom')
-    .appendTo('body')
-    .click(() => {
-      if ($image.hasClass('pre-zoom')) {
-        $image.removeClass('pre-zoom');
+    const $image = $('<img>')
+      .prop('src', image.url)
+      .addClass('full-screen-image pre-zoom')
+      .appendTo('body')
+      .click(() => {
+        if ($image.hasClass('pre-zoom')) {
+          $image.removeClass('pre-zoom');
+        } else {
+          $image.addClass('pre-zoom');
+        }
+      });
+
+    return true;
+  }
+}
+
+class ViewPhotos extends ViewPage {
+  static byUrl() {
+    if (PATH == 'photos') {
+      new ViewPhotos().render();
+      return true;
+    }
+    return false;
+  }
+
+  constructor() {
+    super();
+    this.makeList();
+  }
+
+  makeList() {
+    console.log('make list')
+    this.list = DATABASE.images.filter(image => image.tags.gallery);
+  }
+
+  render() {
+    setPageTitle('Photos');
+    h1('Photos');
+    this.list.forEach(image => {
+      const img = '<img src="' + image.url +
+        '" style="max-height: 200px; max-width: 300px; margin: 5px;" title="' +
+        image.item.title + '">';
+
+      if (image.story) {
+        rend(linkToStory(image.item, img));
       } else {
-        $image.addClass('pre-zoom');
+        rend(linkToSource(image.item, img));
       }
     });
+  }
 }
 
 
@@ -1951,9 +2008,7 @@ function viewPersonSource(person, sourceId) {
 
   if (source.images.length) {
     h2('Images');
-    source.images.forEach((imageUrl, i) => {
-      rend(makeImage(source, i, 200));
-    });
+    source.images.forEach(image => rend(Image.make(image, 200)));
   }
 
   viewer.viewSectionSummary();
@@ -2777,565 +2832,6 @@ class ViewPlace extends ViewPage {
   }
 }
 
-function artifactBlock(story, specs) {
-  const $box = $('<div>');
-
-  if (specs.largeHeader) {
-    $box.append('<h2>' + story.title + '</h2>');
-  } else {
-    $box.css('margin-left', '15px');
-    $box.append('<p>' + linkToStory(story) + '</p>');
-    if (!specs.firstItem) {
-      $box.css('margin-top', '20px');
-    }
-  }
-
-  if (story.summary) {
-    if (specs.largeHeader) {
-      $box.append('<p style="margin-left: 10px">' + story.summary + '</p>');
-    } else {
-      $box.append('<p style="margin-top: 5px">' + story.summary + '</p>');
-    }
-  }
-
-  $box.append($makePeopleList(specs.people || story.people, 'photo'));
-
-  if (story.type == 'book') {
-    $box.append(
-      '<p style="margin: 10px">' +
-        localLink('book/' + story._id, 'read book ' + RIGHT_ARROW) +
-      '</p>'
-    );
-  }
-
-  rend($box);
-}
-
-
-const sourceCategories = [
-  {
-    path: 'all',
-    title: 'All Sources',
-    pathText: 'View All',
-    route: viewSourcesAll,
-  },
-  {
-    path: 'photos',
-    title: 'Photographs',
-    route: viewListOfPhotographs,
-  },
-  {
-    fullPath: 'newspapers',
-    title: 'Newspapers',
-  },
-  {
-    fullPath: 'cemeteries',
-    title: 'Cemeteries',
-  },
-  {
-    fullPath: 'books',
-    title: 'Books',
-  },
-  {
-    path: 'censusUSA',
-    title: 'US Federal Census',
-    route: viewSourcesCensusUSA,
-  },
-  {
-    path: 'censusState',
-    title: 'US State Census',
-    route: viewSourcesCensusState,
-  },
-  {
-    path: 'censusOther',
-    title: 'Other Census',
-    route: viewSourcesCensusOther,
-  },
-  {
-    path: 'draft',
-    title: 'Military Draft Registration',
-    route: viewSourcesDraft,
-  },
-  {
-    path: 'indexOnly',
-    title: 'Index-only Records',
-    route: viewSourcesIndexOnly,
-  },
-  {
-    path: 'other',
-    title: 'Other Sources',
-    route: viewSourcesOther,
-  },
-];
-
-function routeSources() {
-  if (PATH == 'sources') {
-    return viewSourcesIndex();
-  }
-
-  if (PATH.match('source/')) {
-    return ViewSource.byUrl();
-  }
-
-  const categoryPath = PATH.slice(8);
-
-  const category = sourceCategories.filter(category => {
-    return category.path === categoryPath;
-  })[0];
-
-  if (category === undefined) {
-    return pageNotFound();
-  }
-
-  setPageTitle(category.title);
-  headerTrail('sources');
-  rend('<h1>' + category.title + '</h1>');
-
-  if (category.route) {
-    return category.route();
-  }
-}
-
-function viewSourcesIndex() {
-  setPageTitle('Sources');
-  rend('<h1>Sources</h1>');
-
-  sourceCategories.forEach(category => {
-    const path = category.fullPath || ('sources/' + category.path);
-    const text = category.pathText || category.title;
-    rend(
-      '<p style="margin-top: 8px; font-size: 18px;">' +
-        localLink(path, text) +
-      '</p>'
-    );
-  });
-}
-
-function viewSourcesAll() {
-  const $table = $('<table class="event-list" border="1">');
-
-  rend($table);
-
-  $table.append($headerRow(['type', 'group', 'title', 'date', 'location', 'people']));
-
-  DATABASE.sources.forEach(source => {
-    const $row = $('<tr>').appendTo($table);
-
-    addTd($row, source.story.type);
-    addTd($row, linkToStory(source.story));
-    addTd($row, linkToSource(source, source.title));
-    addTd($row, formatDate(source.date));
-    addTd($row, formatLocation(source.location));
-    addTd($row, $makePeopleList(source.people));
-  });
-}
-
-function viewListOfPhotographs() {
-  const photos = DATABASE.sources.filter(source => source.type == 'photo');
-
-  photos.forEach(source => {
-    rend('<h2>' + source.title + '</h2>');
-    source.images.forEach((img, i) => {
-      rend(makeImage(source, i, 200).css('margin-right', '5px'));
-    });
-
-    if (source.content) {
-      rend(formatTranscription(source.content));
-    }
-
-    rend($makePeopleList(source.people, 'photo'));
-
-    if (source.summary) {
-      source.summary.split('\n').forEach(text => {
-        rend('<p>' + text + '</p>');
-      });
-    }
-
-    if (source.notes) {
-      source.notes.split('\n').forEach(text => {
-        rend('<p>' + text + '</p>');
-      });
-    }
-
-    rend(source.links.map(getFancyLink));
-  });
-}
-
-function viewSourcesCensusUSA() {
-  for (let year = 1790; year <= 1950; year += 10) {
-    const story = DATABASE.stories.filter(story => {
-      return story.title == 'Census USA ' + year;
-    })[0];
-
-    if (!story) {
-      continue;
-    }
-
-    h2(year);
-
-    if (year == 1890) {
-      rend(
-        '<p style="padding-left: 10px;">' +
-          'Most of the 1890 census was destroyed in a 1921 fire.' +
-        '</p>'
-      );
-    }
-
-    showSourceList(story.entries, true, false, false);
-  }
-}
-
-function viewSourcesCensusState() {
-  const stories = DATABASE.stories.filter(isStoryStateCensus);
-
-  stories.sortBy(story => story.title);
-
-  let previousHeader;
-
-  stories.forEach(story => {
-    const headerName = USA_STATES[story.location.region1];
-
-    if (previousHeader != headerName) {
-      h2(headerName);
-      previousHeader = headerName;
-    }
-
-    showSourceList(story.entries, true, true, true);
-  });
-}
-
-function isStoryStateCensus(story) {
-  return story.tags['Census US States'];
-}
-
-function viewSourcesCensusOther() {
-  const storyList = DATABASE.stories.filter(story => {
-    return story.title.match('Census')
-      && !story.title.match('USA')
-      && !isStoryStateCensus(story);
-  });
-
-  storyList.sortBy(story => story.title);
-
-  showSourceCategoryList({
-    showStoryTitles: true,
-    showStoryInLink: false,
-    stories: storyList
-  });
-}
-
-function viewSourcesDraft() {
-  ['World War I draft', 'World War II draft'].forEach(title => {
-    showSourceCategoryList({
-      title: title,
-      stories: DATABASE.stories.filter(story => story.title == title),
-      showStoryInLink: false
-    });
-  });
-}
-
-function viewSourcesIndexOnly() {
-  const storiesIndex = DATABASE.stories.filter(story => story.type == 'index');
-
-  storiesIndex.sortBy(story => story.title);
-
-  rend(
-    '<p style="padding: 10px 0;">' +
-      'These sources come from online databases. Some of these records are transcribed from ' +
-      'original documents and images which are not directly available online. Others are from ' +
-      'web-only databases.' +
-    '</p>'
-  );
-
-  showSourceCategoryList({
-    title: 'Birth Index',
-    stories: storiesIndex.filter(story => story.title.match('Birth Index'))
-  });
-
-  showSourceCategoryList({
-    title: 'Death Index',
-    stories: storiesIndex.filter(story => story.title.match('Death Index'))
-  });
-
-  showSourceCategoryList({
-    title: 'Other',
-    stories: storiesIndex.filter(story => {
-      return !story.title.match('Birth Index')
-        && !story.title.match('Death Index');
-    })
-  });
-}
-
-function viewSourcesOther() {
-  const storiesOther = DATABASE.stories.filter(story => {
-    return !['cemetery', 'newspaper', 'index', 'book'].includes(story.type)
-      && !['World War I draft', 'World War II draft',
-        'Photo'].includes(story.title)
-      && !story.title.match('Census');
-  });
-
-  storiesOther.sortBy(story => story.title);
-
-  showSourceCategoryList({
-    title: 'Baptism',
-    stories: storiesOther.filter(story => story.title.match('Baptism'))
-  });
-
-  showSourceCategoryList({
-    title: 'Marriage',
-    stories: storiesOther.filter(story => story.title.match('Marriage'))
-  });
-
-  showSourceCategoryList({
-    title: 'Immigration & Travel',
-    stories: storiesOther.filter(story => story.title.match('Passenger'))
-  });
-
-  showSourceCategoryList({
-    title: 'Other',
-    stories: storiesOther.filter(story => {
-      return !story.title.match('Baptism')
-        && !story.title.match('Marriage')
-        && !story.title.match('Passenger');
-    })
-  });
-}
-
-
-function showSourceCategoryList(options) {
-  showStory = options.showStoryInLink;
-  if (showStory === undefined) {
-    showStory = true;
-  }
-
-  if (options.title) {
-    h2(options.title);
-  }
-
-  options.stories.forEach(story => {
-    if (options.showStoryTitles) {
-      h2(story.title);
-    }
-    showSourceList(story.entries, true, true, showStory);
-  });
-}
-
-function showSourceList(sourceList, showLocation, showDate, showStory) {
-  let previousHeader;
-  let firstItem = true;
-
-  sourceList.forEach(source => {
-    let linkText;
-
-    if (showStory) {
-      linkText = source.story.title + ' - ' + source.title;
-    } else {
-      linkText = source.title;
-    }
-
-    rend(
-      '<p style="padding-top: ' + (firstItem ? '5' : '15') + 'px; padding-left: 10px;">' +
-        linkToSource(source, linkText) +
-      '</p>'
-    );
-
-    if (showLocation) {
-      rend(
-        '<p style="padding-top: 2px; padding-left: 10px;">' +
-          source.location.format +
-        '</p>'
-      );
-    }
-
-    if (showDate) {
-      rend(
-        '<p style="padding-top: 2px; padding-left: 10px;">' +
-          source.date.format +
-        '</p>'
-      );
-    }
-
-    firstItem = false;
-  });
-}
-
-class ViewSource extends ViewPage {
-  static byUrl() {
-    const sourceId = PATH.replace('source/', '');
-
-    const source = DATABASE.sourceRef[sourceId];
-
-    if (!source) {
-      h1('Source not found');
-      return;
-    }
-
-    new ViewSource(source).render();
-  }
-
-  constructor(source) {
-    super(source);
-    this.source = source;
-    this.story = source.story;
-    this.type = source.story.type;
-  }
-
-  render() {
-    this.setTitle();
-    this.headerTrail();
-    this.viewTitles();
-    this.viewSectionSummary();
-    this.viewImages();
-    this.viewSectionContent();
-    this.viewSectionPeople();
-    this.viewStories();
-    this.viewSectionNotes();
-    this.viewSectionLinks();
-    this.otherEntries();
-  }
-
-  setTitle() {
-    if (this.type == 'cemetery') {
-      setPageTitle(this.story.title);
-    } else {
-      setPageTitle('Source');
-    }
-  }
-
-  headerTrail() {
-    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
-      return headerTrail(
-        'sources',
-        pluralize(this.type),
-        [this.type + '/' + this.story._id, this.story.title]
-      );
-    }
-
-    if (this.type == 'document' && this.story.title.match('Census USA')) {
-      return headerTrail('sources', ['sources/censusUSA', 'Census USA'],
-        [false, this.source.date.year]);
-    }
-
-    return headerTrail('sources');
-  }
-
-  viewTitles() {
-    if (this.type == 'cemetery') {
-      pg(this.story.location.format);
-      pg('<br>');
-      h1(this.source.title);
-      return;
-    }
-
-    if (this.type == 'newspaper') {
-      h1(this.source.title);
-      pg('newspaper article');
-      pg(this.story.location.format);
-      pg(this.source.date.format);
-      return;
-    }
-
-    if (this.type == 'document') {
-      if (this.story.title.match('Census USA')) {
-        h1(this.source.title);
-        pg(this.story.type);
-      } else {
-        h1('Document');
-        pg(this.source.title);
-      }
-    } else {
-      h1('Source');
-      pg(this.story.type);
-      pg(this.source.title);
-    }
-
-    pg(this.source.date.format || this.story.date.format);
-    pg(this.source.location.format || this.story.location.format);
-  }
-
-  viewImages() {
-    if (!this.source.images.length) {
-      return;
-    }
-
-    h2('Images');
-
-    if (this.source.tags.cropped) {
-      rend('<p style="margin-bottom:10px">' +
-        'The image is cropped to show the most relevent portion. ' +
-        'See the "links" section below to see the full image.' +
-      '</p>');
-    }
-
-    let measure = this.type == 'cemetery' ? 200 : null;
-
-    this.source.images.forEach((imageUrl, i) => {
-      rend(makeImage(this.source, i, measure).css('margin-right', '5px'));
-    });
-  }
-
-  viewStories() {
-    if (this.source.stories.length == 0) {
-      return;
-    }
-    h2('See Also');
-    this.viewSectionList(this.source.stories, {
-      type: 'stories',
-      bullet: true,
-      divider: false,
-      summary: true,
-      location: true,
-      date: true,
-    });
-  }
-
-  otherEntries() {
-    if (this.type == 'document' && this.story.title.match('Census USA')) {
-      const neighbors = this.story.entries.filter(source => {
-        return source.location.format == this.source.location.format;
-      });
-
-      if (neighbors.length == 0) {
-        return;
-      }
-
-      h2('Neighbors');
-      pg('Other households in <b>' + this.source.location.format + '</b> in '
-        + this.source.date.year + '.').css('margin-bottom', '10px');
-      this.viewSectionList(neighbors, {
-        type: 'sources',
-        showStory: false,
-        bullet: true,
-        divider: false,
-        summary: true,
-        location: false,
-        date: false,
-      });
-      return;
-    }
-
-    if (!['newspaper', 'cemetery'].includes(this.type)) {
-      return;
-    }
-
-    const entries = this.story.entries.filter(s => s != this.source);
-
-    if (entries.length == 0) {
-      return;
-    }
-
-    h2('More from ' + this.story.title);
-
-    if (this.type == 'cemetery') {
-      entries.sortBy(source => source.title);
-      ViewCemeteryOrNewspaper.showListOfGraves(entries);
-    } else {
-      entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
-      ViewCemeteryOrNewspaper.showListOfArticles(entries);
-    }
-  }
-}
-
 class SearchResults extends ViewPage {
   static byUrl() {
     setPageTitle('Search Results');
@@ -3910,6 +3406,565 @@ class SearchResultsPlaces extends SearchResults {
   }
 }
 
+function artifactBlock(story, specs) {
+  const $box = $('<div>');
+
+  if (specs.largeHeader) {
+    $box.append('<h2>' + story.title + '</h2>');
+  } else {
+    $box.css('margin-left', '15px');
+    $box.append('<p>' + linkToStory(story) + '</p>');
+    if (!specs.firstItem) {
+      $box.css('margin-top', '20px');
+    }
+  }
+
+  if (story.summary) {
+    if (specs.largeHeader) {
+      $box.append('<p style="margin-left: 10px">' + story.summary + '</p>');
+    } else {
+      $box.append('<p style="margin-top: 5px">' + story.summary + '</p>');
+    }
+  }
+
+  $box.append($makePeopleList(specs.people || story.people, 'photo'));
+
+  if (story.type == 'book') {
+    $box.append(
+      '<p style="margin: 10px">' +
+        localLink('book/' + story._id, 'read book ' + RIGHT_ARROW) +
+      '</p>'
+    );
+  }
+
+  rend($box);
+}
+
+
+const sourceCategories = [
+  {
+    path: 'all',
+    title: 'All Sources',
+    pathText: 'View All',
+    route: viewSourcesAll,
+  },
+  {
+    path: 'photos',
+    title: 'Photographs',
+    route: viewListOfPhotographs,
+  },
+  {
+    fullPath: 'newspapers',
+    title: 'Newspapers',
+  },
+  {
+    fullPath: 'cemeteries',
+    title: 'Cemeteries',
+  },
+  {
+    fullPath: 'books',
+    title: 'Books',
+  },
+  {
+    path: 'censusUSA',
+    title: 'US Federal Census',
+    route: viewSourcesCensusUSA,
+  },
+  {
+    path: 'censusState',
+    title: 'US State Census',
+    route: viewSourcesCensusState,
+  },
+  {
+    path: 'censusOther',
+    title: 'Other Census',
+    route: viewSourcesCensusOther,
+  },
+  {
+    path: 'draft',
+    title: 'Military Draft Registration',
+    route: viewSourcesDraft,
+  },
+  {
+    path: 'indexOnly',
+    title: 'Index-only Records',
+    route: viewSourcesIndexOnly,
+  },
+  {
+    path: 'other',
+    title: 'Other Sources',
+    route: viewSourcesOther,
+  },
+];
+
+function routeSources() {
+  if (PATH == 'sources') {
+    return viewSourcesIndex();
+  }
+
+  if (PATH.match('source/')) {
+    return ViewSource.byUrl();
+  }
+
+  const categoryPath = PATH.slice(8);
+
+  const category = sourceCategories.filter(category => {
+    return category.path === categoryPath;
+  })[0];
+
+  if (category === undefined) {
+    return pageNotFound();
+  }
+
+  setPageTitle(category.title);
+  headerTrail('sources');
+  rend('<h1>' + category.title + '</h1>');
+
+  if (category.route) {
+    return category.route();
+  }
+}
+
+function viewSourcesIndex() {
+  setPageTitle('Sources');
+  rend('<h1>Sources</h1>');
+
+  sourceCategories.forEach(category => {
+    const path = category.fullPath || ('sources/' + category.path);
+    const text = category.pathText || category.title;
+    rend(
+      '<p style="margin-top: 8px; font-size: 18px;">' +
+        localLink(path, text) +
+      '</p>'
+    );
+  });
+}
+
+function viewSourcesAll() {
+  const $table = $('<table class="event-list" border="1">');
+
+  rend($table);
+
+  $table.append($headerRow(['type', 'group', 'title', 'date', 'location', 'people']));
+
+  DATABASE.sources.forEach(source => {
+    const $row = $('<tr>').appendTo($table);
+
+    addTd($row, source.story.type);
+    addTd($row, linkToStory(source.story));
+    addTd($row, linkToSource(source, source.title));
+    addTd($row, formatDate(source.date));
+    addTd($row, formatLocation(source.location));
+    addTd($row, $makePeopleList(source.people));
+  });
+}
+
+function viewListOfPhotographs() {
+  const photos = DATABASE.sources.filter(source => source.type == 'photo');
+
+  photos.forEach(source => {
+    rend('<h2>' + source.title + '</h2>');
+    source.images.forEach(image => {
+      rend(Image.make(image, 200).css('margin-right', '5px'));
+    });
+
+    if (source.content) {
+      rend(formatTranscription(source.content));
+    }
+
+    rend($makePeopleList(source.people, 'photo'));
+
+    if (source.summary) {
+      source.summary.split('\n').forEach(text => {
+        rend('<p>' + text + '</p>');
+      });
+    }
+
+    if (source.notes) {
+      source.notes.split('\n').forEach(text => {
+        rend('<p>' + text + '</p>');
+      });
+    }
+
+    rend(source.links.map(getFancyLink));
+  });
+}
+
+function viewSourcesCensusUSA() {
+  for (let year = 1790; year <= 1950; year += 10) {
+    const story = DATABASE.stories.filter(story => {
+      return story.title == 'Census USA ' + year;
+    })[0];
+
+    if (!story) {
+      continue;
+    }
+
+    h2(year);
+
+    if (year == 1890) {
+      rend(
+        '<p style="padding-left: 10px;">' +
+          'Most of the 1890 census was destroyed in a 1921 fire.' +
+        '</p>'
+      );
+    }
+
+    showSourceList(story.entries, true, false, false);
+  }
+}
+
+function viewSourcesCensusState() {
+  const stories = DATABASE.stories.filter(isStoryStateCensus);
+
+  stories.sortBy(story => story.title);
+
+  let previousHeader;
+
+  stories.forEach(story => {
+    const headerName = USA_STATES[story.location.region1];
+
+    if (previousHeader != headerName) {
+      h2(headerName);
+      previousHeader = headerName;
+    }
+
+    showSourceList(story.entries, true, true, true);
+  });
+}
+
+function isStoryStateCensus(story) {
+  return story.tags['Census US States'];
+}
+
+function viewSourcesCensusOther() {
+  const storyList = DATABASE.stories.filter(story => {
+    return story.title.match('Census')
+      && !story.title.match('USA')
+      && !isStoryStateCensus(story);
+  });
+
+  storyList.sortBy(story => story.title);
+
+  showSourceCategoryList({
+    showStoryTitles: true,
+    showStoryInLink: false,
+    stories: storyList
+  });
+}
+
+function viewSourcesDraft() {
+  ['World War I draft', 'World War II draft'].forEach(title => {
+    showSourceCategoryList({
+      title: title,
+      stories: DATABASE.stories.filter(story => story.title == title),
+      showStoryInLink: false
+    });
+  });
+}
+
+function viewSourcesIndexOnly() {
+  const storiesIndex = DATABASE.stories.filter(story => story.type == 'index');
+
+  storiesIndex.sortBy(story => story.title);
+
+  rend(
+    '<p style="padding: 10px 0;">' +
+      'These sources come from online databases. Some of these records are transcribed from ' +
+      'original documents and images which are not directly available online. Others are from ' +
+      'web-only databases.' +
+    '</p>'
+  );
+
+  showSourceCategoryList({
+    title: 'Birth Index',
+    stories: storiesIndex.filter(story => story.title.match('Birth Index'))
+  });
+
+  showSourceCategoryList({
+    title: 'Death Index',
+    stories: storiesIndex.filter(story => story.title.match('Death Index'))
+  });
+
+  showSourceCategoryList({
+    title: 'Other',
+    stories: storiesIndex.filter(story => {
+      return !story.title.match('Birth Index')
+        && !story.title.match('Death Index');
+    })
+  });
+}
+
+function viewSourcesOther() {
+  const storiesOther = DATABASE.stories.filter(story => {
+    return !['cemetery', 'newspaper', 'index', 'book'].includes(story.type)
+      && !['World War I draft', 'World War II draft',
+        'Photo'].includes(story.title)
+      && !story.title.match('Census');
+  });
+
+  storiesOther.sortBy(story => story.title);
+
+  showSourceCategoryList({
+    title: 'Baptism',
+    stories: storiesOther.filter(story => story.title.match('Baptism'))
+  });
+
+  showSourceCategoryList({
+    title: 'Marriage',
+    stories: storiesOther.filter(story => story.title.match('Marriage'))
+  });
+
+  showSourceCategoryList({
+    title: 'Immigration & Travel',
+    stories: storiesOther.filter(story => story.title.match('Passenger'))
+  });
+
+  showSourceCategoryList({
+    title: 'Other',
+    stories: storiesOther.filter(story => {
+      return !story.title.match('Baptism')
+        && !story.title.match('Marriage')
+        && !story.title.match('Passenger');
+    })
+  });
+}
+
+
+function showSourceCategoryList(options) {
+  showStory = options.showStoryInLink;
+  if (showStory === undefined) {
+    showStory = true;
+  }
+
+  if (options.title) {
+    h2(options.title);
+  }
+
+  options.stories.forEach(story => {
+    if (options.showStoryTitles) {
+      h2(story.title);
+    }
+    showSourceList(story.entries, true, true, showStory);
+  });
+}
+
+function showSourceList(sourceList, showLocation, showDate, showStory) {
+  let previousHeader;
+  let firstItem = true;
+
+  sourceList.forEach(source => {
+    let linkText;
+
+    if (showStory) {
+      linkText = source.story.title + ' - ' + source.title;
+    } else {
+      linkText = source.title;
+    }
+
+    rend(
+      '<p style="padding-top: ' + (firstItem ? '5' : '15') + 'px; padding-left: 10px;">' +
+        linkToSource(source, linkText) +
+      '</p>'
+    );
+
+    if (showLocation) {
+      rend(
+        '<p style="padding-top: 2px; padding-left: 10px;">' +
+          source.location.format +
+        '</p>'
+      );
+    }
+
+    if (showDate) {
+      rend(
+        '<p style="padding-top: 2px; padding-left: 10px;">' +
+          source.date.format +
+        '</p>'
+      );
+    }
+
+    firstItem = false;
+  });
+}
+
+class ViewSource extends ViewPage {
+  static byUrl() {
+    const sourceId = PATH.replace('source/', '');
+
+    const source = DATABASE.sourceRef[sourceId];
+
+    if (!source) {
+      h1('Source not found');
+      return;
+    }
+
+    new ViewSource(source).render();
+  }
+
+  constructor(source) {
+    super(source);
+    this.source = source;
+    this.story = source.story;
+    this.type = source.story.type;
+  }
+
+  render() {
+    this.setTitle();
+    this.headerTrail();
+    this.viewTitles();
+    this.viewSectionSummary();
+    this.viewImages();
+    this.viewSectionContent();
+    this.viewSectionPeople();
+    this.viewStories();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
+    this.otherEntries();
+  }
+
+  setTitle() {
+    if (this.type == 'cemetery') {
+      setPageTitle(this.story.title);
+    } else {
+      setPageTitle('Source');
+    }
+  }
+
+  headerTrail() {
+    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
+      return headerTrail(
+        'sources',
+        pluralize(this.type),
+        [this.type + '/' + this.story._id, this.story.title]
+      );
+    }
+
+    if (this.type == 'document' && this.story.title.match('Census USA')) {
+      return headerTrail('sources', ['sources/censusUSA', 'Census USA'],
+        [false, this.source.date.year]);
+    }
+
+    return headerTrail('sources');
+  }
+
+  viewTitles() {
+    if (this.type == 'cemetery') {
+      pg(this.story.location.format);
+      pg('<br>');
+      h1(this.source.title);
+      return;
+    }
+
+    if (this.type == 'newspaper') {
+      h1(this.source.title);
+      pg('newspaper article');
+      pg(this.story.location.format);
+      pg(this.source.date.format);
+      return;
+    }
+
+    if (this.type == 'document') {
+      if (this.story.title.match('Census USA')) {
+        h1(this.source.title);
+        pg(this.story.type);
+      } else {
+        h1('Document');
+        pg(this.source.title);
+      }
+    } else {
+      h1('Source');
+      pg(this.story.type);
+      pg(this.source.title);
+    }
+
+    pg(this.source.date.format || this.story.date.format);
+    pg(this.source.location.format || this.story.location.format);
+  }
+
+  viewImages() {
+    if (!this.source.images.length) {
+      return;
+    }
+
+    h2('Images');
+
+    if (this.source.tags.cropped) {
+      rend('<p style="margin-bottom:10px">' +
+        'The image is cropped to show the most relevent portion. ' +
+        'See the "links" section below to see the full image.' +
+      '</p>');
+    }
+
+    let measure = this.type == 'cemetery' ? 200 : null;
+
+    this.source.images.forEach(image => {
+      rend(Image.make(image, measure).css('margin-right', '5px'));
+    });
+  }
+
+  viewStories() {
+    if (this.source.stories.length == 0) {
+      return;
+    }
+    h2('See Also');
+    this.viewSectionList(this.source.stories, {
+      type: 'stories',
+      bullet: true,
+      divider: false,
+      summary: true,
+      location: true,
+      date: true,
+    });
+  }
+
+  otherEntries() {
+    if (this.type == 'document' && this.story.title.match('Census USA')) {
+      const neighbors = this.story.entries.filter(source => {
+        return source.location.format == this.source.location.format;
+      });
+
+      if (neighbors.length == 0) {
+        return;
+      }
+
+      h2('Neighbors');
+      pg('Other households in <b>' + this.source.location.format + '</b> in '
+        + this.source.date.year + '.').css('margin-bottom', '10px');
+      this.viewSectionList(neighbors, {
+        type: 'sources',
+        showStory: false,
+        bullet: true,
+        divider: false,
+        summary: true,
+        location: false,
+        date: false,
+      });
+      return;
+    }
+
+    if (!['newspaper', 'cemetery'].includes(this.type)) {
+      return;
+    }
+
+    const entries = this.story.entries.filter(s => s != this.source);
+
+    if (entries.length == 0) {
+      return;
+    }
+
+    h2('More from ' + this.story.title);
+
+    if (this.type == 'cemetery') {
+      entries.sortBy(source => source.title);
+      ViewCemeteryOrNewspaper.showListOfGraves(entries);
+    } else {
+      entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
+      ViewCemeteryOrNewspaper.showListOfArticles(entries);
+    }
+  }
+}
+
 class ViewStoryIndex extends ViewPage {
   static byUrl() {
     if (['artifacts', 'books', 'cemeteries', 'landmarks', 'newspapers']
@@ -4084,8 +4139,8 @@ class ViewStory extends ViewPage {
       return;
     }
     h2('Images');
-    this.story.images.forEach((imageUrl, i) => {
-      rend(makeImage(this.story, i, 100, 100).css('margin', '10px 5px 0 5px'));
+    this.story.images.forEach(image => {
+      rend(Image.make(image, 100, 100).css('margin', '10px 5px 0 5px'));
     });
   }
 
@@ -4471,7 +4526,7 @@ class viewTopicBigFamilies extends ViewPage {
       'on far left) would later marry Harrison Clifton, himself from a ' +
       'family of 9 children, and have 13 children. ';
 
-    rend(makeImage(source, 0));
+    rend(Image.make(source.images[0]));
 
     rend(
       $('<div style="margin: 10px 0;">')
@@ -4493,7 +4548,7 @@ class viewTopicBigFamilies extends ViewPage {
       .append(linkToSource(source, '<i>(see more about this photo)</i>'))
     );
 
-    rend(makeImage(source, 0));
+    rend(Image.make(source.images[0]));
   }
 
   showLists() {
