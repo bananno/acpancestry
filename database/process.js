@@ -4,6 +4,7 @@ function processDatabase() {
   DATABASE.storyRef = {};
   DATABASE.sourceRef = {};
   DATABASE.imageRef = {};
+  DATABASE.images = [];
 
   DATABASE.people.forEach(person => {
     DATABASE.personRef[person._id] = person;
@@ -16,16 +17,21 @@ function processDatabase() {
 
   DATABASE.stories.forEach(story => {
     DATABASE.storyRef[story._id] = story;
+    story.images.forEach(image => {
+      image.item = story;
+      image.story = true;
+      DATABASE.images.push(image);
+      DATABASE.imageRef[image._id] = image;
+    });
   });
 
   DATABASE.sources.forEach(source => {
     DATABASE.sourceRef[source._id] = source;
-  });
-
-  [...DATABASE.stories, ...DATABASE.sources].forEach(item => {
-    item.images.forEach(image => {
+    source.images.forEach(image => {
+      image.item = source;
+      image.source = true;
+      DATABASE.images.push(image);
       DATABASE.imageRef[image._id] = image;
-      DATABASE.imageRef[image._id].origin = item;
     });
   });
 

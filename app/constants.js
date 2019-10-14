@@ -26,3 +26,5 @@ const SINGULAR_PLURAL_STRINGS = [
   ['child', 'children'],
   ['step-child', 'step-children'],
 ];
+
+const RIGHT_ARROW = '&#8594;';

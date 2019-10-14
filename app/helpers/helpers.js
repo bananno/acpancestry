@@ -1,5 +1,3 @@
-const RIGHT_ARROW = '&#8594;';
-
 function setPageTitle(title) {
   if (title && ('' + title).length) {
     document.title = title + ' | ' + SITE_TITLE;

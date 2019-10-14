@@ -71,6 +71,10 @@ function loadContent() {
     return ViewStoryEvent.byUrl() || pageNotFound();
   }
 
+  if (PATH.match('photo')) {
+    return ViewPhotos.byUrl() || pageNotFound();
+  }
+
   return pageNotFound();
 }
 
