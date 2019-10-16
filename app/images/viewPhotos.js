@@ -13,7 +13,6 @@ class ViewPhotos extends ViewPage {
   }
 
   makeList() {
-    console.log('make list')
     this.list = DATABASE.images.filter(image => image.tags.gallery);
   }
 
@@ -21,15 +20,11 @@ class ViewPhotos extends ViewPage {
     setPageTitle('Photos');
     h1('Photos');
     this.list.forEach(image => {
-      const img = '<img src="' + image.url +
-        '" style="max-height: 200px; max-width: 300px; margin: 5px;" title="' +
-        image.item.title + '">';
-
-      if (image.story) {
-        rend(linkToStory(image.item, img));
-      } else {
-        rend(linkToSource(image.item, img));
-      }
+      const $link = Image.asLink(image, 200, 300);
+      $link.find('img')
+        .prop('title', image.item.title)
+        .css('margin', '5px');
+      rend($link);
     });
   }
 }

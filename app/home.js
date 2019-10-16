@@ -51,14 +51,12 @@ class ViewHome extends ViewPage {
 
   viewPhotos() {
     h2('photos');
-    DATABASE.sources.filter(s => s.story.title == 'Photo').forEach(source => {
-      if (source.images.length) {
-        rend(
-          linkToSource(source, '<img src="' + source.images[0].url +
-          '" style="height: 100px; max-width: 300px; margin: 5px;" title="' +
-          source.title + '">')
-        );
-      }
+    DATABASE.images.filter(image => image.tags.featured).forEach(image => {
+      const $link = Image.asLink(image, 100, 300);
+      $link.find('img')
+        .prop('title', image.item.title)
+        .css('margin', '5px');
+      rend($link);
     });
     pg(localLink('photos', 'see more photos ' + RIGHT_ARROW))
       .css('margin', '10px');

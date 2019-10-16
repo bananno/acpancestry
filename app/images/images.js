@@ -29,6 +29,29 @@ class Image {
 
     return $imageViewer;
   }
+
+  static asLink(image, maxHeight, maxWidth) {
+    image = Image.find(image);
+
+    const linkAddress = 'image/' + image._id;
+
+    const img = '<img src="' + image.url + '">';
+
+    const $link = $(image.story ? linkToStory(image.item, img)
+      : linkToSource(image.item, img));
+
+    if (maxHeight) {
+      $link.find('img').css('max-height', maxHeight + 'px');
+    }
+
+    if (maxWidth) {
+      $link.find('img').css('max-width', maxWidth + 'px');
+    } else {
+      $link.find('img').css('max-width', '100%');
+    }
+
+    return $link;
+  }
 }
 
 class ViewImage extends ViewPage {
