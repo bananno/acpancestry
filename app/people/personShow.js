@@ -40,6 +40,7 @@ class ViewPerson extends ViewPage {
     }
 
     this.viewProfileSummary();
+    this.viewPhotos();
     this.viewBiographies();
     this.viewFamily();
     this.viewDescendants();
@@ -149,6 +150,26 @@ class ViewPerson extends ViewPage {
       notation.text.split('\n').forEach(s => {
         rend('<p style="margin-top: 20px;">' + s + '</p>');
       });
+    });
+  }
+
+  viewPhotos() {
+    const images = DATABASE.images.filter(image => {
+      return image.tags.profile && this.person.isInList(image.item.people);
+    });
+
+    if (images.length == 0) {
+      return;
+    }
+
+    h2('Photos');
+
+    images.forEach(image => {
+      const $link = Image.asLink(image, 200, 300);
+      $link.find('img')
+        .prop('title', image.item.title)
+        .css('margin', '5px');
+      rend($link);
     });
   }
 

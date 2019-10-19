@@ -428,14 +428,12 @@ class ViewHome extends ViewPage {
 
   viewPhotos() {
     h2('photos');
-    DATABASE.sources.filter(s => s.story.title == 'Photo').forEach(source => {
-      if (source.images.length) {
-        rend(
-          linkToSource(source, '<img src="' + source.images[0].url +
-          '" style="height: 100px; max-width: 300px; margin: 5px;" title="' +
-          source.title + '">')
-        );
-      }
+    DATABASE.images.filter(image => image.tags.featured).forEach(image => {
+      const $link = Image.asLink(image, 100, 300);
+      $link.find('img')
+        .prop('title', image.item.title)
+        .css('margin', '5px');
+      rend($link);
     });
     pg(localLink('photos', 'see more photos ' + RIGHT_ARROW))
       .css('margin', '10px');
@@ -1380,6 +1378,29 @@ class Image {
 
     return $imageViewer;
   }
+
+  static asLink(image, maxHeight, maxWidth) {
+    image = Image.find(image);
+
+    const linkAddress = 'image/' + image._id;
+
+    const img = '<img src="' + image.url + '">';
+
+    const $link = $(image.story ? linkToStory(image.item, img)
+      : linkToSource(image.item, img));
+
+    if (maxHeight) {
+      $link.find('img').css('max-height', maxHeight + 'px');
+    }
+
+    if (maxWidth) {
+      $link.find('img').css('max-width', maxWidth + 'px');
+    } else {
+      $link.find('img').css('max-width', '100%');
+    }
+
+    return $link;
+  }
 }
 
 class ViewImage extends ViewPage {
@@ -1432,7 +1453,6 @@ class ViewPhotos extends ViewPage {
   }
 
   makeList() {
-    console.log('make list')
     this.list = DATABASE.images.filter(image => image.tags.gallery);
   }
 
@@ -1440,15 +1460,11 @@ class ViewPhotos extends ViewPage {
     setPageTitle('Photos');
     h1('Photos');
     this.list.forEach(image => {
-      const img = '<img src="' + image.url +
-        '" style="max-height: 200px; max-width: 300px; margin: 5px;" title="' +
-        image.item.title + '">';
-
-      if (image.story) {
-        rend(linkToStory(image.item, img));
-      } else {
-        rend(linkToSource(image.item, img));
-      }
+      const $link = Image.asLink(image, 200, 300);
+      $link.find('img')
+        .prop('title', image.item.title)
+        .css('margin', '5px');
+      rend($link);
     });
   }
 }
@@ -1724,6 +1740,7 @@ class ViewPerson extends ViewPage {
     }
 
     this.viewProfileSummary();
+    this.viewPhotos();
     this.viewBiographies();
     this.viewFamily();
     this.viewDescendants();
@@ -1833,6 +1850,26 @@ class ViewPerson extends ViewPage {
       notation.text.split('\n').forEach(s => {
         rend('<p style="margin-top: 20px;">' + s + '</p>');
       });
+    });
+  }
+
+  viewPhotos() {
+    const images = DATABASE.images.filter(image => {
+      return image.tags.profile && this.person.isInList(image.item.people);
+    });
+
+    if (images.length == 0) {
+      return;
+    }
+
+    h2('Photos');
+
+    images.forEach(image => {
+      const $link = Image.asLink(image, 200, 300);
+      $link.find('img')
+        .prop('title', image.item.title)
+        .css('margin', '5px');
+      rend($link);
     });
   }
 
@@ -2102,6 +2139,18 @@ Person.prototype.populateFamily = function() {
           relativeMap[child._id] = 'step-child';
         }
       }
+    });
+  });
+
+  [
+    'siblings',
+    'half-siblings',
+    'step-siblings',
+    'children',
+    'step-children'
+  ].forEach(relationship => {
+    this[relationship].sortBy(relative => {
+      return relative.birth ? relative.birth.date.sort : '3000';
     });
   });
 };
@@ -4386,6 +4435,7 @@ class ViewStoryTopic extends ViewStory {
     setPageTitle(this.story.title);
     h1(this.story.title);
     this.viewExcerpts();
+    this.viewSources();
   }
 }
 

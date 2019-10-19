@@ -279,6 +279,7 @@ class ViewStoryTopic extends ViewStory {
     setPageTitle(this.story.title);
     h1(this.story.title);
     this.viewExcerpts();
+    this.viewSources();
   }
 }
 
