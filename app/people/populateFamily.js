@@ -79,4 +79,16 @@ Person.prototype.populateFamily = function() {
       }
     });
   });
+
+  [
+    'siblings',
+    'half-siblings',
+    'step-siblings',
+    'children',
+    'step-children'
+  ].forEach(relationship => {
+    this[relationship].sortBy(relative => {
+      return relative.birth ? relative.birth.date.sort : '3000';
+    });
+  });
 };
