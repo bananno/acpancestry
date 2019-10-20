@@ -16,10 +16,12 @@ function closeSideMenu() {
 }
 
 function createHeaderLinks() {
-  $('#page-header h1').append('<a href="' + ORIGIN + '">' + SITE_TITLE + '</a>');
+  $('#page-header h1').append('<a href="' + ORIGIN + '" class="local-link">'
+    + SITE_TITLE + '</a>');
+
   const $list = $('#main-navigation ul');
 
-  $list.append('<li><a href="' + ORIGIN + '">Home</a></li>');
+  $list.append('<li><a href="' + ORIGIN + '" class="local-link">Home</a></li>');
 
   ['People', 'Events', 'Sources', 'Places'].forEach(nav => {
     $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');

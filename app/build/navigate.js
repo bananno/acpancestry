@@ -1,7 +1,12 @@
-let ORIGIN, PATH, ENV;
+const ORIGIN = window.location.origin;
+const ENV = !!ORIGIN.match('localhost') ? 'dev' : '';
+const USE_SINGLE_PAGE = true;
+
+let PATH;
+window.onpopstate = getRoute;
 
 function clickLocalLink(event) {
-  if (event.metaKey) {
+  if (!USE_SINGLE_PAGE || event.metaKey) {
     return;
   }
 
@@ -11,29 +16,26 @@ function clickLocalLink(event) {
 
   history.pushState({}, null, clickedPath);
 
-  clearPage();
   getRoute();
 }
 
 function getRoute() {
-  [ORIGIN, PATH, ENV] = getFilePaths();
+  PATH = getCurrentPath();
+  clearPage();
   loadContent();
 }
 
-function getFilePaths() {
-  let url = window.location.href;
-  let path = '';
-  let env;
+function getCurrentPath() {
+  let path = window.location.pathname + window.location.search;
 
-  if (url.match('\\?')) {
-    path = url.slice(url.indexOf('\?') + 1);
-    url = url.slice(0, url.indexOf('\?'));
+  if (path.match('\\?')) {
+    path = path.slice(path.indexOf('\?') + 1);
   }
 
-  if (url.match('localhost')) {
-    env = 'dev';
+  if (path.charAt(0) == '/') {
+    path = path.slice(1);
   }
 
-  return [url, path, env];
+  return path;
 }
 
