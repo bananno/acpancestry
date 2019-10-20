@@ -10,6 +10,10 @@ function rend(content) {
   $('#page-content').append(content);
 }
 
+function clearPage() {
+  $('#page-content').html('');
+}
+
 function h1(content) {
   rend($('<h1>').append(content));
 }

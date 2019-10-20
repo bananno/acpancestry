@@ -1,4 +1,3 @@
-
 function loadContent() {
   if (PATH == '') {
     return ViewHome.byUrl();
@@ -76,14 +75,6 @@ function loadContent() {
   }
 
   return pageNotFound();
-}
-
-function viewPeople() {
-  setPageTitle('People');
-  h1('All People');
-  const peopleList = [...DATABASE.people];
-  Person.sortListByAncestorDegree(peopleList);
-  rend($makePeopleList(peopleList, 'photo'));
 }
 
 function viewTests() {

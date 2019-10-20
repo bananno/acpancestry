@@ -1,5 +1,5 @@
 function localLink(target, text, newTab) {
-  return '<a href="' + ORIGIN + '?' + target + '"'
+  return '<a href="' + ORIGIN + '?' + target + '" class="local-link"'
     + (newTab ? ' target="_blank"' : '') + '>' + text + '</a>';
 }
 
