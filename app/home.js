@@ -13,7 +13,6 @@ class ViewHome extends ViewPage {
 
     this.viewFeatured();
     this.viewPhotos();
-    this.viewTopics();
     this.viewBrowse();
   }
 
@@ -62,28 +61,97 @@ class ViewHome extends ViewPage {
       .css('margin', '10px');
   }
 
-  viewTopics() {
-    h2('topics');
-
-    const basicTopicList = [
-      ['landmarks', 'landmarks and buildings'],
-      ['artifacts', 'artifacts and family heirlooms'],
-      ['topic/brickwalls', 'brick walls and mysteries'],
-      ['topic/military', 'military'],
-      ['topic/immigration', 'immigration'],
-      ['topic/disease', 'disease'],
-      ['topic/big-families', 'big families'],
-    ].map(([path, text]) => localLink(path, text));
-
-    const storyTopicList = DATABASE.stories
-      .filter(story => story.type == 'topic')
-      .map(story => linkToStory(story, story.title.toLowerCase()));
-
-    bulletList([...basicTopicList, ...storyTopicList]);
-  }
-
   viewBrowse() {
     h2('browse');
-    bulletList([localLink('year/1904', 'browse by year')]);
+
+    this.viewBrowseSection({
+      first: true,
+      path: 'landmarks',
+      title: 'landmarks and buildings',
+      text: 'All the houses, businesses, farms, and other landmarks of any ' +
+        'significance to the Family Tree.'
+    });
+
+    this.viewBrowseSection({
+      path: 'artifacts',
+      title: 'artifacts and family heirlooms'
+    });
+
+    this.viewBrowseSection({
+      path: 'topic/brickwalls',
+      title: 'brick walls and mysteries'
+    });
+
+    this.viewBrowseSection({
+      path: 'topic/military',
+      title: 'military'
+    });
+
+    (() => {
+      const people = DATABASE.people.filter(person => person.tags.immigrant);
+      const countries = [];
+      people.forEach(person => {
+        if (person.tags.country && !countries.includes(person.tags.country)) {
+          countries.push(person.tags.country);
+        }
+      });
+      this.viewBrowseSection({
+        path: 'topic/immigration',
+        title: 'immigration',
+        text: 'People in the Family Tree immigrated from ' +
+          countries.length + ' different countries. See a list of ' +
+          'immigrants by county and a timeline of events.'
+      });
+    })();
+
+    (() => {
+      const people = DATABASE.people.filter(person => {
+        return person.tags['died of disease'];
+      });
+      const diseases = [];
+      people.forEach(person => {
+        if (person.tags.disease && !diseases.includes(person.tags.disease)) {
+          diseases.push(person.tags.disease);
+        }
+      });
+      this.viewBrowseSection({
+        path: 'topic/disease',
+        title: 'disease',
+        text: 'At least ' + people.length + ' people in the Family Tree ' +
+          ' have died of ' + diseases.length + ' different diseases. See a ' +
+          'list of people, historical events, and newspapers articles.'
+      });
+    })();
+
+    this.viewBrowseSection({
+      path: 'topic/big-families',
+      title: 'big families'
+    });
+
+    DATABASE.stories.filter(story => story.type == 'topic').forEach(story => {
+      this.viewBrowseSection({
+        path: 'topic/' + story._id,
+        title: story.title.toLowerCase()
+      });
+    });
+
+    this.viewBrowseSection({
+      path: 'year/1904',
+      title: 'browse by year',
+      text: 'See what everyone in the Family Tree was up to during any given year.'
+    });
+  }
+
+  viewBrowseSection(options) {
+    if (!options.first) {
+      rend('<hr style="margin-top: 20px;">');
+    }
+
+    pg(localLink(options.path, options.title))
+      .css('margin-top', '20px').css('font-size', '18px');
+
+    if (options.text) {
+      pg(options.text).css('margin-top', '5px');
+    }
   }
 }
