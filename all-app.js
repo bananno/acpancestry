@@ -57,7 +57,7 @@ class ViewPage {
       rend($ul);
     }
 
-    list.forEach(item => {
+    list.forEach((item, i) => {
       let $container;
 
       if ($ul) {
@@ -65,6 +65,10 @@ class ViewPage {
       } else {
         $container = $('<div>');
         rend($container);
+      }
+
+      if (i > 0) {
+        $container.css('margin-top', '15px');
       }
 
       if (options.divider) {
@@ -390,7 +394,6 @@ class ViewHome extends ViewPage {
 
     this.viewFeatured();
     this.viewPhotos();
-    this.viewTopics();
     this.viewBrowse();
   }
 
@@ -439,158 +442,99 @@ class ViewHome extends ViewPage {
       .css('margin', '10px');
   }
 
-  viewTopics() {
-    h2('topics');
-
-    const basicTopicList = [
-      ['landmarks', 'landmarks and buildings'],
-      ['artifacts', 'artifacts and family heirlooms'],
-      ['topic/brickwalls', 'brick walls and mysteries'],
-      ['topic/military', 'military'],
-      ['topic/immigration', 'immigration'],
-      ['topic/disease', 'disease'],
-      ['topic/big-families', 'big families'],
-    ].map(([path, text]) => localLink(path, text));
-
-    const storyTopicList = DATABASE.stories
-      .filter(story => story.type == 'topic')
-      .map(story => linkToStory(story, story.title.toLowerCase()));
-
-    bulletList([...basicTopicList, ...storyTopicList]);
-  }
-
   viewBrowse() {
     h2('browse');
-    bulletList([localLink('year/1904', 'browse by year')]);
-  }
-}
 
+    this.viewBrowseSection({
+      first: true,
+      path: 'landmarks',
+      title: 'landmarks and buildings',
+      text: 'All the houses, businesses, farms, and other landmarks of any ' +
+        'significance to the Family Tree.'
+    });
 
-const [ORIGIN, PATH, ENV] = getFilePaths();
+    this.viewBrowseSection({
+      path: 'artifacts',
+      title: 'artifacts and family heirlooms'
+    });
 
-$(document).ready(() => {
-  setupLayout();
-  setPageTitle();
-  processDatabase();
-  loadContent();
-  runTests();
-});
+    this.viewBrowseSection({
+      path: 'topic/brickwalls',
+      title: 'brick walls and mysteries'
+    });
 
-function getFilePaths() {
-  let url = window.location.href;
-  let path = '';
-  let env;
+    this.viewBrowseSection({
+      path: 'topic/military',
+      title: 'military'
+    });
 
-  if (url.match('\\?')) {
-    path = url.slice(url.indexOf('\?') + 1);
-    url = url.slice(0, url.indexOf('\?'));
-  }
+    (() => {
+      const people = DATABASE.people.filter(person => person.tags.immigrant);
+      const countries = [];
+      people.forEach(person => {
+        if (person.tags.country && !countries.includes(person.tags.country)) {
+          countries.push(person.tags.country);
+        }
+      });
+      this.viewBrowseSection({
+        path: 'topic/immigration',
+        title: 'immigration',
+        text: 'People in the Family Tree immigrated from ' +
+          countries.length + ' different countries. See a list of ' +
+          'immigrants by county and a timeline of events.'
+      });
+    })();
 
-  if (url.match('localhost')) {
-    env = 'dev';
-  }
+    (() => {
+      const people = DATABASE.people.filter(person => {
+        return person.tags['died of disease'];
+      });
+      const diseases = [];
+      people.forEach(person => {
+        if (person.tags.disease && !diseases.includes(person.tags.disease)) {
+          diseases.push(person.tags.disease);
+        }
+      });
+      this.viewBrowseSection({
+        path: 'topic/disease',
+        title: 'disease',
+        text: 'At least ' + people.length + ' people in the Family Tree ' +
+          ' have died of ' + diseases.length + ' different diseases. See a ' +
+          'list of people, historical events, and newspapers articles.'
+      });
+    })();
 
-  return [url, path, env];
-}
+    this.viewBrowseSection({
+      path: 'topic/big-families',
+      title: 'big families'
+    });
 
-function runTests() {} // overwritten in dev version
+    DATABASE.stories.filter(story => story.type == 'topic').forEach(story => {
+      this.viewBrowseSection({
+        path: 'topic/' + story._id,
+        title: story.title.toLowerCase()
+      });
+    });
 
-
-function loadContent() {
-  if (PATH == '') {
-    return ViewHome.byUrl();
-  }
-
-  if (PATH == 'people') {
-    return viewPeople();
-  }
-
-  if (PATH.match('person/')) {
-    return ViewPerson.byUrl();
-  }
-
-  if (PATH == 'events') {
-    return viewEvents();
-  }
-
-  if (PATH.length > 5 && PATH.slice(0, 6) == 'source') {
-    return routeSources();
-  }
-
-  if (PATH.match('search')) {
-    return SearchResults.byUrl();
-  }
-
-  if (PATH.match('place')) {
-    return ViewPlace.byUrl() || pageNotFound();
-  }
-
-  if (PATH == 'test' && ENV == 'dev') {
-    return viewTests();
-  }
-
-  if (PATH.match('audit') && ENV == 'dev') {
-    return ViewAudit.byUrl() || pageNotFound();
-  }
-
-  if (PATH.match('image/')) {
-    return ViewImage.byUrl() || pageNotFound();
-  }
-
-  if (PATH.match('topic/')) {
-    return ViewTopic.byUrl() || pageNotFound();
-  }
-
-  if (PATH.match('year/')) {
-    return viewYear();
+    this.viewBrowseSection({
+      path: 'year/1904',
+      title: 'browse by year',
+      text: 'See what everyone in the Family Tree was up to during any given year.'
+    });
   }
 
-  if (PATH.match('about/')) {
-    return viewAbout();
+  viewBrowseSection(options) {
+    if (!options.first) {
+      rend('<hr style="margin-top: 20px;">');
+    }
+
+    pg(localLink(options.path, options.title))
+      .css('margin-top', '20px').css('font-size', '18px');
+
+    if (options.text) {
+      pg(options.text).css('margin-top', '5px');
+    }
   }
-
-  if (PATH.match('artifact') || PATH.match('landmark')) {
-    return ViewStoryIndex.byUrl() || ViewStoryArtifactOrLandmark.byUrl()
-      || pageNotFound();
-  }
-
-  if (PATH.match('cemeter') || PATH.match('newspaper')) {
-    return ViewStoryIndex.byUrl() || ViewCemeteryOrNewspaper.byUrl()
-      || pageNotFound();
-  }
-
-  if (PATH.match('book')) {
-    return ViewStoryIndex.byUrl() || ViewStoryBook.byUrl()
-      || pageNotFound();
-  }
-
-  if (PATH.match('event')) {
-    return ViewStoryEvent.byUrl() || pageNotFound();
-  }
-
-  if (PATH.match('photo')) {
-    return ViewPhotos.byUrl() || pageNotFound();
-  }
-
-  return pageNotFound();
-}
-
-function viewPeople() {
-  setPageTitle('People');
-  h1('All People');
-  const peopleList = [...DATABASE.people];
-  Person.sortListByAncestorDegree(peopleList);
-  rend($makePeopleList(peopleList, 'photo'));
-}
-
-function viewTests() {
-  setPageTitle('Tests');
-  rend('<h1>Tests</h1>');
-}
-
-function pageNotFound() {
-  setPageTitle('Page Not Found');
-  rend('<h1>Page Not Found</h1>');
 }
 
 class Timeline {
@@ -708,9 +652,9 @@ class TimelineItem {
       }
 
       if (this.item.title == 'death' && this.person) {
-        let age = this.person.ageAt(this.item.date);
+        let age = this.person.ageAtDeath();
         if (age) {
-          return 'death (age ' + age + ')';
+          return 'death (age: ' + age + ')';
         }
         return 'death';
       }
@@ -757,26 +701,15 @@ class TimelineItem {
       return;
     }
 
-    const $list = $makePeopleList(this.item.people, 'photo').css('margin-left', '-5px');
+    const $list = $makePeopleList(this.item.people, 'photo', {
+      css: { 'margin-left': '-5px'},
+      collapseIfAtLeast: 6,
+      collapseAfterNumber: 0,
+      collapseMessage: 'show all TOTALNUM tagged people',
+      allowRehide: true,
+    });
 
     this.$col2.append($list);
-
-    if (this.item.people.length > 5) {
-      $list.hide();
-      const $show = $('<div class="fake-link" style="margin-top: 5px">')
-      let showText = 'show all ' + this.item.people.length + ' tagged people';
-      $show.text(showText);
-      $list.before($show);
-      $show.click(() => {
-        if ($list.is(':visible')) {
-          $list.slideUp();
-          $show.text(showText);
-        } else {
-          $list.slideDown();
-          $show.text('hide list');
-        }
-      });
-    }
   }
 
   getItemText() {
@@ -968,8 +901,196 @@ function viewYear() {
   });
 }
 
+$(document).ready(() => {
+  setupLayout();
+  setPageTitle();
+  processDatabase();
+  runTests();
+
+  $(document).on('click', '.local-link', clickLocalLink);
+
+  getRoute();
+});
+
+function runTests() {} // overwritten in dev version
+
+
+function setupLayout() {
+  $(document).on('click', '#menu-icon', openSideMenu);
+  $(document).on('click', '#main-navigation .close-me', closeSideMenu);
+  $(document).on('click', '#menu-backdrop', closeSideMenu);
+  createHeaderLinks();
+  addFooterQuote();
+}
+
+function openSideMenu() {
+  $('#main-navigation, #menu-backdrop').addClass('open');
+}
+
+function closeSideMenu() {
+  $('#main-navigation, #menu-backdrop').removeClass('open');
+}
+
+function createHeaderLinks() {
+  $('#page-header h1').append('<a href="' + ORIGIN + '" class="local-link">'
+    + SITE_TITLE + '</a>');
+
+  const $list = $('#main-navigation ul');
+
+  $list.append('<li><a href="' + ORIGIN + '" class="local-link">Home</a></li>');
+
+  ['People', 'Events', 'Sources', 'Places'].forEach(nav => {
+    $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');
+  });
+
+  if (ENV == 'dev') {
+    ['Test', 'Audit'].forEach(nav => {
+      $list.append('<li>' + localLink(nav.toLowerCase(), nav.slice(0, 1))
+        + '</li>');
+    });
+  }
+}
+
+function addFooterQuote() {
+  const quotes = DATABASE.notations.filter(n => n.tags['featured quote']);
+  $('#page-footer').append(quotes.random().text);
+}
+
+const ORIGIN = window.location.origin;
+const ENV = !!ORIGIN.match('localhost') ? 'dev' : '';
+const USE_SINGLE_PAGE = true;
+
+let PATH;
+window.onpopstate = getRoute;
+
+function clickLocalLink(event) {
+  if (!USE_SINGLE_PAGE || event.metaKey) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const clickedPath = $(event.target).attr('href');
+
+  history.pushState({}, null, clickedPath);
+
+  getRoute();
+
+  window.scrollTo(0, 0);
+}
+
+function getRoute() {
+  PATH = getCurrentPath();
+  clearPage();
+  loadContent();
+}
+
+function getCurrentPath() {
+  let path = window.location.pathname + window.location.search;
+
+  if (path.match('\\?')) {
+    path = path.slice(path.indexOf('\?') + 1);
+  }
+
+  if (path.charAt(0) == '/') {
+    path = path.slice(1);
+  }
+
+  return path;
+}
+
+
+function loadContent() {
+  if (PATH == '') {
+    return ViewHome.byUrl();
+  }
+
+  if (PATH == 'people') {
+    return viewPeople();
+  }
+
+  if (PATH.match('person/')) {
+    return ViewPerson.byUrl();
+  }
+
+  if (PATH == 'events') {
+    return viewEvents();
+  }
+
+  if (PATH.length > 5 && PATH.slice(0, 6) == 'source') {
+    return routeSources();
+  }
+
+  if (PATH.match('search')) {
+    return SearchResults.byUrl();
+  }
+
+  if (PATH.match('place')) {
+    return ViewPlace.byUrl() || pageNotFound();
+  }
+
+  if (PATH == 'test' && ENV == 'dev') {
+    return viewTests();
+  }
+
+  if (PATH.match('audit') && ENV == 'dev') {
+    return ViewAudit.byUrl() || pageNotFound();
+  }
+
+  if (PATH.match('image/')) {
+    return ViewImage.byUrl() || pageNotFound();
+  }
+
+  if (PATH.match('topic/')) {
+    return ViewTopic.byUrl() || pageNotFound();
+  }
+
+  if (PATH.match('year/')) {
+    return viewYear();
+  }
+
+  if (PATH.match('about/')) {
+    return viewAbout();
+  }
+
+  if (PATH.match('artifact') || PATH.match('landmark')) {
+    return ViewStoryIndex.byUrl() || ViewStoryArtifactOrLandmark.byUrl()
+      || pageNotFound();
+  }
+
+  if (PATH.match('cemeter') || PATH.match('newspaper')) {
+    return ViewStoryIndex.byUrl() || ViewCemeteryOrNewspaper.byUrl()
+      || pageNotFound();
+  }
+
+  if (PATH.match('book')) {
+    return ViewStoryIndex.byUrl() || ViewStoryBook.byUrl()
+      || pageNotFound();
+  }
+
+  if (PATH.match('event')) {
+    return ViewStoryEvent.byUrl() || pageNotFound();
+  }
+
+  if (PATH.match('photo')) {
+    return ViewPhotos.byUrl() || pageNotFound();
+  }
+
+  return pageNotFound();
+}
+
+function viewTests() {
+  setPageTitle('Tests');
+  rend('<h1>Tests</h1>');
+}
+
+function pageNotFound() {
+  setPageTitle('Page Not Found');
+  rend('<h1>Page Not Found</h1>');
+}
+
 function localLink(target, text, newTab) {
-  return '<a href="' + ORIGIN + '?' + target + '"'
+  return '<a href="' + ORIGIN + '?' + target + '" class="local-link"'
     + (newTab ? ' target="_blank"' : '') + '>' + text + '</a>';
 }
 
@@ -1053,6 +1174,10 @@ function rend(content) {
   $('#page-content').append(content);
 }
 
+function clearPage() {
+  $('#page-content').html('');
+}
+
 function h1(content) {
   rend($('<h1>').append(content));
 }
@@ -1073,34 +1198,6 @@ function bulletList(array, skipRender) {
   if (!skipRender) {
     rend($list);
   }
-  return $list;
-}
-
-function $makePeopleList(people, format, keywords) {
-  if (format == 'photo') {
-    const $list = $('<div class="people-list">');
-
-    people.forEach(person => {
-      const $item = $('<div class="icon-link">').appendTo($list);
-      $item.attr('data-person', person._id);
-      if (keywords) {
-        $item.addClass('search-result-item');
-      }
-      $item.append(linkToPerson(person, false, '<img src="' + person.profileImage + '">'));
-      $item.append(linkToPerson(person, true, null, keywords));
-    });
-
-    return $list;
-  }
-
-  const $list = $('<ul class="people-list">');
-
-  people.forEach(person => {
-    const $item = $('<li>').appendTo($list);
-    $item.attr('data-person', person._id);
-    $item.append(linkToPerson(person, true, null, keywords));
-  });
-
   return $list;
 }
 
@@ -1182,7 +1279,8 @@ function fixSpecialCharacters(str) {
   return str.replace('å', '&aring;')
     .replace(/ö/g, '&ouml;')
     .replace('“', '"')
-    .replace('”', '"');
+    .replace('”', '"')
+    .replace('’', '\'');
 }
 
 function addTd($row, content) {
@@ -1347,6 +1445,88 @@ function pad0(number, length) {
   return number;
 }
 
+function $makePeopleList(people, format, options = {}) {
+  if (format == 'photo') {
+    return $makePeopleListPhoto(people, format, options);
+  }
+
+  const $list = $('<ul class="people-list">');
+
+  if (options.css) {
+    $list.css(options.css);
+  }
+
+  people.forEach(person => {
+    const $item = $('<li>').appendTo($list);
+    $item.attr('data-person', person._id);
+    $item.append(linkToPerson(person, true, null, options.highlightKeywords));
+  });
+
+  return $list;
+}
+
+function $makePeopleListPhoto(people, format, options) {
+  const $list = $('<div class="people-list">');
+
+  if (options.css) {
+    $list.css(options.css);
+  }
+
+  let $visiblePart, $toggleListLink, $hiddenPart, numVisiblePeople;
+
+  $visiblePart = $('<div>').appendTo($list);
+
+  if (options.collapseIfAtLeast !== undefined
+      && people.length >= options.collapseIfAtLeast) {
+    $toggleListLink = $('<div>').appendTo($list);
+    $hiddenPart = $('<div>').appendTo($list);
+    $hiddenPart.hide();
+    numVisiblePeople = options.collapseAfterNumber || 0;
+
+    const showText = options.collapseMessage
+      .replace('HIDDENNUM', people.length - numVisiblePeople)
+      .replace('TOTALNUM', people.length);
+
+    $toggleListLink.addClass('fake-link').css('margin-top', '5px').text(showText);
+
+    $toggleListLink.click(() => {
+      if ($hiddenPart.is(':visible')) {
+        $hiddenPart.slideUp();
+        $toggleListLink.text(showText);
+      } else {
+        $hiddenPart.slideDown();
+        if (options.allowRehide) {
+          $toggleListLink.text('hide list');
+        } else {
+          $toggleListLink.remove();
+        }
+      }
+    });
+  } else {
+    numVisiblePeople = people.length;
+  }
+
+  people.forEach((person, index) => {
+    const $item = $('<div class="icon-link">');
+    $item.attr('data-person', person._id);
+
+    if (options.highlightKeywords) {
+      $item.addClass('search-result-item');
+    }
+
+    $item.append(linkToPerson(person, false, '<img src="' + person.profileImage + '">'));
+    $item.append(linkToPerson(person, true, null, options.highlightKeywords));
+
+    if (index >= numVisiblePeople) {
+      $hiddenPart.append($item);
+    } else {
+      $visiblePart.append($item);
+    }
+  });
+
+  return $list;
+}
+
 class Image {
   static find(image) {
     if (image._id) {
@@ -1469,44 +1649,12 @@ class ViewPhotos extends ViewPage {
   }
 }
 
-
-function setupLayout() {
-  $(document).on('click', '#menu-icon', openSideMenu);
-  $(document).on('click', '#main-navigation .close-me', closeSideMenu);
-  $(document).on('click', '#menu-backdrop', closeSideMenu);
-  createHeaderLinks();
-  addFooterQuote();
-}
-
-function openSideMenu() {
-  $('#main-navigation, #menu-backdrop').addClass('open');
-}
-
-function closeSideMenu() {
-  $('#main-navigation, #menu-backdrop').removeClass('open');
-}
-
-function createHeaderLinks() {
-  $('#page-header h1').append('<a href="' + ORIGIN + '">' + SITE_TITLE + '</a>');
-  const $list = $('#main-navigation ul');
-
-  $list.append('<li><a href="' + ORIGIN + '">Home</a></li>');
-
-  ['People', 'Events', 'Sources', 'Places'].forEach(nav => {
-    $list.append('<li>' + localLink(nav.toLowerCase(), nav) + '</li>');
-  });
-
-  if (ENV == 'dev') {
-    ['Test', 'Audit'].forEach(nav => {
-      $list.append('<li>' + localLink(nav.toLowerCase(), nav.slice(0, 1))
-        + '</li>');
-    });
-  }
-}
-
-function addFooterQuote() {
-  const quotes = DATABASE.notations.filter(n => n.tags['featured quote']);
-  $('#page-footer').append(quotes.random().text);
+function viewPeople() {
+  setPageTitle('People');
+  h1('All People');
+  const peopleList = [...DATABASE.people];
+  Person.sortListByAncestorDegree(peopleList);
+  rend($makePeopleList(peopleList, 'photo'));
 }
 
 class Person {
@@ -1661,7 +1809,7 @@ class Person {
   }
 
   ageAtDeath() {
-    return this.ageAt(this.death);
+    return this.tags['age at death'] || this.ageAt(this.death);
   }
 
   ageAt(date) {
@@ -2897,6 +3045,7 @@ class SearchResults extends ViewPage {
     h1('Search Results for "' + keywords.join(' ') + '"');
     pg().css('padding-top', '10px').attr('id', 'number-of-search-results');
 
+    new SearchResultsTopics(keywords);
     new SearchResultsPeople(keywords);
     new SearchResultsPlaces(keywords);
     new SearchResultsLandmarks(keywords);
@@ -2970,7 +3119,37 @@ class SearchResultsPeople extends SearchResults {
 
   renderResults() {
     this.title('People');
-    rend($makePeopleList(this.resultsList, 'photo', this.keywords));
+    rend($makePeopleList(this.resultsList, 'photo', {
+      highlightKeywords: this.keywords,
+      collapseIfAtLeast: 12,
+      collapseAfterNumber: 10,
+      collapseAll: false,
+      collapseMessage: 'show HIDDENNUM more people',
+      allowRehide: false,
+    }));
+  }
+}
+
+class SearchResultsTopics extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    this.resultsList = DATABASE.stories.filter(story => {
+      return story.type == 'topic' && this.isMatch(story.title);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Topics');
+    this.resultsList.forEach(story => {
+      pg(linkToStory(story, this.highlight(story.title))).css('margin', '10px');
+    });
   }
 }
 
@@ -2999,6 +3178,7 @@ class SearchResultsArtifacts extends SearchResults {
         firstItem: i == 0,
         largeHeader: false,
         people: [],
+        highlightKeywords: this.keywords
       });
     });
   }
@@ -3025,7 +3205,7 @@ class SearchResultsLandmarks extends SearchResults {
     this.title('Landmarks');
     this.resultsList.forEach(story => {
       rend('<p style="margin: 15px 0 0 15px;" class="search-result-item">'
-        + linkToStory(story) + '</p>');
+        + linkToStory(story, this.highlight(story.title)) + '</p>');
 
       if (story.location.format) {
         rend('<p style="margin: 2px 0 0 15px;" class="search-result-item">'
@@ -3119,94 +3299,111 @@ class SearchResultsBooks extends SearchResults {
 }
 
 class SearchResultsCemeteriesOrNewspapers extends SearchResults {
-  constructor(keywords, isTest, sourceType, groupTitle, entryTitle, entrySingular) {
+  constructor(keywords, isTest, options) {
     super(keywords, isTest);
-    this.sourceType = sourceType;
-    this.groupTitle = groupTitle;
-    this.entryTitle = entryTitle;
-    this.entrySingular = entrySingular;
-    this.groupList = [];
-    this.groupEntryCount = {};
-    this.individualList = [];
+
+    this.storyType = options.storyType;
+    this.sectionStoryTitle = options.sectionStoryTitle;
+    this.sectionSourceTitle = options.sectionSourceTitle;
+    this.entryName = options.entryName;
+
+    this.resultsListStories = [];
+    this.resultsListSources = [];
+
     this.getResults();
     this.renderGroupResults();
     this.renderIndividualResults();
   }
 
   getResults() {
-    DATABASE.sources.forEach(source => {
-      if (source.type != this.sourceType) {
+    DATABASE.stories.forEach(story => {
+      if (story.type != this.storyType) {
         return;
       }
 
-      if (this.isMatch(source.group)) {
-        if (this.groupEntryCount[source.group]) {
-          this.groupEntryCount[source.group] += 1;
-        } else {
-          this.groupEntryCount[source.group] = 1;
-          this.groupList.push(source);
+      if (this.isMatch(story.title)) {
+        this.resultsListStories.push(story);
+      }
+
+      story.entries.forEach(source => {
+        let searchString = story.title + source.title + source.content;
+
+        if (this.isMatch(searchString)) {
+          this.resultsListSources.push(source);
         }
-      }
-
-      let searchString = source.title + source.content;
-
-      if (this.isMatch(searchString)) {
-        this.individualList.push(source);
-      }
+      });
     });
   }
 
   renderGroupResults() {
-    if (this.groupList.length == 0) {
+    if (this.resultsListStories.length == 0) {
       return;
     }
 
-    this.title(this.groupTitle);
+    this.title(this.sectionStoryTitle);
 
-    this.groupList.forEach(source => {
-      let linkText = this.highlight(source.group);
+    this.resultsListStories.forEach(story => {
+      let linkText = this.highlight(story.title);
       rend(
         '<p style="padding: 5px 10px" class="search-result-item">' +
-          linkToSourceGroup(source, linkText) + '<br>' +
-          source.location.format + '<br>' +
-          this.groupEntryCount[source.group] + ' ' + this.entrySingular +
-          (this.groupEntryCount[source.group] == 1 ? '' : 's') +
+          linkToStory(story, linkText) + '<br>' +
+          story.location.format + '<br>' +
+          story.entries.length + ' ' +
+          this.entryName.pluralize(story.entries.length) +
         '</p>'
       );
     });
   }
 
   renderIndividualResults() {
-    if (this.individualList.length == 0 ) {
+    if (this.resultsListSources.length == 0 ) {
       return;
     }
 
-    this.title(this.entryTitle);
+    this.title(this.sectionSourceTitle);
 
-    this.individualList.forEach(source => {
-      rend(
-        '<p style="padding: 5px 10px" class="search-result-item">' +
-          linkToSource(source, this.highlight(source.title)) + '<br>' +
-          source.group + '<br>' +
-          (source.date.format ? source.date.format + '<br>' : '') +
-          (source.location.format ? source.location.format + '<br>' : '') +
-        '</p>'
-      );
+    this.resultsListSources.forEach((source, i) => {
+      pg(linkToSource(source, this.highlight(source.title)))
+        .css('padding', '2px 10px')
+        .css('padding-top', (i == 0 ? '5px' : '15px'))
+        .addClass('search-result-item');
 
-      rend(formatTranscription(this.highlight(source.content)));
+      pg(source.story.title).css('padding', '2px 10px');
+
+      ['date', 'location'].forEach(attr => {
+        if (source[attr].format) {
+          pg(source[attr].format).css('padding', '2px 10px');
+        } else if (source.story[attr].format) {
+          pg(source.story[attr].format).css('padding', '2px 10px');
+        }
+      });
+
+      if (source.content) {
+        rend(formatTranscription(this.highlight(source.content)));
+      }
     });
   }
 }
 
 class SearchResultsCemeteries extends SearchResultsCemeteriesOrNewspapers {
   constructor(keywords, isTest) {
-    super(keywords, isTest, 'newspaper', 'Newspapers', 'Newspaper Articles', 'article');
+    super(keywords, isTest, {
+      storyType: 'newspaper',
+      sectionStoryTitle: 'Newspapers',
+      sectionSourceTitle: 'Newspaper Articles',
+      entryName: 'article'
+    });
   }
 }
 
 class SearchResultsNewspapers extends SearchResultsCemeteriesOrNewspapers {
   constructor(keywords, isTest) {
-    super(keywords, isTest, 'grave', 'Cemeteries', 'Graves', 'grave');
+    super(keywords, isTest, {
+      storyType: 'cemetery',
+      sectionStoryTitle: 'Cemeteries',
+      sectionSourceTitle: 'Graves',
+      entryName: 'grave'
+    });
   }
 }
 
@@ -3455,6 +3652,494 @@ class SearchResultsPlaces extends SearchResults {
   }
 }
 
+class ViewStoryIndex extends ViewPage {
+  static byUrl() {
+    if (['artifacts', 'books', 'cemeteries', 'landmarks', 'newspapers']
+        .includes(PATH)) {
+      new ViewStoryIndex(PATH).render();
+      return true;
+    }
+    return false;
+  }
+
+  constructor(storyType) {
+    super();
+    this.type = storyType.singularize();
+    this.mainTitle = storyType.capitalize();
+    this.stories = this.getStories();
+    this.entryName = this.getEntryName();
+  }
+
+  getStories() {
+    if (this.type == 'artifact') {
+      return DATABASE.stories.filter(story => {
+        return story.type == 'artifact' || story.tags.artifact;
+      });
+    }
+    return DATABASE.stories.filter(story => {
+      return story.type == this.type;
+    });
+  }
+
+  getEntryName() {
+    if (this.type == 'cemetery') {
+      return 'grave';
+    }
+    if (this.type == 'newspaper') {
+      return 'article';
+    }
+  }
+
+  render() {
+    this.headerTrail();
+    this.setPageTitle();
+    this.viewTitle();
+    this.viewStories();
+  }
+
+  headerTrail() {
+    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
+      headerTrail('sources');
+    }
+  }
+
+  setPageTitle() {
+    setPageTitle(this.mainTitle);
+  }
+
+  viewTitle() {
+    if (this.type == 'artifact') {
+      return h1('Artifacts and family heirlooms');
+    }
+    if (this.type == 'landmark') {
+      return h1('Landmarks and buildings');
+    }
+    h1(this.mainTitle);
+  }
+
+  viewStories() {
+    if (['cemetery', 'newspaper'].includes(this.type)) {
+      return this.viewCemeteriesNewspapers();
+    }
+
+    this.viewSectionList(this.stories, {
+      type: 'stories',
+      bullet: false,
+      divider: true,
+      summary: true,
+      location: true,
+      date: true,
+    });
+  }
+
+  viewCemeteriesNewspapers() {
+    const [placeList, storiesByPlace] = this.getStoriesByPlace();
+
+    placeList.forEach(place => {
+      h2(place);
+      storiesByPlace[place].forEach(story => {
+        pg(linkToStory(story)).css('margin', '15px 0 0 5px');
+        pg(story.location.format).css('margin-left', '5px');
+
+        let numEntries;
+
+        if (this.type == 'cemetery') {
+          numEntries = ViewStoryIndex.getNumberOfGravesInCemetery(story);
+        } else {
+          numEntries = story.entries.length;
+        }
+
+        pg(numEntries + ' ' + this.entryName.pluralize(numEntries))
+          .css('margin-left', '5px');
+      });
+    });
+  }
+
+  getStoriesByPlace() {
+    const placeList = [];
+    const storiesByPlace = { Other: [] };
+    const stories = DATABASE.stories.filter(s => s.type == this.type);
+
+    stories.forEach(story => {
+      let placeName = 'Other';
+      if (story.location.country == 'United States' && story.location.region1) {
+        placeName = USA_STATES[story.location.region1];
+      }
+      if (storiesByPlace[placeName] == undefined) {
+        placeList.push(placeName);
+        storiesByPlace[placeName] = [];
+      }
+      storiesByPlace[placeName].push(story);
+    });
+
+    placeList.sort();
+
+    if (storiesByPlace.Other.length) {
+      placeList.push('Other');
+    }
+
+    return [placeList, storiesByPlace];
+  }
+
+  static getNumberOfGravesInCemetery(story) {
+    let count = 0;
+
+    story.entries.forEach(source => {
+      count += source.people.length || 1;
+    });
+
+    return count;
+  }
+}
+
+class ViewStory extends ViewPage {
+  static byId(storyId) {
+    const story = DATABASE.storyRef[storyId];
+
+    if (story) {
+      new ViewStory(story);
+      return true;
+    }
+  }
+
+  constructor(story) {
+    super(story);
+    this.story = story;
+    this.type = story.type;
+    this.entries = story.entries;
+  }
+
+  headerTrail() {
+    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
+      return headerTrail('sources', pluralize(this.type));
+    }
+
+    if (['artifact', 'landmark'].includes(this.type)) {
+      return headerTrail(pluralize(this.type));
+    }
+
+    return headerTrail('sources');
+  }
+
+  viewImages() {
+    if (!this.story.images.length) {
+      return;
+    }
+    h2('Images');
+    this.story.images.forEach(image => {
+      rend(Image.make(image, 100, 100).css('margin', '10px 5px 0 5px'));
+    });
+  }
+
+  viewPhotos() {
+    const images = [];
+
+    const sources = DATABASE.sources.filter(source => {
+      if (source.stories.includes(this.story)) {
+        source.images.forEach(image => {
+          if (image.tags.story) {
+            images.push(image);
+          }
+        });
+      }
+    });
+
+    if (images.length == 0) {
+      return;
+    }
+
+    h2('Photos');
+
+    images.forEach(image => {
+      const $link = Image.asLink(image, 200, 300);
+      $link.find('img')
+        .prop('title', image.item.title)
+        .css('margin', '5px');
+      rend($link);
+    });
+  }
+
+  viewSources() {
+    const sources = DATABASE.sources.filter(source => {
+      return source.stories.includes(this.story);
+    });
+    if (sources.length == 0) {
+      return;
+    }
+    h2('Sources');
+    sources.forEach(source => {
+      rend('<p style="margin: 10px">' + linkToSource(source, true) + '</p>');
+    });
+  }
+
+  viewExcerpts() {
+    const excerpts = this.story.notations.filter(notation => {
+      return notation.title == 'excerpt';
+    });
+    if (excerpts.length == 0) {
+      return;
+    }
+    h2('Excerpts');
+    excerpts.forEach((notation, i) => {
+      if (i > 0) {
+        rend('<hr style="margin: 20px 0;">');
+      }
+      pg(notation.text).css('margin-top', '20px');
+      pg('from ' + linkToSource(notation.source, true))
+        .css('margin', '10px 0 0 30px');
+    });
+  }
+
+  viewSectionSources() {
+    if (this.story.sources.length == 0) {
+      return;
+    }
+    h2('Sources');
+    this.story.sources.forEach(source => {
+      pg(linkToSource(source, true)).css('margin', '10px 5px');
+    });
+  }
+}
+
+class ViewCemeteryOrNewspaper extends ViewStory {
+  static byUrl() {
+    const storyId = PATH.replace('newspaper/', '').replace('cemetery/', '');
+    const story = DATABASE.storyRef[storyId];
+
+    if (!story) {
+      return pageNotFound();
+    }
+
+    new ViewCemeteryOrNewspaper(story).render();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+
+    if (this.type == 'cemetery') {
+      this.entries.sortBy(source => source.title);
+    } else if (this.type == 'newspaper') {
+      this.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
+    }
+  }
+
+  render() {
+    this.headerTrail();
+
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
+    rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
+
+    this.viewSectionPeople();
+    this.viewImages();
+    this.viewSectionContent();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
+    this.viewSources();
+    this.viewExcerpts();
+    this.showEntries();
+  }
+
+  showEntries() {
+    if (this.type == 'cemetery') {
+      h2('Graves');
+      ViewCemeteryOrNewspaper.showListOfGraves(this.entries)
+    } else {
+      h2('Articles');
+      ViewCemeteryOrNewspaper.showListOfArticles(this.entries);
+    }
+  }
+
+  static showListOfGraves(sources) {
+    sources.forEach((source, i) => {
+      const $box = $('<div style="margin: 20px 10px;">');
+
+      $box.append('<p>' + linkToSource(source) + '</p>');
+
+      if (source.summary) {
+        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
+      }
+
+      rend($box);
+    });
+  }
+
+  static showListOfArticles(sources) {
+    sources.forEach((source, i) => {
+      if (i > 0) {
+        rend('<hr>');
+      }
+
+      const $box = $('<div style="margin: 20px 10px;">');
+
+      $box.append('<p>' + linkToSource(source) + '</p>');
+
+      if (source.date.format) {
+        $box.append('<p style="margin-top: 5px">' + source.date.format + '</p>');
+      }
+
+      if (source.summary) {
+        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
+      }
+
+      rend($box);
+    });
+  }
+}
+
+class ViewStoryBook extends ViewStory {
+  static byUrl() {
+    const storyId = PATH.replace('book/', '');
+    const story = DATABASE.storyRef[storyId];
+
+    if (!story) {
+      return pageNotFound();
+    }
+
+    new ViewStoryBook(story).render();
+    return true;
+  }
+
+  render() {
+    this.headerTrail();
+
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
+    ['date', 'location'].forEach(attr => {
+      if (this.story[attr].format) {
+        rend('<p style="padding-top: 10px;">' + this.story[attr].format + '</p>');
+      }
+    });
+
+    this.viewSectionPeople();
+    this.viewImages();
+    this.viewSectionContent();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
+    this.viewSources();
+    this.viewExcerpts();
+    this.showEntries();
+  }
+
+  showEntries() {
+    h2('Chapters');
+
+    if (this.entries.length == 0) {
+      pg('<i>None</i>').css('margin', '15px 10px');
+      return;
+    }
+
+    this.viewSectionList(this.entries, {
+      type: 'sources',
+      showStory: false,
+      bullet: true,
+      divider: false,
+      summary: true,
+    });
+  }
+}
+
+class ViewStoryArtifactOrLandmark extends ViewStory {
+  static byUrl() {
+    const [storyType, storyId, extraText] = PATH.split('/');
+    const story = DATABASE.storyRef[storyId];
+
+    if (storyType != 'artifact' && storyType != 'landmark') {
+      return false;
+    }
+
+    if (!story || extraText) {
+      return pageNotFound();
+    }
+
+    new ViewStoryArtifactOrLandmark(story).render();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  render() {
+    this.headerTrail();
+
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
+    rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
+
+    this.viewSectionSummary();
+    this.viewSectionPeople();
+    this.viewPhotos();
+    this.viewImages();
+    this.viewSectionContent();
+    this.viewSectionNotes();
+    this.viewSectionLinks();
+    this.viewSources();
+    this.viewExcerpts();
+  }
+}
+
+class ViewStoryTopic extends ViewStory {
+  static byId(storyId) {
+    const story = DATABASE.storyRef[storyId];
+
+    if (!story) {
+      return false;
+    }
+
+    new ViewStoryTopic(story).render();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  render() {
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+    this.viewExcerpts();
+    this.viewSources();
+  }
+}
+
+class ViewStoryEvent extends ViewStory {
+  static byUrl() {
+    const storyId = PATH.replace('event/', '');
+    const story = DATABASE.storyRef[storyId];
+
+    if (!story) {
+      return false;
+    }
+
+    new ViewStoryEvent(story).render();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  render() {
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
+    ['date', 'location'].forEach(attr => {
+      if (this.story[attr] && this.story[attr].format) {
+        pg(this.story[attr].format).css('margin', '5px');
+      }
+    });
+
+    this.viewSectionPeople();
+    this.viewSectionSources();
+    this.viewExcerpts();
+  }
+}
+
 function artifactBlock(story, specs) {
   const $box = $('<div>');
 
@@ -3462,17 +4147,22 @@ function artifactBlock(story, specs) {
     $box.append('<h2>' + story.title + '</h2>');
   } else {
     $box.css('margin-left', '15px');
-    $box.append('<p>' + linkToStory(story) + '</p>');
+    const text = specs.highlightKeywords
+      ? highlightKeywords(story.title, specs.highlightKeywords) : null;
+    $box.append('<p>' + linkToStory(story, text) + '</p>');
     if (!specs.firstItem) {
       $box.css('margin-top', '20px');
     }
   }
 
   if (story.summary) {
+    const summary = specs.highlightKeywords
+      ? highlightKeywords(story.summary, specs.highlightKeywords) : story.summary;
+
     if (specs.largeHeader) {
-      $box.append('<p style="margin-left: 10px">' + story.summary + '</p>');
+      $box.append('<p style="margin-left: 10px">' + summary + '</p>');
     } else {
-      $box.append('<p style="margin-top: 5px">' + story.summary + '</p>');
+      $box.append('<p style="margin-top: 5px">' + summary + '</p>');
     }
   }
 
@@ -3577,6 +4267,10 @@ function routeSources() {
 function viewSourcesIndex() {
   setPageTitle('Sources');
   rend('<h1>Sources</h1>');
+
+  pg('A "source" can be a document, photograph, artifact, landmark, ' +
+    'website, or anything else that adds to the picture of a family tree.')
+  .css('margin', '10px 0 15px 0');
 
   sourceCategories.forEach(category => {
     const path = category.fullPath || ('sources/' + category.path);
@@ -3970,7 +4664,8 @@ class ViewSource extends ViewPage {
   otherEntries() {
     if (this.type == 'document' && this.story.title.match('Census USA')) {
       const neighbors = this.story.entries.filter(source => {
-        return source.location.format == this.source.location.format;
+        return source.location.format == this.source.location.format
+          && source._id != this.source._id;
       });
 
       if (neighbors.length == 0) {
@@ -3978,8 +4673,10 @@ class ViewSource extends ViewPage {
       }
 
       h2('Neighbors');
+
       pg('Other households in <b>' + this.source.location.format + '</b> in '
         + this.source.date.year + '.').css('margin-bottom', '10px');
+
       this.viewSectionList(neighbors, {
         type: 'sources',
         showStory: false,
@@ -3989,6 +4686,7 @@ class ViewSource extends ViewPage {
         location: false,
         date: false,
       });
+
       return;
     }
 
@@ -4011,464 +4709,6 @@ class ViewSource extends ViewPage {
       entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
       ViewCemeteryOrNewspaper.showListOfArticles(entries);
     }
-  }
-}
-
-class ViewStoryIndex extends ViewPage {
-  static byUrl() {
-    if (['artifacts', 'books', 'cemeteries', 'landmarks', 'newspapers']
-        .includes(PATH)) {
-      new ViewStoryIndex(PATH).render();
-      return true;
-    }
-    return false;
-  }
-
-  constructor(storyType) {
-    super();
-    this.type = storyType.singularize();
-    this.mainTitle = storyType.capitalize();
-    this.stories = this.getStories();
-    this.entryName = this.getEntryName();
-  }
-
-  getStories() {
-    if (this.type == 'artifact') {
-      return DATABASE.stories.filter(story => {
-        return story.type == 'artifact' || story.tags.artifact;
-      });
-    }
-    return DATABASE.stories.filter(story => {
-      return story.type == this.type;
-    });
-  }
-
-  getEntryName() {
-    if (this.type == 'cemetery') {
-      return 'grave';
-    }
-    if (this.type == 'newspaper') {
-      return 'article';
-    }
-  }
-
-  render() {
-    this.headerTrail();
-    this.setPageTitle();
-    this.viewTitle();
-    this.viewStories();
-  }
-
-  headerTrail() {
-    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
-      headerTrail('sources');
-    }
-  }
-
-  setPageTitle() {
-    setPageTitle(this.mainTitle);
-  }
-
-  viewTitle() {
-    if (this.type == 'artifact') {
-      return h1('Artifacts and family heirlooms');
-    }
-    if (this.type == 'landmark') {
-      return h1('Landmarks and buildings');
-    }
-    h1(this.mainTitle);
-  }
-
-  viewStories() {
-    if (['cemetery', 'newspaper'].includes(this.type)) {
-      return this.viewCemeteriesNewspapers();
-    }
-
-    this.viewSectionList(this.stories, {
-      type: 'stories',
-      bullet: false,
-      divider: true,
-      summary: true,
-      location: true,
-      date: true,
-    });
-  }
-
-  viewCemeteriesNewspapers() {
-    const [placeList, storiesByPlace] = this.getStoriesByPlace();
-
-    placeList.forEach(place => {
-      h2(place);
-      storiesByPlace[place].forEach(story => {
-        pg(linkToStory(story)).css('margin', '15px 0 0 5px');
-        pg(story.location.format).css('margin-left', '5px');
-
-        let numEntries;
-
-        if (this.type == 'cemetery') {
-          numEntries = ViewStoryIndex.getNumberOfGravesInCemetery(story);
-        } else {
-          numEntries = story.entries.length;
-        }
-
-        pg(numEntries + ' ' + this.entryName.pluralize(numEntries))
-          .css('margin-left', '5px');
-      });
-    });
-  }
-
-  getStoriesByPlace() {
-    const placeList = [];
-    const storiesByPlace = { Other: [] };
-    const stories = DATABASE.stories.filter(s => s.type == this.type);
-
-    stories.forEach(story => {
-      let placeName = 'Other';
-      if (story.location.country == 'United States' && story.location.region1) {
-        placeName = USA_STATES[story.location.region1];
-      }
-      if (storiesByPlace[placeName] == undefined) {
-        placeList.push(placeName);
-        storiesByPlace[placeName] = [];
-      }
-      storiesByPlace[placeName].push(story);
-    });
-
-    placeList.sort();
-
-    if (storiesByPlace.Other.length) {
-      placeList.push('Other');
-    }
-
-    return [placeList, storiesByPlace];
-  }
-
-  static getNumberOfGravesInCemetery(story) {
-    let count = 0;
-
-    story.entries.forEach(source => {
-      count += source.people.length || 1;
-    });
-
-    return count;
-  }
-}
-
-class ViewStory extends ViewPage {
-  static byId(storyId) {
-    const story = DATABASE.storyRef[storyId];
-
-    if (story) {
-      new ViewStory(story);
-      return true;
-    }
-  }
-
-  constructor(story) {
-    super(story);
-    this.story = story;
-    this.type = story.type;
-    this.entries = story.entries;
-  }
-
-  headerTrail() {
-    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
-      return headerTrail('sources', pluralize(this.type));
-    }
-
-    if (['artifact', 'landmark'].includes(this.type)) {
-      return headerTrail(pluralize(this.type));
-    }
-
-    return headerTrail('sources');
-  }
-
-  viewImages() {
-    if (!this.story.images.length) {
-      return;
-    }
-    h2('Images');
-    this.story.images.forEach(image => {
-      rend(Image.make(image, 100, 100).css('margin', '10px 5px 0 5px'));
-    });
-  }
-
-  viewSources() {
-    const sources = DATABASE.sources.filter(source => {
-      return source.stories.includes(this.story);
-    });
-    if (sources.length == 0) {
-      return;
-    }
-    h2('Sources');
-    sources.forEach(source => {
-      rend('<p style="margin: 10px">' + linkToSource(source, true) + '</p>');
-    });
-  }
-
-  viewExcerpts() {
-    const excerpts = this.story.notations.filter(notation => {
-      return notation.title == 'excerpt';
-    });
-    if (excerpts.length == 0) {
-      return;
-    }
-    h2('Excerpts');
-    excerpts.forEach((notation, i) => {
-      if (i > 0) {
-        rend('<hr style="margin: 20px 0;">');
-      }
-      pg(notation.text).css('margin-top', '20px');
-      pg('from ' + linkToSource(notation.source, true))
-        .css('margin', '10px 0 0 30px');
-    });
-  }
-
-  viewSectionSources() {
-    if (this.story.sources.length == 0) {
-      return;
-    }
-    h2('Sources');
-    this.story.sources.forEach(source => {
-      pg(linkToSource(source, true)).css('margin', '10px 5px');
-    });
-  }
-}
-
-class ViewCemeteryOrNewspaper extends ViewStory {
-  static byUrl() {
-    const storyId = PATH.replace('newspaper/', '').replace('cemetery/', '');
-    const story = DATABASE.storyRef[storyId];
-
-    if (!story) {
-      return pageNotFound();
-    }
-
-    new ViewCemeteryOrNewspaper(story).render();
-    return true;
-  }
-
-  constructor(story) {
-    super(story);
-
-    if (this.type == 'cemetery') {
-      this.entries.sortBy(source => source.title);
-    } else if (this.type == 'newspaper') {
-      this.entries.trueSort((a, b) => isDateBeforeDate(a.date, b.date));
-    }
-  }
-
-  render() {
-    this.headerTrail();
-
-    setPageTitle(this.story.title);
-    h1(this.story.title);
-
-    rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
-
-    this.viewSectionPeople();
-    this.viewImages();
-    this.viewSectionContent();
-    this.viewSectionNotes();
-    this.viewSectionLinks();
-    this.viewSources();
-    this.viewExcerpts();
-    this.showEntries();
-  }
-
-  showEntries() {
-    if (this.type == 'cemetery') {
-      h2('Graves');
-      ViewCemeteryOrNewspaper.showListOfGraves(this.entries)
-    } else {
-      h2('Articles');
-      ViewCemeteryOrNewspaper.showListOfArticles(this.entries);
-    }
-  }
-
-  static showListOfGraves(sources) {
-    sources.forEach((source, i) => {
-      const $box = $('<div style="margin: 20px 10px;">');
-
-      $box.append('<p>' + linkToSource(source) + '</p>');
-
-      if (source.summary) {
-        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
-      }
-
-      rend($box);
-    });
-  }
-
-  static showListOfArticles(sources) {
-    sources.forEach((source, i) => {
-      if (i > 0) {
-        rend('<hr>');
-      }
-
-      const $box = $('<div style="margin: 20px 10px;">');
-
-      $box.append('<p>' + linkToSource(source) + '</p>');
-
-      if (source.date.format) {
-        $box.append('<p style="margin-top: 5px">' + source.date.format + '</p>');
-      }
-
-      if (source.summary) {
-        $box.append('<p style="margin-top: 5px">' + source.summary + '</p>');
-      }
-
-      rend($box);
-    });
-  }
-}
-
-class ViewStoryBook extends ViewStory {
-  static byUrl() {
-    const storyId = PATH.replace('book/', '');
-    const story = DATABASE.storyRef[storyId];
-
-    if (!story) {
-      return pageNotFound();
-    }
-
-    new ViewStoryBook(story).render();
-    return true;
-  }
-
-  render() {
-    this.headerTrail();
-
-    setPageTitle(this.story.title);
-    h1(this.story.title);
-
-    ['date', 'location'].forEach(attr => {
-      if (this.story[attr].format) {
-        rend('<p style="padding-top: 10px;">' + this.story[attr].format + '</p>');
-      }
-    });
-
-    this.viewSectionPeople();
-    this.viewImages();
-    this.viewSectionContent();
-    this.viewSectionNotes();
-    this.viewSectionLinks();
-    this.viewSources();
-    this.viewExcerpts();
-    this.showEntries();
-  }
-
-  showEntries() {
-    h2('Chapters');
-
-    if (this.entries.length == 0) {
-      pg('<i>None</i>').css('margin', '15px 10px');
-      return;
-    }
-
-    this.viewSectionList(this.entries, {
-      type: 'sources',
-      showStory: false,
-      bullet: true,
-      divider: false,
-      summary: true,
-    });
-  }
-}
-
-class ViewStoryArtifactOrLandmark extends ViewStory {
-  static byUrl() {
-    const [storyType, storyId, extraText] = PATH.split('/');
-    const story = DATABASE.storyRef[storyId];
-
-    if (storyType != 'artifact' && storyType != 'landmark') {
-      return false;
-    }
-
-    if (!story || extraText) {
-      return pageNotFound();
-    }
-
-    new ViewStoryArtifactOrLandmark(story).render();
-    return true;
-  }
-
-  constructor(story) {
-    super(story);
-  }
-
-  render() {
-    this.headerTrail();
-
-    setPageTitle(this.story.title);
-    h1(this.story.title);
-
-    rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
-
-    this.viewSectionPeople();
-    this.viewImages();
-    this.viewSectionContent();
-    this.viewSectionNotes();
-    this.viewSectionLinks();
-    this.viewSources();
-    this.viewExcerpts();
-  }
-}
-
-class ViewStoryTopic extends ViewStory {
-  static byId(storyId) {
-    const story = DATABASE.storyRef[storyId];
-
-    if (!story) {
-      return false;
-    }
-
-    new ViewStoryTopic(story).render();
-    return true;
-  }
-
-  constructor(story) {
-    super(story);
-  }
-
-  render() {
-    setPageTitle(this.story.title);
-    h1(this.story.title);
-    this.viewExcerpts();
-    this.viewSources();
-  }
-}
-
-class ViewStoryEvent extends ViewStory {
-  static byUrl() {
-    const storyId = PATH.replace('event/', '');
-    const story = DATABASE.storyRef[storyId];
-
-    if (!story) {
-      return false;
-    }
-
-    new ViewStoryEvent(story).render();
-    return true;
-  }
-
-  constructor(story) {
-    super(story);
-  }
-
-  render() {
-    setPageTitle(this.story.title);
-    h1(this.story.title);
-
-    ['date', 'location'].forEach(attr => {
-      if (this.story[attr] && this.story[attr].format) {
-        pg(this.story[attr].format).css('margin', '5px');
-      }
-    });
-
-    this.viewSectionPeople();
-    this.viewSectionSources();
-    this.viewExcerpts();
   }
 }
 
@@ -4705,6 +4945,11 @@ function viewTopicImmigration() {
 
   setPageTitle('Immigration');
   h1('Immigration');
+
+  if (ENV == 'dev') {
+    pg(localLink('audit/immigration', 'immigration audit page'))
+      .css('margin', '20px 10px');
+  }
 
   countries.forEach(country => {
     h2(country);
