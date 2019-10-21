@@ -12,6 +12,10 @@ class ViewAudit extends ViewPage {
       new ViewAuditChildren().render();
       return true;
     }
+    if (PATH == 'audit/immigration') {
+      new ViewAuditImmigration().render();
+      return true;
+    }
   }
 
   constructor() {
@@ -25,6 +29,7 @@ class ViewAudit extends ViewPage {
     [
       ['age-at-death', 'age at death'],
       ['children', 'children'],
+      ['immigration', 'immigration'],
     ].forEach(([path, text]) => {
       pg(localLink('audit/' + path, text));
     });

@@ -19,6 +19,11 @@ function viewTopicImmigration() {
   setPageTitle('Immigration');
   h1('Immigration');
 
+  if (ENV == 'dev') {
+    pg(localLink('audit/immigration', 'immigration audit page'))
+      .css('margin', '20px 10px');
+  }
+
   countries.forEach(country => {
     h2(country);
     rend($makePeopleList(peopleByCountry[country], 'photo'));
