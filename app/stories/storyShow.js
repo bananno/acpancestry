@@ -37,6 +37,34 @@ class ViewStory extends ViewPage {
     });
   }
 
+  viewPhotos() {
+    const images = [];
+
+    const sources = DATABASE.sources.filter(source => {
+      if (source.stories.includes(this.story)) {
+        source.images.forEach(image => {
+          if (image.tags.story) {
+            images.push(image);
+          }
+        });
+      }
+    });
+
+    if (images.length == 0) {
+      return;
+    }
+
+    h2('Photos');
+
+    images.forEach(image => {
+      const $link = Image.asLink(image, 200, 300);
+      $link.find('img')
+        .prop('title', image.item.title)
+        .css('margin', '5px');
+      rend($link);
+    });
+  }
+
   viewSources() {
     const sources = DATABASE.sources.filter(source => {
       return source.stories.includes(this.story);
@@ -249,7 +277,9 @@ class ViewStoryArtifactOrLandmark extends ViewStory {
 
     rend('<p style="padding-top: 10px;">' + this.story.location.format + '</p>');
 
+    this.viewSectionSummary();
     this.viewSectionPeople();
+    this.viewPhotos();
     this.viewImages();
     this.viewSectionContent();
     this.viewSectionNotes();

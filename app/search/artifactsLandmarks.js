@@ -23,6 +23,7 @@ class SearchResultsArtifacts extends SearchResults {
         firstItem: i == 0,
         largeHeader: false,
         people: [],
+        highlightKeywords: this.keywords
       });
     });
   }
@@ -49,7 +50,7 @@ class SearchResultsLandmarks extends SearchResults {
     this.title('Landmarks');
     this.resultsList.forEach(story => {
       rend('<p style="margin: 15px 0 0 15px;" class="search-result-item">'
-        + linkToStory(story) + '</p>');
+        + linkToStory(story, this.highlight(story.title)) + '</p>');
 
       if (story.location.format) {
         rend('<p style="margin: 2px 0 0 15px;" class="search-result-item">'

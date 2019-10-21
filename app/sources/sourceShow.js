@@ -131,7 +131,8 @@ class ViewSource extends ViewPage {
   otherEntries() {
     if (this.type == 'document' && this.story.title.match('Census USA')) {
       const neighbors = this.story.entries.filter(source => {
-        return source.location.format == this.source.location.format;
+        return source.location.format == this.source.location.format
+          && source._id != this.source._id;
       });
 
       if (neighbors.length == 0) {
@@ -139,8 +140,10 @@ class ViewSource extends ViewPage {
       }
 
       h2('Neighbors');
+
       pg('Other households in <b>' + this.source.location.format + '</b> in '
         + this.source.date.year + '.').css('margin-bottom', '10px');
+
       this.viewSectionList(neighbors, {
         type: 'sources',
         showStory: false,
@@ -150,6 +153,7 @@ class ViewSource extends ViewPage {
         location: false,
         date: false,
       });
+
       return;
     }
 

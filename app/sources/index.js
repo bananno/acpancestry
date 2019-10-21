@@ -87,6 +87,10 @@ function viewSourcesIndex() {
   setPageTitle('Sources');
   rend('<h1>Sources</h1>');
 
+  pg('A "source" can be a document, photograph, artifact, landmark, ' +
+    'website, or anything else that adds to the picture of a family tree.')
+  .css('margin', '10px 0 15px 0');
+
   sourceCategories.forEach(category => {
     const path = category.fullPath || ('sources/' + category.path);
     const text = category.pathText || category.title;

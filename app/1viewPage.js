@@ -57,7 +57,7 @@ class ViewPage {
       rend($ul);
     }
 
-    list.forEach(item => {
+    list.forEach((item, i) => {
       let $container;
 
       if ($ul) {
@@ -65,6 +65,10 @@ class ViewPage {
       } else {
         $container = $('<div>');
         rend($container);
+      }
+
+      if (i > 0) {
+        $container.css('margin-top', '15px');
       }
 
       if (options.divider) {

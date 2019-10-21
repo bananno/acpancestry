@@ -115,7 +115,8 @@ function fixSpecialCharacters(str) {
   return str.replace('å', '&aring;')
     .replace(/ö/g, '&ouml;')
     .replace('“', '"')
-    .replace('”', '"');
+    .replace('”', '"')
+    .replace('’', '\'');
 }
 
 function addTd($row, content) {
