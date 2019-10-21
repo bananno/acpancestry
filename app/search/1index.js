@@ -87,6 +87,13 @@ class SearchResultsPeople extends SearchResults {
 
   renderResults() {
     this.title('People');
-    rend($makePeopleList(this.resultsList, 'photo', this.keywords));
+    rend($makePeopleList(this.resultsList, 'photo', {
+      highlightKeywords: this.keywords,
+      collapseIfAtLeast: 12,
+      collapseAfterNumber: 10,
+      collapseAll: false,
+      collapseMessage: 'show HIDDENNUM more people',
+      allowRehide: false,
+    }));
   }
 }

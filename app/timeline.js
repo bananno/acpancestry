@@ -162,26 +162,15 @@ class TimelineItem {
       return;
     }
 
-    const $list = $makePeopleList(this.item.people, 'photo').css('margin-left', '-5px');
+    const $list = $makePeopleList(this.item.people, 'photo', {
+      css: { 'margin-left': '-5px'},
+      collapseIfAtLeast: 6,
+      collapseAfterNumber: 0,
+      collapseMessage: 'show all TOTALNUM tagged people',
+      allowRehide: true,
+    });
 
     this.$col2.append($list);
-
-    if (this.item.people.length > 5) {
-      $list.hide();
-      const $show = $('<div class="fake-link" style="margin-top: 5px">')
-      let showText = 'show all ' + this.item.people.length + ' tagged people';
-      $show.text(showText);
-      $list.before($show);
-      $show.click(() => {
-        if ($list.is(':visible')) {
-          $list.slideUp();
-          $show.text(showText);
-        } else {
-          $list.slideDown();
-          $show.text('hide list');
-        }
-      });
-    }
   }
 
   getItemText() {

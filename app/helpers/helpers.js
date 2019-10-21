@@ -37,34 +37,6 @@ function bulletList(array, skipRender) {
   return $list;
 }
 
-function $makePeopleList(people, format, keywords) {
-  if (format == 'photo') {
-    const $list = $('<div class="people-list">');
-
-    people.forEach(person => {
-      const $item = $('<div class="icon-link">').appendTo($list);
-      $item.attr('data-person', person._id);
-      if (keywords) {
-        $item.addClass('search-result-item');
-      }
-      $item.append(linkToPerson(person, false, '<img src="' + person.profileImage + '">'));
-      $item.append(linkToPerson(person, true, null, keywords));
-    });
-
-    return $list;
-  }
-
-  const $list = $('<ul class="people-list">');
-
-  people.forEach(person => {
-    const $item = $('<li>').appendTo($list);
-    $item.attr('data-person', person._id);
-    $item.append(linkToPerson(person, true, null, keywords));
-  });
-
-  return $list;
-}
-
 function formatDate(date) {
   if (date == null) {
     return '';
