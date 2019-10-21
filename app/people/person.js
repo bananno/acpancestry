@@ -150,7 +150,7 @@ class Person {
   }
 
   ageAtDeath() {
-    return this.ageAt(this.death);
+    return this.tags['age at death'] || this.ageAt(this.death);
   }
 
   ageAt(date) {

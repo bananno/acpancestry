@@ -113,9 +113,9 @@ class TimelineItem {
       }
 
       if (this.item.title == 'death' && this.person) {
-        let age = this.person.ageAt(this.item.date);
+        let age = this.person.ageAtDeath();
         if (age) {
-          return 'death (age ' + age + ')';
+          return 'death (age: ' + age + ')';
         }
         return 'death';
       }

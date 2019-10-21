@@ -14,6 +14,7 @@ class SearchResults extends ViewPage {
     h1('Search Results for "' + keywords.join(' ') + '"');
     pg().css('padding-top', '10px').attr('id', 'number-of-search-results');
 
+    new SearchResultsTopics(keywords);
     new SearchResultsPeople(keywords);
     new SearchResultsPlaces(keywords);
     new SearchResultsLandmarks(keywords);
@@ -95,5 +96,28 @@ class SearchResultsPeople extends SearchResults {
       collapseMessage: 'show HIDDENNUM more people',
       allowRehide: false,
     }));
+  }
+}
+
+class SearchResultsTopics extends SearchResults {
+  constructor(keywords, isTest) {
+    super(keywords, isTest);
+    this.execute();
+  }
+
+  getResults() {
+    this.resultsList = DATABASE.stories.filter(story => {
+      return story.type == 'topic' && this.isMatch(story.title);
+    });
+  }
+
+  sortResults() {
+  }
+
+  renderResults() {
+    this.title('Topics');
+    this.resultsList.forEach(story => {
+      pg(linkToStory(story, this.highlight(story.title))).css('margin', '10px');
+    });
   }
 }
