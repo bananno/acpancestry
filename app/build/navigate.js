@@ -17,6 +17,8 @@ function clickLocalLink(event) {
   history.pushState({}, null, clickedPath);
 
   getRoute();
+
+  window.scrollTo(0, 0);
 }
 
 function getRoute() {
