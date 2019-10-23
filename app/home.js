@@ -119,7 +119,7 @@ class ViewHome extends ViewPage {
         title: 'disease',
         text: 'At least ' + people.length + ' people in the Family Tree ' +
           ' have died of ' + diseases.length + ' different diseases. See a ' +
-          'list of people, historical events, and newspapers articles.'
+          'list of people, historical events, and newspaper articles.'
       });
     })();
 
