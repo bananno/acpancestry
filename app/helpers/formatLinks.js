@@ -1,6 +1,10 @@
 function localLink(target, text, newTab) {
-  return '<a href="' + ORIGIN + '?' + target + '" class="local-link"'
-    + (newTab ? ' target="_blank"' : '') + '>' + text + '</a>';
+  if (newTab) {
+    return '<a href="' + ORIGIN + '?' + target + '" target="_blank">'
+      + text + '</a>';
+  }
+  return '<a href="' + ORIGIN + '?' + target + '" class="local-link">'
+    + text + '</a>';
 }
 
 function linkToPerson(person, includeLeaf, text, keywords) {
