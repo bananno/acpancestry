@@ -918,6 +918,7 @@ function runTests() {} // overwritten in dev version
 function setupLayout() {
   $(document).on('click', '#menu-icon', openSideMenu);
   $(document).on('click', '#main-navigation .close-me', closeSideMenu);
+  $(document).on('click', '#main-navigation .local-link', closeSideMenu);
   $(document).on('click', '#menu-backdrop', closeSideMenu);
   createHeaderLinks();
   addFooterQuote();
