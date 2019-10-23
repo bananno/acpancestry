@@ -16,6 +16,9 @@ class ViewAudit extends ViewPage {
       new ViewAuditImmigration().render();
       return true;
     }
+    if (PATH.match('audit/census')) {
+      return ViewAuditCensus.byUrl() || false;
+    }
   }
 
   constructor() {
@@ -30,6 +33,7 @@ class ViewAudit extends ViewPage {
       ['age-at-death', 'age at death'],
       ['children', 'children'],
       ['immigration', 'immigration'],
+      ['census/1940', 'census'],
     ].forEach(([path, text]) => {
       pg(localLink('audit/' + path, text));
     });
