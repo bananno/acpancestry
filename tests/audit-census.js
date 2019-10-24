@@ -25,18 +25,17 @@ class ViewAuditCensus extends ViewAudit {
     });
 
     this.list = {
-      'ancestorMissingInfo': ['ancestors missing date info', []],
-      'ancestorMissingCensus': ['ancestors missing census', []],
-      'missingInfo': ['missing date info', []],
-      'missingCensus': ['missing census', []],
+      'missingDateInfo': ['missing date info', []],
+      'incomplete': ['missing census', []],
+      'outsideCountry': ['missing census, but maybe not living in USA', []],
       'complete': ['complete', []],
-      'outOfRange': ['dates are out of range', []],
+      'outOfRangeLate': ['out of range: born after ' + this.year, []],
+      'outOfRangeEarly': ['out of range: died before ' + this.year, []],
       'ignore': ['ignore', []],
-      'other': ['other', []],
     };
 
     DATABASE.people.forEach(person => {
-      const list = (() => {
+      const category = (() => {
         if (hasSource[person._id]) {
           return 'complete';
         }
@@ -45,27 +44,39 @@ class ViewAuditCensus extends ViewAudit {
           return 'ignore';
         }
 
-        const isAncestor = !!person.leaf;
+        const birthYear = (person.birth && person.birth.date
+          && person.birth.date.year) ? person.birth.date.year : 0;
 
-        const enoughInfo = person.birth && person.death
-          && person.birth.date && person.death.date
-          && person.birth.date.year && person.death.date.year;
+        const deathYear = (person.death && person.death.date
+          && person.death.date.year) ? person.death.date.year : 0;
 
-        if (!enoughInfo) {
-          return isAncestor ? 'ancestorMissingInfo' : 'missingInfo';
+        if (birthYear && birthYear > this.year) {
+          return 'outOfRangeLate';
         }
 
-        const inRange = enoughInfo && person.birth.date.year <= this.year
-          && person.death.date.year >= this.year;
-
-        if (!inRange) {
-          return 'outOfRange';
+        if (deathYear && deathYear < this.year) {
+          return 'outOfRangeEarly';
         }
 
-        return isAncestor ? 'ancestorMissingCensus' : 'missingCensus';
+        if (!birthYear || !deathYear) {
+          return 'missingDateInfo';
+        }
+
+        if (person.death.location && person.death.location.country
+            && person.death.location.country != 'United States') {
+          return 'outsideCountry';
+        }
+
+        return 'incomplete';
       })();
 
-      this.list[list][1].push(person);
+      this.list[category][1].push(person);
+    });
+
+    ['missingDateInfo', 'incomplete'].forEach(category => {
+      this.list[category][1].sortBy(person => {
+        return person.leaf ? '1' : '2';
+      });
     });
   }
 
