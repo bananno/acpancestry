@@ -43,13 +43,13 @@ class Timeline {
   }
 
   sortList() {
-    this.list.trueSort((a, b) => {
-      // if there is no date on either item, the cemetery should be rated higher.
-      if (!a.date.year && !b.date.year) {
-        return a.type == 'grave';
-      }
-      return isDateBeforeDate(a.date, b.date);
+    this.list.forEach(item => {
+      item.sortBy = TimelineItem.getSortValue(item);
     });
+
+    console.log(this.list)
+
+    this.list.sortBy(item => item.sortBy);
   }
 
   renderTimeline() {
@@ -73,6 +73,24 @@ class Timeline {
 }
 
 class TimelineItem {
+  static getSortValue(item) {
+    if (!item.date && item.story) {
+      // Items without dates should be at the bottom of the list and
+      // graves should be at the top of that section.
+      if (item.story.type == 'cemetery') {
+        return '3000-00-00';
+      }
+
+      item.date = item.story.date || {};
+    }
+
+    return [
+      item.date.year || '3000',
+      pad0(item.date.month || 12, 2),
+      pad0(item.date.day || 32, 2),
+    ].join('-');
+  }
+
   constructor(item, isTest, person) {
     this.item = item;
     this.isTest = isTest === true;
