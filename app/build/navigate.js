@@ -12,7 +12,7 @@ function clickLocalLink(event) {
 
   event.preventDefault();
 
-  const clickedPath = $(event.target).attr('href');
+  const clickedPath = $(event.target).closest('a').attr('href');
 
   history.pushState({}, null, clickedPath);
 
