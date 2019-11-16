@@ -317,6 +317,9 @@ class ViewStoryTopic extends ViewStory {
     if (this.story.title == 'Gravestone symbols') {
       return ViewSpecialTopicGravestones.gravestoneSymbols();
     }
+    if (this.story.title == 'Masonry') {
+      return ViewSpecialTopicGravestones.masonGravestones();
+    }
   }
 }
 
