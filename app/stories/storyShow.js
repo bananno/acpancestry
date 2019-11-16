@@ -310,6 +310,13 @@ class ViewStoryTopic extends ViewStory {
     h1(this.story.title);
     this.viewExcerpts();
     this.viewSources();
+    this.viewSpecialTopic();
+  }
+
+  viewSpecialTopic() {
+    if (this.story.title == 'Gravestone symbols') {
+      return ViewSpecialTopicGravestones.gravestoneSymbols();
+    }
   }
 }
 
