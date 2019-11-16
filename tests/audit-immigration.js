@@ -8,6 +8,8 @@ class ViewAuditImmigration extends ViewAudit {
   eval() {
     this.list = {
       'review': ['REVIEW: might be an immigrant', []],
+      'missing-event': ['immigrant but missing immigration event', []],
+      'missing-country': ['immigrant but country not specified', []],
       'only-outside': ['born and died outside the USA', []],
       'tagged non-immigrant': ['tagged as non-immigrant', [],
         'birth/death locations flag them as a possible immigrant but ' +
@@ -34,6 +36,16 @@ class ViewAuditImmigration extends ViewAudit {
     DATABASE.people.forEach(person => {
       const category = (() => {
         if (person.tags.immigrant) {
+          if (!person.tags.country) {
+            return 'missing-country';
+          }
+          const event = DATABASE.events.find(event => {
+            return event.title == 'immigration'
+              && Person.isInList(event.people, person);
+          });
+          if (!event) {
+            return 'missing-event';
+          }
           return 'tagged immigrant';
         }
 
