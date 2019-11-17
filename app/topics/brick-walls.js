@@ -19,6 +19,9 @@ function viewTopicBrickwallHelper(tagName) {
     } else if (people.length > 0) {
       rend('<hr style="margin-top: 10px">');
     }
-    rend($notationBlock(notation, true));
+    rend($notationBlock(notation, {
+      alwaysShowPeople: true,
+      splitParagraphs: false
+    }));
   });
 }

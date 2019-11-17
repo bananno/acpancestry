@@ -244,11 +244,17 @@ function removeDuplicatesById(list) {
   });
 }
 
-function $notationBlock(notation, alwaysShowPeople) {
+function $notationBlock(notation, options = {}) {
   const $div = $('<div class="notation-block">');
   $div.append('<p style="margin-bottom: 10px"><b>' + notation.title + '</b></p>');
-  $div.append('<p>' + notation.text + '</p>');
-  if (notation.people.length > 1 || alwaysShowPeople) {
+  if (options.splitParagraphs) {
+    notation.text.split('\n').forEach(text => {
+      $div.append('<p style="margin: 8px 0;">' + text + '</p>');
+    });
+  } else {
+    $div.append('<p>' + notation.text + '</p>');
+  }
+  if (notation.people.length > 1 || options.alwaysShowPeople) {
     $div.append($makePeopleList(notation.people, 'photo'));
   }
   return $div;

@@ -282,7 +282,7 @@ class ViewPerson extends ViewPage {
       if (i > 0) {
         rend('<hr>');
       }
-      rend($notationBlock(notation));
+      rend($notationBlock(notation, {splitParagraphs: true}));
     });
   }
 
