@@ -47,8 +47,6 @@ class Timeline {
       item.sortBy = TimelineItem.getSortValue(item);
     });
 
-    console.log(this.list)
-
     this.list.sortBy(item => item.sortBy);
   }
 
