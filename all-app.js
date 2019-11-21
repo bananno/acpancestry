@@ -468,22 +468,13 @@ class ViewHome extends ViewPage {
       title: 'military'
     });
 
-    (() => {
-      const people = DATABASE.people.filter(person => person.tags.immigrant);
-      const countries = [];
-      people.forEach(person => {
-        if (person.tags.country && !countries.includes(person.tags.country)) {
-          countries.push(person.tags.country);
-        }
-      });
-      this.viewBrowseSection({
-        path: 'topic/immigration',
-        title: 'immigration',
-        text: 'People in the Family Tree immigrated from ' +
-          countries.length + ' different countries. See a list of ' +
-          'immigrants by county and a timeline of events.'
-      });
-    })();
+    this.viewBrowseSection({
+      path: 'topic/immigration',
+      title: 'immigration',
+      text: 'People in the Family Tree immigrated to the United States from ' +
+        DATABASE.countryList.length + ' different countries. ' +
+        'See a list of immigrants by county and a timeline of events.'
+    });
 
     (() => {
       const people = DATABASE.people.filter(person => {
