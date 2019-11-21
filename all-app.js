@@ -2577,7 +2577,9 @@ class PersonTimeline extends Timeline {
         return this.person.death.date.year && item.date.year - this.person.death.date.year < 5;
       }
       // ignore historical events attached to the child.
-      if (item.tags && item.tags.historical) {
+      // ignore events that are specified to be hidden from parent's timeline.
+      if (item.tags && (item.tags.historical
+          || item.tags['hide from parent timeline'])) {
         return false;
       }
       // include other child events if they are during person's life.

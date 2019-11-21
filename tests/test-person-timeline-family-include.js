@@ -322,6 +322,15 @@ test(t => {
 
   testEvent.title = 'other event';
   testEvent.date.year = 1950;
+  testEvent.tags = { 'hide from parent timeline': true };
+  timeline = new PersonTimeline(testPerson1, true);
+  t.assertFalse('exclude "hide from parent timeline" child events even if during person\'s life',
+    timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
+  );
+  testEvent.tags = {};
+
+  testEvent.title = 'other event';
+  testEvent.date.year = 1950;
   timeline = new PersonTimeline(testPerson1, true);
   t.assertTrue('include other child events if during person\'s life',
     timeline.shouldIncludeFamilyEvent(testPerson2, 'child', testEvent),
