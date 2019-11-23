@@ -48,6 +48,17 @@ class PersonTimeline extends Timeline {
       }
     });
 
+    DATABASE.notations.filter(item => {
+      return item.title == 'excerpt'
+        && Person.isInList(item.people, this.person)
+        && item.tags['person timeline'];
+    }).forEach(item => {
+      this.insertItem({
+        notation: true,
+        ...item
+      });
+    });
+
     this.person.forEachRelationship((relationship, relatives) => {
       relatives.forEach(relative => {
         this.addFamilyEventsToList(relative, relationship.singularize());

@@ -139,11 +139,16 @@ class TimelineItem {
       return this.item.title;
     }
 
+    if (this.item.notation) {
+      return this.item.tags.title || 'event';
+    }
+
     const storyType = this.item.story.type;
 
     if (storyType == 'index') {
       return 'source';
     }
+
     if (storyType == 'newspaper') {
       return 'newspaper article';
     }
@@ -196,6 +201,11 @@ class TimelineItem {
       }
       return [];
     }
+
+    if (this.item.notation) {
+      return this.item.text.split('\n');
+    }
+
     let arr = [];
     if (this.item.story && this.item.story.summary) {
       arr = this.item.story.summary.split('\n');
@@ -250,7 +260,7 @@ class TimelineItem {
       this.renderItemPeople();
     }
 
-    if (item.source) {
+    if (item.source && !item.notation) {
       if (item.images.length) {
         $col1.append(Image.make(item.images[0], 100, 100));
       }

@@ -184,6 +184,14 @@ function getProcessedNotation(notation) {
     story.notations.push(notation);
     return story;
   });
+
+  notation.date = notation.date || {};
+  notation.date.format = formatDate(notation.date);
+  notation.date.sort = getSortDate(notation.date);
+
+  notation.location = notation.location || {};
+  notation.location.format = formatLocation(notation.location);
+
   return notation;
 }
 
