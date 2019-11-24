@@ -49,7 +49,7 @@ class PersonTimeline extends Timeline {
     });
 
     DATABASE.notations.filter(item => {
-      return item.title == 'excerpt'
+      return (item.title == 'excerpt' || item.tags.excerpt)
         && Person.isInList(item.people, this.person)
         && item.tags['person timeline'];
     }).forEach(item => {

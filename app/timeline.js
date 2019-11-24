@@ -140,7 +140,7 @@ class TimelineItem {
     }
 
     if (this.item.notation) {
-      return this.item.tags.title || 'event';
+      return this.item.title;
     }
 
     const storyType = this.item.story.type;
