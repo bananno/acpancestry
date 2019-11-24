@@ -261,11 +261,20 @@ function $notationBlock(notation, options = {}) {
 }
 
 function $quoteBlock(options) {
-  const $quote = $('<div class="quote-block">' +
+  const $quote = $('<div class="quote-block with-single">' +
     '<div class="left"></div>' +
-    '<div class="main cover-background"></div>' +
-    '<div class="right"></div>' +
+    '<div class="main"></div>' +
     '</div>');
+
+  if (options.rightQuote) {
+    $quote.removeClass('with-single');
+    $quote.addClass('with-double');
+    $quote.append('<div class="right">');
+  }
+
+  if (options.coverBackground) {
+    $quote.addClass('cover-background');
+  }
 
   const $main = $quote.find('.main');
 

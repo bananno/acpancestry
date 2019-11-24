@@ -701,6 +701,9 @@ class TimelineItem {
         return false;
       }
     }
+    if (this.isPerson && this.item.notation && this.item.people.length == 1) {
+      return false;
+    }
     return true;
   }
 
@@ -802,9 +805,28 @@ class TimelineItem {
       );
     }
 
-    this.getItemText().forEach(text => {
-      $col2.append('<p style="margin-top: 5px;">' + text + '</p>');
-    });
+    if (item.notation) {
+      const $quote = $quoteBlock({
+        text: this.getItemText(),
+        small: true,
+        css: {
+          'margin-top': '10px'
+        },
+      });
+
+      $col2.append($quote);
+
+      $col2.append(
+        '<p style="margin: 5px 0;"><i>' +
+          '- excerpt from ' +
+          linkToSource(item.source, true) + '</i>' +
+        '</p>'
+      );
+    } else {
+      this.getItemText().forEach(text => {
+        $col2.append('<p style="margin-top: 5px;">' + text + '</p>');
+      });
+    }
 
     if (!this.shouldDisplayPeopleAboveText()) {
       this.renderItemPeople();
@@ -1447,11 +1469,20 @@ function $notationBlock(notation, options = {}) {
 }
 
 function $quoteBlock(options) {
-  const $quote = $('<div class="quote-block">' +
+  const $quote = $('<div class="quote-block with-single">' +
     '<div class="left"></div>' +
-    '<div class="main cover-background"></div>' +
-    '<div class="right"></div>' +
+    '<div class="main"></div>' +
     '</div>');
+
+  if (options.rightQuote) {
+    $quote.removeClass('with-single');
+    $quote.addClass('with-double');
+    $quote.append('<div class="right">');
+  }
+
+  if (options.coverBackground) {
+    $quote.addClass('cover-background');
+  }
 
   const $main = $quote.find('.main');
 
@@ -4851,9 +4882,11 @@ class viewTopicBigFamilies extends ViewPage {
     rend($quoteBlock({
       text: quote,
       credit: $credit,
+      rightQuote: true,
       css: {
         'margin-top': '20px'
-      }
+      },
+      coverBackground: true,
     }));
   }
 

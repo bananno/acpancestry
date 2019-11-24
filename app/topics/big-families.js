@@ -53,9 +53,11 @@ class viewTopicBigFamilies extends ViewPage {
     rend($quoteBlock({
       text: quote,
       credit: $credit,
+      rightQuote: true,
       css: {
         'margin-top': '20px'
-      }
+      },
+      coverBackground: true,
     }));
   }
 

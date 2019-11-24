@@ -8,8 +8,8 @@
 
 .quote-block .left,
 .quote-block .right {
-  width: 50px;
-  height: 50px;
+  width: 30px;
+  height: 30px;
   background-image: url("/images/quotes.png");
   background-size: 100%;
   background-repeat: no-repeat;
@@ -22,8 +22,15 @@
 }
 
 .quote-block .main {
-  width: calc(100% - 100px);
   padding: 0 10px;
+}
+
+.quote-block.with-single .main {
+  width: calc(100% - 30px);
+}
+
+.quote-block.with-double .main {
+  width: calc(100% - 60px);
 }
 
 .quote-block .quotation {

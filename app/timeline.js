@@ -171,6 +171,9 @@ class TimelineItem {
         return false;
       }
     }
+    if (this.isPerson && this.item.notation && this.item.people.length == 1) {
+      return false;
+    }
     return true;
   }
 
@@ -272,9 +275,28 @@ class TimelineItem {
       );
     }
 
-    this.getItemText().forEach(text => {
-      $col2.append('<p style="margin-top: 5px;">' + text + '</p>');
-    });
+    if (item.notation) {
+      const $quote = $quoteBlock({
+        text: this.getItemText(),
+        small: true,
+        css: {
+          'margin-top': '10px'
+        },
+      });
+
+      $col2.append($quote);
+
+      $col2.append(
+        '<p style="margin: 5px 0;">' +
+          '- excerpt from ' +
+          linkToSource(item.source, true) +
+        '</p>'
+      );
+    } else {
+      this.getItemText().forEach(text => {
+        $col2.append('<p style="margin-top: 5px;">' + text + '</p>');
+      });
+    }
 
     if (!this.shouldDisplayPeopleAboveText()) {
       this.renderItemPeople();
