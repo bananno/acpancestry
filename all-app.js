@@ -670,7 +670,7 @@ class TimelineItem {
     }
 
     if (this.item.notation) {
-      return this.item.tags.title || 'event';
+      return this.item.title;
     }
 
     const storyType = this.item.story.type;
@@ -817,9 +817,9 @@ class TimelineItem {
       $col2.append($quote);
 
       $col2.append(
-        '<p style="margin: 5px 0;"><i>' +
+        '<p style="margin: 5px 0;">' +
           '- excerpt from ' +
-          linkToSource(item.source, true) + '</i>' +
+          linkToSource(item.source, true) +
         '</p>'
       );
     } else {
@@ -2521,17 +2521,17 @@ class PersonTimeline extends Timeline {
       }
     });
 
-    DATABASE.sources.forEach(item => {
-      if (Person.isInList(item.people, this.person)) {
-        this.insertItem({
-          source: true,
-          ...item
-        });
-      }
+    DATABASE.sources
+    .filter(item => this.shouldIncludeSource(item))
+    .forEach(item => {
+      this.insertItem({
+        source: true,
+        ...item
+      });
     });
 
     DATABASE.notations.filter(item => {
-      return item.title == 'excerpt'
+      return (item.title == 'excerpt' || item.tags.excerpt)
         && Person.isInList(item.people, this.person)
         && item.tags['person timeline'];
     }).forEach(item => {
@@ -2562,6 +2562,12 @@ class PersonTimeline extends Timeline {
         });
       }
     });
+  }
+
+  shouldIncludeSource(source) {
+    return Person.isInList(source.people, this.person)
+      && !source.tags['hide from person timeline']
+      && !source.story.tags['hide from person timeline'];
   }
 
   shouldIncludeFamilyEvent(relative, relationship, item) {

@@ -39,13 +39,13 @@ class PersonTimeline extends Timeline {
       }
     });
 
-    DATABASE.sources.forEach(item => {
-      if (Person.isInList(item.people, this.person)) {
-        this.insertItem({
-          source: true,
-          ...item
-        });
-      }
+    DATABASE.sources
+    .filter(item => this.shouldIncludeSource(item))
+    .forEach(item => {
+      this.insertItem({
+        source: true,
+        ...item
+      });
     });
 
     DATABASE.notations.filter(item => {
@@ -80,6 +80,12 @@ class PersonTimeline extends Timeline {
         });
       }
     });
+  }
+
+  shouldIncludeSource(source) {
+    return Person.isInList(source.people, this.person)
+      && !source.tags['hide from person timeline']
+      && !source.story.tags['hide from person timeline'];
   }
 
   shouldIncludeFamilyEvent(relative, relationship, item) {
