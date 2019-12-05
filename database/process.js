@@ -77,7 +77,7 @@ function getProcessedPerson(person) {
   person.citations = [];
 
   if (!person.profileImage) {
-    person.profileImage = 'images/profile-'
+    person.profileImage = '/images/profile-'
       + (['female', 'male'][person.gender - 1] || 'generic') + '.png';
   }
 
