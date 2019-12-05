@@ -1,9 +1,12 @@
 function localLink(target, text, newTab) {
+  if (target.slice(0, 1) == '/') {
+    target = target.slice(1);
+  }
   if (newTab) {
-    return '<a href="' + ORIGIN + '?' + target + '" target="_blank">'
+    return '<a href="' + ORIGIN + '/' + target + '" target="_blank">'
       + text + '</a>';
   }
-  return '<a href="' + ORIGIN + '?' + target + '" class="local-link">'
+  return '<a href="' + ORIGIN + '/' + target + '" class="local-link">'
     + text + '</a>';
 }
 
