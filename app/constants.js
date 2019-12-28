@@ -1,5 +1,5 @@
 
-const SITE_TITLE = 'Lundberg Ancestry';
+const SITE_TITLE = 'Anna\'s Ancestors';
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
   'August', 'September', 'October', 'November', 'December'];

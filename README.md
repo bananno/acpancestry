@@ -1,4 +1,4 @@
-# Lundberg Ancestry
+# My Ancestors
 
 This app is for sharing my genealogy research.
 
