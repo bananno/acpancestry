@@ -75,6 +75,10 @@ function $makePeopleListPhoto(people, format, options) {
     } else {
       $visiblePart.append($item);
     }
+
+    if (options.showText) {
+      $item.append(' ' + (options.showText(person) || ''));
+    }
   });
 
   return $list;
