@@ -314,11 +314,16 @@ class ViewStoryTopic extends ViewStory {
   }
 
   viewSpecialTopic() {
-    if (this.story.title == 'Gravestone symbols') {
+    let tempTitle = this.story.title.toLowerCase();
+
+    if (tempTitle == 'gravestone symbols') {
       return ViewSpecialTopicGravestones.gravestoneSymbols();
     }
-    if (this.story.title == 'Masonry') {
+    if (tempTitle == 'masonry') {
       return ViewSpecialTopicGravestones.masonGravestones();
+    }
+    if (tempTitle == 'cause of death') {
+      return ViewSpecialTopicCauseOfDeath.new(this.story);
     }
   }
 }

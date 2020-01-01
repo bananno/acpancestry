@@ -1385,7 +1385,7 @@ DATABASE.citations = [
   {"_id":"5cc4d55c42f3ba68f06e1c6a","item":"number of children","information":"1950 - 5 living; 10 total including stepson","person":"5ca7cb361c6fde14ec65ff4b","source":"5ca7e5981c6fde14ec65ff6e","__v":0},
   {"_id":"5cc63f8942f3ba68f06e1c76","item":"name","information":"Maurice Miller","person":"5bcfc4760a62a6125f8edeca","source":"5cc63f1c42f3ba68f06e1c75","__v":0},
   {"_id":"5cc63f9142f3ba68f06e1c77","item":"birth - date","information":"1902-08-11","person":"5bcfc4760a62a6125f8edeca","source":"5cc63f1c42f3ba68f06e1c75","__v":0},
-  {"_id":"5cc63f9d42f3ba68f06e1c78","item":"birth - date","information":"1979-04-10","person":"5bcfc4760a62a6125f8edeca","source":"5cc63f1c42f3ba68f06e1c75","__v":0},
+  {"_id":"5cc63f9d42f3ba68f06e1c78","item":"death - date","information":"1979-04-10","person":"5bcfc4760a62a6125f8edeca","source":"5cc63f1c42f3ba68f06e1c75","__v":0},
   {"_id":"5cf29579290c1030bd73e34b","item":"name","information":"Daisy Smith Pearson","person":"5cf29307290c1030bd73e348","source":"5cf294b1290c1030bd73e34a","__v":0},
   {"_id":"5cf29581290c1030bd73e34c","item":"birth - date","information":"1871","person":"5cf29307290c1030bd73e348","source":"5cf294b1290c1030bd73e34a","__v":0},
   {"_id":"5cf29587290c1030bd73e34d","item":"death - date","information":"1958","person":"5cf29307290c1030bd73e348","source":"5cf294b1290c1030bd73e34a","__v":0},
@@ -4891,4 +4891,6 @@ DATABASE.citations = [
   {"_id":"5de2fc5fc4d3e4be2b3a0cdd","source":"5bfb26ded1b0f00fdfabf5c1","person":"5de2fb61c4d3e4be2b3a0cda","item":"name","information":"John T. Sharpe","__v":0},
   {"_id":"5de2fc69c4d3e4be2b3a0cde","source":"5bfb26ded1b0f00fdfabf5c1","person":"5de2fb61c4d3e4be2b3a0cda","item":"occupation","information":"1895 - farmer","__v":0},
   {"_id":"5de2fc74c4d3e4be2b3a0cdf","source":"5bfb26ded1b0f00fdfabf5c1","person":"5de2fb61c4d3e4be2b3a0cda","item":"residence","information":"1895 - Tattnall County, Georgia","__v":0},
+  {"_id":"5e0773488d99abe797c21422","source":"5bd7e27e7be3cf43cc46dbd0","person":"5d96b3d96ba7a7aa2a034ccf","item":"name","information":"Caroline G. Bell","__v":0},
+  {"_id":"5e0773698d99abe797c21423","source":"5bd7e27e7be3cf43cc46dbd0","person":"5d96b3d96ba7a7aa2a034ccf","item":"death - cause","information":"presumed lost at sea","__v":0},
 ];
