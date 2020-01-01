@@ -64,8 +64,10 @@ function viewTopicMilitary() {
     rend($makePeopleList(otherVeterans, 'photo'));
   }
 
+  const showText = person => ' - ' + person.tags['cause of death note'];
+
   h2('People who died at war');
-  rend($makePeopleList(diedAtWar, 'photo'));
+  rend($makePeopleList(diedAtWar, 'photo', {showText}));
 
   h2('Timeline');
   militaryTimeline.renderTimeline();

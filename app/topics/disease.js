@@ -5,7 +5,10 @@ class ViewTopicDisease extends ViewPage {
   }
 
   collectData() {
-    this.people = Person.filter(person => person.tags['died of disease']);
+    this.people = Person.filter(person => {
+      return person.tags['died of disease']
+        || person.tags['cause of death'] == 'disease';
+    });
 
     this.timeline = new Timeline(false, false, {
       sourceFilter: this.sourceFilter.bind(this),
@@ -24,10 +27,19 @@ class ViewTopicDisease extends ViewPage {
     h1('Disease');
 
     h2('People that died of disease');
-    rend($makePeopleList(this.people, 'photo'));
+
+    rend($makePeopleList(this.people, 'photo', {
+      showText: this.printListShowText
+    }));
 
     h2('Timeline');
     this.timeline.renderTimeline();
+  }
+
+  printListShowText(person) {
+    if (person.tags['cause of death note']) {
+      return ' - ' + person.tags['cause of death note'];
+    }
   }
 
   sourceFilter(source) {
