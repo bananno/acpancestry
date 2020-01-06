@@ -41,7 +41,7 @@ class ViewStoryTopic extends ViewStory {
   render() {
     setPageTitle(this.story.title);
     h1(this.story.title);
-    this.viewSpecialTopic();
+    this.viewSpecialTopic() || this.viewOtherTopic();
   }
 
   viewSpecialTopic() {
@@ -70,15 +70,11 @@ class ViewStoryTopic extends ViewStory {
     }
 
     if (this.tempTitle == 'gravestone symbols') {
-      this.viewExcerpts();
-      this.viewSources();
-      return ViewSpecialTopicGravestones.gravestoneSymbols();
+      return ViewTopicGravestones.gravestoneSymbols();
     }
 
     if (this.tempTitle == 'masonry') {
-      this.viewExcerpts();
-      this.viewSources();
-      return ViewSpecialTopicGravestones.masonGravestones();
+      return ViewTopicMasonry.new(this.story);
     }
 
     if (this.tempTitle == 'cause of death') {
@@ -86,7 +82,9 @@ class ViewStoryTopic extends ViewStory {
       this.viewSources();
       return ViewSpecialTopicCauseOfDeath.new(this.story);
     }
+  }
 
+  viewOtherTopic() {
     this.viewExcerpts();
     this.viewSources();
   }

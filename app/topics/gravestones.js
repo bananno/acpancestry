@@ -1,4 +1,4 @@
-class ViewSpecialTopicGravestones extends ViewPage {
+class ViewTopicGravestones extends ViewStoryTopic {
   static forEachGravestoneImage(callback) {
     DATABASE.stories
     .filter(story => story.type == 'cemetery')
@@ -12,13 +12,16 @@ class ViewSpecialTopicGravestones extends ViewPage {
   }
 
   static gravestoneSymbols() {
+    super.viewExcerpts();
+    super.viewSources();
+
     pg('Click any image for more information about the grave.')
       .css('margin-top', '15px');
 
     const categories = {};
     const noCategory = [];
 
-    ViewSpecialTopicGravestones.forEachGravestoneImage(image => {
+    ViewTopicGravestones.forEachGravestoneImage(image => {
       if (image.tags['gravestone symbol']) {
         const cat = image.tags['gravestone symbol'] || 'none';
         categories[cat] = categories[cat] || [];
@@ -40,22 +43,5 @@ class ViewSpecialTopicGravestones extends ViewPage {
         rend($link);
       });
     }
-  }
-
-  static masonGravestones() {
-    h2('Gravestones');
-
-    pg('These gravestones show the Mason symbol. Click any image for more '
-      + 'information about the grave.').css('margin', '15px 0');
-
-    ViewSpecialTopicGravestones.forEachGravestoneImage(image => {
-      if (image.tags['gravestone symbol'] == 'Freemasons') {
-        const $link = Image.asLink(image, 250);
-        $link.find('img')
-          .prop('title', image.item.title)
-          .css('margin', '5px');
-        rend($link);
-      }
-    });
   }
 }

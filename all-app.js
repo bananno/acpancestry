@@ -4784,7 +4784,7 @@ class ViewStoryTopic extends ViewStory {
   render() {
     setPageTitle(this.story.title);
     h1(this.story.title);
-    this.viewSpecialTopic();
+    this.viewSpecialTopic() || this.viewOtherTopic();
   }
 
   viewSpecialTopic() {
@@ -4813,15 +4813,11 @@ class ViewStoryTopic extends ViewStory {
     }
 
     if (this.tempTitle == 'gravestone symbols') {
-      this.viewExcerpts();
-      this.viewSources();
-      return ViewSpecialTopicGravestones.gravestoneSymbols();
+      return ViewTopicGravestones.gravestoneSymbols();
     }
 
     if (this.tempTitle == 'masonry') {
-      this.viewExcerpts();
-      this.viewSources();
-      return ViewSpecialTopicGravestones.masonGravestones();
+      return ViewTopicMasonry.new(this.story);
     }
 
     if (this.tempTitle == 'cause of death') {
@@ -4829,7 +4825,9 @@ class ViewStoryTopic extends ViewStory {
       this.viewSources();
       return ViewSpecialTopicCauseOfDeath.new(this.story);
     }
+  }
 
+  viewOtherTopic() {
     this.viewExcerpts();
     this.viewSources();
   }
@@ -5157,6 +5155,54 @@ class ViewTopicDisease extends ViewPage {
   }
 }
 
+class ViewTopicGravestones extends ViewStoryTopic {
+  static forEachGravestoneImage(callback) {
+    DATABASE.stories
+    .filter(story => story.type == 'cemetery')
+    .forEach(story => {
+      story.entries.forEach(source => {
+        source.images.forEach(image => {
+          callback(image);
+        });
+      });
+    });
+  }
+
+  static gravestoneSymbols() {
+    super.viewExcerpts();
+    super.viewSources();
+
+    pg('Click any image for more information about the grave.')
+      .css('margin-top', '15px');
+
+    const categories = {};
+    const noCategory = [];
+
+    ViewTopicGravestones.forEachGravestoneImage(image => {
+      if (image.tags['gravestone symbol']) {
+        const cat = image.tags['gravestone symbol'] || 'none';
+        categories[cat] = categories[cat] || [];
+        categories[cat].push(image);
+      } else {
+        noCategory.push(image);
+      }
+    });
+
+    // categories.none = noCategory;
+
+    for (let cat in categories) {
+      h2(cat);
+      categories[cat].forEach(image => {
+        const $link = Image.asLink(image, 300);
+        $link.find('img')
+          .prop('title', image.item.title)
+          .css('margin', '5px');
+        rend($link);
+      });
+    }
+  }
+}
+
 function viewTopicImmigration() {
   const countries = [];
   const peopleByCountry = {};
@@ -5193,6 +5239,50 @@ function viewTopicImmigration() {
     sort: true,
     render: true
   });
+}
+
+class ViewTopicMasonry extends ViewStoryTopic {
+  static new(story) {
+    new ViewTopicMasonry(story).render();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  render() {
+    this.renderPeople();
+    super.viewExcerpts();
+    super.viewSources();
+    this.renderSectionGravestones();
+  }
+
+  renderPeople() {
+    h2('Known members');
+
+    pg('Members are often identified in their obituary or by a ' +
+      'symbol on their gravestone.').css('margin', '15px 0');
+
+    rend($makePeopleList(this.story.people, 'photo'));
+  }
+
+  renderSectionGravestones() {
+    h2('Gravestones');
+
+    pg('These gravestones show the Mason symbol. Click any image for more '
+      + 'information about the grave.').css('margin', '15px 0');
+
+    ViewTopicGravestones.forEachGravestoneImage(image => {
+      if (image.tags['gravestone symbol'] == 'Freemasons') {
+        const $link = Image.asLink(image, 250);
+        $link.find('img')
+          .prop('title', image.item.title)
+          .css('margin', '5px');
+        rend($link);
+      }
+    });
+  }
 }
 
 function viewTopicMilitary() {
@@ -5265,66 +5355,4 @@ function viewTopicMilitary() {
 
   h2('Timeline');
   militaryTimeline.renderTimeline();
-}
-
-class ViewSpecialTopicGravestones extends ViewPage {
-  static forEachGravestoneImage(callback) {
-    DATABASE.stories
-    .filter(story => story.type == 'cemetery')
-    .forEach(story => {
-      story.entries.forEach(source => {
-        source.images.forEach(image => {
-          callback(image);
-        });
-      });
-    });
-  }
-
-  static gravestoneSymbols() {
-    pg('Click any image for more information about the grave.')
-      .css('margin-top', '15px');
-
-    const categories = {};
-    const noCategory = [];
-
-    ViewSpecialTopicGravestones.forEachGravestoneImage(image => {
-      if (image.tags['gravestone symbol']) {
-        const cat = image.tags['gravestone symbol'] || 'none';
-        categories[cat] = categories[cat] || [];
-        categories[cat].push(image);
-      } else {
-        noCategory.push(image);
-      }
-    });
-
-    // categories.none = noCategory;
-
-    for (let cat in categories) {
-      h2(cat);
-      categories[cat].forEach(image => {
-        const $link = Image.asLink(image, 300);
-        $link.find('img')
-          .prop('title', image.item.title)
-          .css('margin', '5px');
-        rend($link);
-      });
-    }
-  }
-
-  static masonGravestones() {
-    h2('Gravestones');
-
-    pg('These gravestones show the Mason symbol. Click any image for more '
-      + 'information about the grave.').css('margin', '15px 0');
-
-    ViewSpecialTopicGravestones.forEachGravestoneImage(image => {
-      if (image.tags['gravestone symbol'] == 'Freemasons') {
-        const $link = Image.asLink(image, 250);
-        $link.find('img')
-          .prop('title', image.item.title)
-          .css('margin', '5px');
-        rend($link);
-      }
-    });
-  }
 }
