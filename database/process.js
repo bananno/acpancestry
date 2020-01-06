@@ -18,12 +18,8 @@ function processDatabase() {
   DATABASE.stories.forEach(story => {
     DATABASE.storyRef[story._id] = story;
 
-    if (story.type == 'topic') {
-      let titleUrl = story.title
-        .toLowerCase()
-        .replace(/ /g, '')
-        .replace(/'/g, '');
-      DATABASE.storyRef[titleUrl] = story;
+    if (story.tags && story.tags.customId) {
+      DATABASE.storyRef[story.tags.customId] = story;
     }
 
     story.images.forEach(image => {

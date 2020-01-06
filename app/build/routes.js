@@ -40,7 +40,7 @@ function loadContent() {
   }
 
   if (PATH.match('topic/')) {
-    return ViewTopic.byUrl() || pageNotFound();
+    return ViewStoryTopic.byUrl() || pageNotFound();
   }
 
   if (PATH.match('year/')) {

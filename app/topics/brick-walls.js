@@ -26,8 +26,6 @@ class ViewTopicBrickWalls extends ViewStoryTopic {
   }
 
   render() {
-    setPageTitle('Brick Walls');
-    h1('Brick Walls & Mysteries');
     h2('Current questions');
     this.renderSection('current');
     h2('Solved');

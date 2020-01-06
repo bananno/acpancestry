@@ -496,7 +496,7 @@ class ViewHome extends ViewPage {
     });
 
     DATABASE.stories.filter(story => story.type == 'topic').forEach(story => {
-      let storyId = story.tags.url || story._id;
+      let storyId = story.tags.customId || story._id;
       this.viewBrowseSection({
         path: 'topic/' + storyId,
         title: story.title.toLowerCase()
@@ -1078,7 +1078,7 @@ function loadContent() {
   }
 
   if (PATH.match('topic/')) {
-    return ViewTopic.byUrl() || pageNotFound();
+    return ViewStoryTopic.byUrl() || pageNotFound();
   }
 
   if (PATH.match('year/')) {
@@ -1707,6 +1707,400 @@ class ViewPhotos extends ViewPage {
         .prop('title', image.item.title)
         .css('margin', '5px');
       rend($link);
+    });
+  }
+}
+
+
+function viewPlaces() {
+  const placePath = getURLPathPlaces();
+
+  let [placeList, items] = getItemsByPlace(placePath);
+
+  placeList = editPlaceNames(placePath, placeList);
+
+  showPageTitleAndHeader(placePath);
+
+  if (items.length == 0) {
+    rend('<p style="margin-top: 10px;">There is no information available for this place.</p>');
+  } else if (placePath.length == 4) {
+    viewPlacesItemList(items, true);
+  } else if (placePath.length && placePath[placePath.length - 1].path == 'all') {
+    viewPlacesItemList(items, false);
+  } else {
+    viewPlacesIndex(placePath, placeList);
+  }
+}
+
+function getURLPathPlaces() {
+  if (PATH == 'places') {
+    return [];
+  }
+
+  let places = PATH.replace('places/', '').split('/').map(place => {
+    let placeFix = place.replace(/\%20/g, ' ').replace(/\+/g, ' ');
+    return {
+      path: place,
+      true: placeFix,
+      text: placeFix,
+    };
+  });
+
+  if (places.length == 0) {
+    return [];
+  }
+
+  if (places[0].text == 'United States' || places[0].text == 'USA') {
+    places[0].path = 'USA';
+    places[0].text = 'United States';
+    places[0].true = 'United States';
+
+    if (places.length > 1) {
+      if (USA_STATES[places[1].text]) {
+        places[1].text = USA_STATES[places[1].text];
+      }
+    }
+  }
+
+  return places;
+}
+
+function showPageTitleAndHeader(placePath) {
+  if (placePath.length == 0) {
+    setPageTitle('Places');
+    rend('<h1>Places</h1>');
+    return;
+  }
+
+  let mostSpecificPlace = placePath[placePath.length - 1].text;
+  let showAll = false;
+
+  if (mostSpecificPlace == 'all') {
+    mostSpecificPlace = placePath[placePath.length - 2].text;
+    showAll = true;
+  }
+
+  setPageTitle(mostSpecificPlace);
+
+  let tempPath = 'places';
+  let links = [localLink('places', 'Places')];
+
+  for (let i = 0; i < placePath.length - 1; i++) {
+    tempPath += '/' + placePath[i].path;
+    links.push(localLink(tempPath, placePath[i].text));
+  }
+
+  rend('<p class="header-trail">' + links.join(' &#8594; ') + '</p>');
+
+  rend('<h1>' + mostSpecificPlace + (showAll ? ' - all' : '') + '</h1>');
+}
+
+
+function viewPlacesItemList(itemList, hideLocation) {
+
+  // view list of stories/sources in given location - REPAIR LATER
+  return;
+
+  [['Cemeteries', 'grave', 'grave'],
+  ['Newspapers', 'newspaper', 'article']].forEach(([sectionTitle, sourceType, entryName]) => {
+    const groupList = createListOfNewspapersOrCemeteries(sourceType, itemList)[1];
+    let needHeader = true;
+
+    for (let groupName in groupList) {
+      if (needHeader) {
+        rend('<h2>' + sectionTitle + '</h2>');
+        needHeader = false;
+      }
+
+      const rootSource = groupList[groupName][0];
+      const numItems = groupList[groupName].length;
+
+      rend(sourceListitemCemeteryOrNewspaper(rootSource, entryName, numItems, hideLocation));
+    }
+  });
+
+  const otherItems = itemList.filter(item => item.type != 'grave' && item.type != 'newspaper');
+
+  if (otherItems.length) {
+    rend('<h2>Other</h2>');
+  }
+
+  otherItems.forEach(item => {
+    if (item.group) {
+      viewPlacesItemSource(item);
+    } else {
+      viewPlacesItemEvent(item);
+    }
+  });
+}
+
+function viewPlacesItemSource(source) {
+  rend(
+    '<p style="margin-top: 10px;">' +
+    linkToSource(source, source.type + ' - ' + source.group + ' - ' + source.title) +
+    '</p>'
+  );
+}
+
+function viewPlacesItemEvent(event) {
+  rend(
+    '<p style="margin-top: 10px;">' +
+      event.title + ' - ' +
+      event.people.map(person => linkToPerson(person)).join(', ') +
+    '</p>'
+  );
+}
+
+
+const placeLevels = ['country', 'region1', 'region2', 'city'];
+
+function getItemsByPlace(placePath) {
+  const placeList = [];
+  const foundPlaceAlready = [];
+  const mostSpecificLevel = placeLevels[placePath.length];
+
+  const listOfItemsOnly = mostSpecificLevel == 'city'
+    || (placePath.length && placePath[placePath.length - 1].path == 'all');
+
+  const items = [...DATABASE.events, ...DATABASE.sources].filter((item, t) => {
+    if (!placeMatch(item.location, placePath)) {
+      return false;
+    }
+
+    if (listOfItemsOnly) {
+      return true;
+    }
+
+    const itemPlace = item.location[mostSpecificLevel] || 'other';
+
+    if (!foundPlaceAlready[itemPlace]) {
+      placeList.push({
+        path: itemPlace,
+        text: itemPlace,
+      });
+      foundPlaceAlready[itemPlace] = true;
+    }
+
+    return true;
+  });
+
+  return [placeList, items];
+}
+
+function placeMatch(itemLocation, placePath) {
+  for (let i = 0; i < placePath.length; i++) {
+    let levelName = placeLevels[i];
+    let itemPlace = itemLocation[levelName];
+    let placeName = placePath[i].true;
+
+    if (placeName == 'other') {
+      if (itemPlace == null || itemPlace == '') {
+        continue;
+      }
+    }
+
+    if (placeName == 'all') {
+      return true;
+    }
+
+    if (itemPlace == placeName) {
+      continue;
+    }
+
+    return false;
+  }
+
+  return true;
+}
+
+function editPlaceNames(placePath, placeList) {
+  let otherText = 'other';
+
+  if (placePath.length == 0) {
+    otherText = 'location not specified';
+    placeList = placeList.map(place => {
+      if (place.path == 'United States') {
+        place.path = 'USA';
+      }
+      return place;
+    });
+  } else if (placePath.length == 1 && placePath[0].path == 'USA') {
+    otherText = 'state not specified';
+    placeList = placeList.map(place => {
+      place.text = USA_STATES[place.text] || 'other';
+      return place;
+    });
+  } else if (placePath.length == 2 && placePath[0].path == 'USA') {
+    otherText = 'county not specified';
+  }
+
+  placeList.sort((a, b) => {
+    let [str1, str2] = [b.text.toLowerCase(), a.text.toLowerCase()];
+    const swap = (str1 > str2 || str1 == 'other') && str2 != 'other';
+    return swap ? -1 : 1;
+  });
+
+  if (placeList.length && placeList[placeList.length - 1].text == 'other') {
+    placeList[placeList.length - 1].text = otherText;
+  }
+
+  return placeList;
+}
+
+class Place {
+  static getLinkPath(place) {
+    let parts = ['places'];
+
+    if (place.country == 'United States') {
+      parts.push('USA');
+    } else {
+      parts.push(place.country);
+    }
+
+    parts = [...parts, place.region1, place.region2, place.city];
+
+    return parts.filter(s => s).join('/');
+  }
+
+  static $iconLink(place, options = {}) {
+    let path = Place.getLinkPath(place);
+
+    let text = options.text || 'place...';
+
+    const $icon = $makeIconLink(path, text, 'images/map-icon.svg');
+
+    if (options.render) {
+      rend($icon);
+    }
+
+    return $icon;
+  }
+}
+
+
+function viewPlacesIndex(placePath, placeList) {
+  let path = ['places', ...(placePath.map(place => place.path))].join('/') + '/';
+
+  if (placeListShouldAllowViewAll(placePath)) {
+    rend(
+      '<p style="padding-top: 5px;">' +
+        localLink(path + 'all', 'view all') +
+      '</p>'
+    );
+  }
+
+  placeList.forEach(place => {
+    rend(
+      '<p style="padding-top: 5px;">' +
+        localLink(path + place.path, place.text) +
+      '</p>'
+    );
+  });
+}
+
+function placeListShouldAllowViewAll(placePath) {
+  if (placePath.length == 0) {
+    return false;
+  }
+  if (placePath.length == 1 && placePath[0].path == 'USA') {
+    return false;
+  }
+  return true;
+}
+
+class ViewPlace extends ViewPage {
+  static byUrl() {
+    let [base, country, region1, region2, city, extra] = PATH.split('/');
+
+    if (base != 'places' || extra) {
+      return false;
+    }
+
+    if (country == 'USA') {
+      country = 'United States';
+      if (region2) {
+        region2 = region2.replace('%20', ' ');
+      }
+    }
+
+    const place = { country, region1, region2, city };
+    const story = ViewPlace.findStory(place);
+
+    new ViewPlace(place, story).render();
+
+    return true;
+  }
+
+  static findStory(place) {
+    return DATABASE.stories.filter(story => {
+      return story.type == 'place' && story.location
+        && !['country', 'region1', 'region2', 'city'].some(part => {
+          return story.location[part] != place[part];
+        });
+    })[0];
+  }
+
+  static new(place, story) {
+    return new ViewPlace(place, story);
+  }
+
+  constructor(place = {}, story) {
+    super(story);
+    this.story = story;
+    this.place = place;
+    for (let key in place) {
+      this[key] = place[key];
+    }
+    this.placePath = [this.country, this.region1, this.region2,
+      this.city].filter(s => s);
+
+    this.stories = DATABASE.stories.filter(story => {
+      return !['country', 'region1', 'region2', 'city'].some(part => {
+        return this[part] != story.location[part];
+      });
+    });
+  }
+
+  render() {
+    setPageTitle('Places');
+    this.headerTrail();
+    this.viewTitle();
+    this.viewStories('Landmarks', 'landmark');
+    this.viewStories('Cemeteries', 'cemetery');
+    this.viewStories('Newspapers', 'newspaper');
+  }
+
+  headerTrail() {
+    let tempPath = 'places';
+    let links = [['places', 'Places']];
+
+    this.placePath.forEach(part => {
+      tempPath += '/' + part;
+      links.push([tempPath, part]);
+    });
+
+    headerTrail(...links.slice(0, links.length - 1));
+  }
+
+  viewTitle() {
+    if (this.story) {
+      h1(this.story.title);
+    } else {
+      h1(this.placePath.reverse().join(', '));
+    }
+  }
+
+  viewStories(name, type) {
+    const stories = this.stories.filter(story => story.type == type);
+
+    if (stories.length == 0) {
+      return;
+    }
+
+    h2(name);
+
+    stories.forEach(story => {
+      pg(linkToStory(story));
     });
   }
 }
@@ -2722,400 +3116,6 @@ function personTree(person, safety, parent) {
       '</tr>' +
     '</table>'
   );
-}
-
-
-function viewPlaces() {
-  const placePath = getURLPathPlaces();
-
-  let [placeList, items] = getItemsByPlace(placePath);
-
-  placeList = editPlaceNames(placePath, placeList);
-
-  showPageTitleAndHeader(placePath);
-
-  if (items.length == 0) {
-    rend('<p style="margin-top: 10px;">There is no information available for this place.</p>');
-  } else if (placePath.length == 4) {
-    viewPlacesItemList(items, true);
-  } else if (placePath.length && placePath[placePath.length - 1].path == 'all') {
-    viewPlacesItemList(items, false);
-  } else {
-    viewPlacesIndex(placePath, placeList);
-  }
-}
-
-function getURLPathPlaces() {
-  if (PATH == 'places') {
-    return [];
-  }
-
-  let places = PATH.replace('places/', '').split('/').map(place => {
-    let placeFix = place.replace(/\%20/g, ' ').replace(/\+/g, ' ');
-    return {
-      path: place,
-      true: placeFix,
-      text: placeFix,
-    };
-  });
-
-  if (places.length == 0) {
-    return [];
-  }
-
-  if (places[0].text == 'United States' || places[0].text == 'USA') {
-    places[0].path = 'USA';
-    places[0].text = 'United States';
-    places[0].true = 'United States';
-
-    if (places.length > 1) {
-      if (USA_STATES[places[1].text]) {
-        places[1].text = USA_STATES[places[1].text];
-      }
-    }
-  }
-
-  return places;
-}
-
-function showPageTitleAndHeader(placePath) {
-  if (placePath.length == 0) {
-    setPageTitle('Places');
-    rend('<h1>Places</h1>');
-    return;
-  }
-
-  let mostSpecificPlace = placePath[placePath.length - 1].text;
-  let showAll = false;
-
-  if (mostSpecificPlace == 'all') {
-    mostSpecificPlace = placePath[placePath.length - 2].text;
-    showAll = true;
-  }
-
-  setPageTitle(mostSpecificPlace);
-
-  let tempPath = 'places';
-  let links = [localLink('places', 'Places')];
-
-  for (let i = 0; i < placePath.length - 1; i++) {
-    tempPath += '/' + placePath[i].path;
-    links.push(localLink(tempPath, placePath[i].text));
-  }
-
-  rend('<p class="header-trail">' + links.join(' &#8594; ') + '</p>');
-
-  rend('<h1>' + mostSpecificPlace + (showAll ? ' - all' : '') + '</h1>');
-}
-
-
-function viewPlacesItemList(itemList, hideLocation) {
-
-  // view list of stories/sources in given location - REPAIR LATER
-  return;
-
-  [['Cemeteries', 'grave', 'grave'],
-  ['Newspapers', 'newspaper', 'article']].forEach(([sectionTitle, sourceType, entryName]) => {
-    const groupList = createListOfNewspapersOrCemeteries(sourceType, itemList)[1];
-    let needHeader = true;
-
-    for (let groupName in groupList) {
-      if (needHeader) {
-        rend('<h2>' + sectionTitle + '</h2>');
-        needHeader = false;
-      }
-
-      const rootSource = groupList[groupName][0];
-      const numItems = groupList[groupName].length;
-
-      rend(sourceListitemCemeteryOrNewspaper(rootSource, entryName, numItems, hideLocation));
-    }
-  });
-
-  const otherItems = itemList.filter(item => item.type != 'grave' && item.type != 'newspaper');
-
-  if (otherItems.length) {
-    rend('<h2>Other</h2>');
-  }
-
-  otherItems.forEach(item => {
-    if (item.group) {
-      viewPlacesItemSource(item);
-    } else {
-      viewPlacesItemEvent(item);
-    }
-  });
-}
-
-function viewPlacesItemSource(source) {
-  rend(
-    '<p style="margin-top: 10px;">' +
-    linkToSource(source, source.type + ' - ' + source.group + ' - ' + source.title) +
-    '</p>'
-  );
-}
-
-function viewPlacesItemEvent(event) {
-  rend(
-    '<p style="margin-top: 10px;">' +
-      event.title + ' - ' +
-      event.people.map(person => linkToPerson(person)).join(', ') +
-    '</p>'
-  );
-}
-
-
-const placeLevels = ['country', 'region1', 'region2', 'city'];
-
-function getItemsByPlace(placePath) {
-  const placeList = [];
-  const foundPlaceAlready = [];
-  const mostSpecificLevel = placeLevels[placePath.length];
-
-  const listOfItemsOnly = mostSpecificLevel == 'city'
-    || (placePath.length && placePath[placePath.length - 1].path == 'all');
-
-  const items = [...DATABASE.events, ...DATABASE.sources].filter((item, t) => {
-    if (!placeMatch(item.location, placePath)) {
-      return false;
-    }
-
-    if (listOfItemsOnly) {
-      return true;
-    }
-
-    const itemPlace = item.location[mostSpecificLevel] || 'other';
-
-    if (!foundPlaceAlready[itemPlace]) {
-      placeList.push({
-        path: itemPlace,
-        text: itemPlace,
-      });
-      foundPlaceAlready[itemPlace] = true;
-    }
-
-    return true;
-  });
-
-  return [placeList, items];
-}
-
-function placeMatch(itemLocation, placePath) {
-  for (let i = 0; i < placePath.length; i++) {
-    let levelName = placeLevels[i];
-    let itemPlace = itemLocation[levelName];
-    let placeName = placePath[i].true;
-
-    if (placeName == 'other') {
-      if (itemPlace == null || itemPlace == '') {
-        continue;
-      }
-    }
-
-    if (placeName == 'all') {
-      return true;
-    }
-
-    if (itemPlace == placeName) {
-      continue;
-    }
-
-    return false;
-  }
-
-  return true;
-}
-
-function editPlaceNames(placePath, placeList) {
-  let otherText = 'other';
-
-  if (placePath.length == 0) {
-    otherText = 'location not specified';
-    placeList = placeList.map(place => {
-      if (place.path == 'United States') {
-        place.path = 'USA';
-      }
-      return place;
-    });
-  } else if (placePath.length == 1 && placePath[0].path == 'USA') {
-    otherText = 'state not specified';
-    placeList = placeList.map(place => {
-      place.text = USA_STATES[place.text] || 'other';
-      return place;
-    });
-  } else if (placePath.length == 2 && placePath[0].path == 'USA') {
-    otherText = 'county not specified';
-  }
-
-  placeList.sort((a, b) => {
-    let [str1, str2] = [b.text.toLowerCase(), a.text.toLowerCase()];
-    const swap = (str1 > str2 || str1 == 'other') && str2 != 'other';
-    return swap ? -1 : 1;
-  });
-
-  if (placeList.length && placeList[placeList.length - 1].text == 'other') {
-    placeList[placeList.length - 1].text = otherText;
-  }
-
-  return placeList;
-}
-
-class Place {
-  static getLinkPath(place) {
-    let parts = ['places'];
-
-    if (place.country == 'United States') {
-      parts.push('USA');
-    } else {
-      parts.push(place.country);
-    }
-
-    parts = [...parts, place.region1, place.region2, place.city];
-
-    return parts.filter(s => s).join('/');
-  }
-
-  static $iconLink(place, options = {}) {
-    let path = Place.getLinkPath(place);
-
-    let text = options.text || 'place...';
-
-    const $icon = $makeIconLink(path, text, 'images/map-icon.svg');
-
-    if (options.render) {
-      rend($icon);
-    }
-
-    return $icon;
-  }
-}
-
-
-function viewPlacesIndex(placePath, placeList) {
-  let path = ['places', ...(placePath.map(place => place.path))].join('/') + '/';
-
-  if (placeListShouldAllowViewAll(placePath)) {
-    rend(
-      '<p style="padding-top: 5px;">' +
-        localLink(path + 'all', 'view all') +
-      '</p>'
-    );
-  }
-
-  placeList.forEach(place => {
-    rend(
-      '<p style="padding-top: 5px;">' +
-        localLink(path + place.path, place.text) +
-      '</p>'
-    );
-  });
-}
-
-function placeListShouldAllowViewAll(placePath) {
-  if (placePath.length == 0) {
-    return false;
-  }
-  if (placePath.length == 1 && placePath[0].path == 'USA') {
-    return false;
-  }
-  return true;
-}
-
-class ViewPlace extends ViewPage {
-  static byUrl() {
-    let [base, country, region1, region2, city, extra] = PATH.split('/');
-
-    if (base != 'places' || extra) {
-      return false;
-    }
-
-    if (country == 'USA') {
-      country = 'United States';
-      if (region2) {
-        region2 = region2.replace('%20', ' ');
-      }
-    }
-
-    const place = { country, region1, region2, city };
-    const story = ViewPlace.findStory(place);
-
-    new ViewPlace(place, story).render();
-
-    return true;
-  }
-
-  static findStory(place) {
-    return DATABASE.stories.filter(story => {
-      return story.type == 'place' && story.location
-        && !['country', 'region1', 'region2', 'city'].some(part => {
-          return story.location[part] != place[part];
-        });
-    })[0];
-  }
-
-  static new(place, story) {
-    return new ViewPlace(place, story);
-  }
-
-  constructor(place = {}, story) {
-    super(story);
-    this.story = story;
-    this.place = place;
-    for (let key in place) {
-      this[key] = place[key];
-    }
-    this.placePath = [this.country, this.region1, this.region2,
-      this.city].filter(s => s);
-
-    this.stories = DATABASE.stories.filter(story => {
-      return !['country', 'region1', 'region2', 'city'].some(part => {
-        return this[part] != story.location[part];
-      });
-    });
-  }
-
-  render() {
-    setPageTitle('Places');
-    this.headerTrail();
-    this.viewTitle();
-    this.viewStories('Landmarks', 'landmark');
-    this.viewStories('Cemeteries', 'cemetery');
-    this.viewStories('Newspapers', 'newspaper');
-  }
-
-  headerTrail() {
-    let tempPath = 'places';
-    let links = [['places', 'Places']];
-
-    this.placePath.forEach(part => {
-      tempPath += '/' + part;
-      links.push([tempPath, part]);
-    });
-
-    headerTrail(...links.slice(0, links.length - 1));
-  }
-
-  viewTitle() {
-    if (this.story) {
-      h1(this.story.title);
-    } else {
-      h1(this.placePath.reverse().join(', '));
-    }
-  }
-
-  viewStories(name, type) {
-    const stories = this.stories.filter(story => story.type == type);
-
-    if (stories.length == 0) {
-      return;
-    }
-
-    h2(name);
-
-    stories.forEach(story => {
-      pg(linkToStory(story));
-    });
-  }
 }
 
 class SearchResults extends ViewPage {
@@ -4777,40 +4777,34 @@ class ViewStoryEvent extends ViewStory {
   }
 }
 
-class ViewTopic extends ViewPage {
+class ViewStoryTopic extends ViewStory {
   static byUrl() {
-    const topic = PATH.replace('topic/', '');
+    const [isTopic, storyId, leftovers] = PATH.split('/');
 
-    if (topic == 'military') {
+    if (isTopic != 'topic' || !storyId || leftovers) {
+      return false;
+    }
+
+    if (storyId == 'military') {
       viewTopicMilitary();
       return true;
     }
 
-    if (topic == 'immigration') {
+    if (storyId == 'immigration') {
       viewTopicImmigration();
       return true;
     }
 
-    if (topic == 'disease') {
+    if (storyId == 'disease') {
       new ViewTopicDisease().render();
       return true;
     }
 
-    if (topic == 'brickwalls') {
-      return ViewTopicBrickWalls.new();
-    }
-
-    if (topic == 'big-families') {
+    if (storyId == 'big-families') {
       viewTopicBigFamilies.new();
       return true;
     }
 
-    return ViewStoryTopic.byId(topic);
-  }
-}
-
-class ViewStoryTopic extends ViewStory {
-  static byId(storyId) {
     const story = DATABASE.storyRef[storyId];
 
     if (!story) {
@@ -4827,12 +4821,13 @@ class ViewStoryTopic extends ViewStory {
   }
 
   render() {
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
     if (this.tempTitle.match('brick walls')) {
       return ViewTopicBrickWalls.new();
     }
 
-    setPageTitle(this.story.title);
-    h1(this.story.title);
     this.viewExcerpts();
     this.viewSources();
     this.viewSpecialTopic();
@@ -4985,8 +4980,6 @@ class ViewTopicBrickWalls extends ViewStoryTopic {
   }
 
   render() {
-    setPageTitle('Brick Walls');
-    h1('Brick Walls & Mysteries');
     h2('Current questions');
     this.renderSection('current');
     h2('Solved');

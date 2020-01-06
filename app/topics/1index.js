@@ -1,37 +1,31 @@
-class ViewTopic extends ViewPage {
+class ViewStoryTopic extends ViewStory {
   static byUrl() {
-    const topic = PATH.replace('topic/', '');
+    const [isTopic, storyId, leftovers] = PATH.split('/');
 
-    if (topic == 'military') {
+    if (isTopic != 'topic' || !storyId || leftovers) {
+      return false;
+    }
+
+    if (storyId == 'military') {
       viewTopicMilitary();
       return true;
     }
 
-    if (topic == 'immigration') {
+    if (storyId == 'immigration') {
       viewTopicImmigration();
       return true;
     }
 
-    if (topic == 'disease') {
+    if (storyId == 'disease') {
       new ViewTopicDisease().render();
       return true;
     }
 
-    if (topic == 'brickwalls') {
-      return ViewTopicBrickWalls.new();
-    }
-
-    if (topic == 'big-families') {
+    if (storyId == 'big-families') {
       viewTopicBigFamilies.new();
       return true;
     }
 
-    return ViewStoryTopic.byId(topic);
-  }
-}
-
-class ViewStoryTopic extends ViewStory {
-  static byId(storyId) {
     const story = DATABASE.storyRef[storyId];
 
     if (!story) {
@@ -48,12 +42,13 @@ class ViewStoryTopic extends ViewStory {
   }
 
   render() {
+    setPageTitle(this.story.title);
+    h1(this.story.title);
+
     if (this.tempTitle.match('brick walls')) {
       return ViewTopicBrickWalls.new();
     }
 
-    setPageTitle(this.story.title);
-    h1(this.story.title);
     this.viewExcerpts();
     this.viewSources();
     this.viewSpecialTopic();

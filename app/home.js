@@ -115,7 +115,7 @@ class ViewHome extends ViewPage {
     });
 
     DATABASE.stories.filter(story => story.type == 'topic').forEach(story => {
-      let storyId = story.tags.url || story._id;
+      let storyId = story.tags.customId || story._id;
       this.viewBrowseSection({
         path: 'topic/' + storyId,
         title: story.title.toLowerCase()
