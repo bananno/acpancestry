@@ -459,11 +459,6 @@ class ViewHome extends ViewPage {
     });
 
     this.viewBrowseSection({
-      path: 'topic/brickwalls',
-      title: 'brick walls and mysteries'
-    });
-
-    this.viewBrowseSection({
       path: 'topic/military',
       title: 'military'
     });
@@ -501,8 +496,9 @@ class ViewHome extends ViewPage {
     });
 
     DATABASE.stories.filter(story => story.type == 'topic').forEach(story => {
+      let storyId = story.tags.url || story._id;
       this.viewBrowseSection({
-        path: 'topic/' + story._id,
+        path: 'topic/' + storyId,
         title: story.title.toLowerCase()
       });
     });
@@ -4801,8 +4797,7 @@ class ViewTopic extends ViewPage {
     }
 
     if (topic == 'brickwalls') {
-      viewTopicBrickwalls();
-      return true;
+      return ViewTopicBrickWalls.new();
     }
 
     if (topic == 'big-families') {
@@ -4828,9 +4823,14 @@ class ViewStoryTopic extends ViewStory {
 
   constructor(story) {
     super(story);
+    this.tempTitle = this.story.title.toLowerCase();
   }
 
   render() {
+    if (this.tempTitle.match('brick walls')) {
+      return ViewTopicBrickWalls.new();
+    }
+
     setPageTitle(this.story.title);
     h1(this.story.title);
     this.viewExcerpts();
@@ -4839,15 +4839,13 @@ class ViewStoryTopic extends ViewStory {
   }
 
   viewSpecialTopic() {
-    let tempTitle = this.story.title.toLowerCase();
-
-    if (tempTitle == 'gravestone symbols') {
+    if (this.tempTitle == 'gravestone symbols') {
       return ViewSpecialTopicGravestones.gravestoneSymbols();
     }
-    if (tempTitle == 'masonry') {
+    if (this.tempTitle == 'masonry') {
       return ViewSpecialTopicGravestones.masonGravestones();
     }
-    if (tempTitle == 'cause of death') {
+    if (this.tempTitle == 'cause of death') {
       return ViewSpecialTopicCauseOfDeath.new(this.story);
     }
   }
@@ -4959,32 +4957,57 @@ class viewTopicBigFamilies extends ViewPage {
   }
 }
 
-function viewTopicBrickwalls() {
-  setPageTitle('Brick Walls');
-  h1('Brick Walls & Mysteries');
-  h2('Current questions');
-  viewTopicBrickwallHelper('brick wall');
-  h2('Solved');
-  viewTopicBrickwallHelper('broken brick wall');
-}
+class ViewTopicBrickWalls extends ViewStoryTopic {
+  static new() {
+    const story = DATABASE.stories.find(story => story.title.match('Brick'));
+    new ViewTopicBrickWalls(story).render();
+    return true;
+  }
 
-function viewTopicBrickwallHelper(tagName) {
-  const people = DATABASE.people.filter(person => person.tags[tagName]);
-  const notations = DATABASE.notations.filter(note => note.tags[tagName]);
+  constructor(story) {
+    super(story);
 
-  rend($makePeopleList(people, 'photo'));
+    this.current = {};
+    this.solved = {};
 
-  notations.forEach((notation, i) => {
-    if (i > 0) {
-      rend('<hr>');
-    } else if (people.length > 0) {
-      rend('<hr style="margin-top: 10px">');
-    }
-    rend($notationBlock(notation, {
-      alwaysShowPeople: true,
-      splitParagraphs: false
-    }));
-  });
+    ['people', 'notations'].forEach(itemType => {
+      this.current[itemType] = [];
+      this.solved[itemType] = [];
+
+      this.story[itemType].forEach(item => {
+        if (item.tags['broken brick wall']) {
+          this.solved[itemType].push(item);
+        } else {
+          this.current[itemType].push(item);
+        }
+      });
+    });
+  }
+
+  render() {
+    setPageTitle('Brick Walls');
+    h1('Brick Walls & Mysteries');
+    h2('Current questions');
+    this.renderSection('current');
+    h2('Solved');
+    this.renderSection('solved');
+  }
+
+  renderSection(section) {
+    rend($makePeopleList(this[section].people, 'photo'));
+
+    this[section].notations.forEach((notation, i) => {
+      if (i > 0) {
+        rend('<hr>');
+      } else if (this[section].people.length > 0) {
+        rend('<hr style="margin-top: 10px">');
+      }
+      rend($notationBlock(notation, {
+        alwaysShowPeople: true,
+        splitParagraphs: false
+      }));
+    });
+  }
 }
 
 class ViewSpecialTopicCauseOfDeath extends ViewPage {

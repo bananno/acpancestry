@@ -78,11 +78,6 @@ class ViewHome extends ViewPage {
     });
 
     this.viewBrowseSection({
-      path: 'topic/brickwalls',
-      title: 'brick walls and mysteries'
-    });
-
-    this.viewBrowseSection({
       path: 'topic/military',
       title: 'military'
     });
@@ -120,8 +115,9 @@ class ViewHome extends ViewPage {
     });
 
     DATABASE.stories.filter(story => story.type == 'topic').forEach(story => {
+      let storyId = story.tags.url || story._id;
       this.viewBrowseSection({
-        path: 'topic/' + story._id,
+        path: 'topic/' + storyId,
         title: story.title.toLowerCase()
       });
     });

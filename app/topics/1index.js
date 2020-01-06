@@ -18,8 +18,7 @@ class ViewTopic extends ViewPage {
     }
 
     if (topic == 'brickwalls') {
-      viewTopicBrickwalls();
-      return true;
+      return ViewTopicBrickWalls.new();
     }
 
     if (topic == 'big-families') {
@@ -45,9 +44,14 @@ class ViewStoryTopic extends ViewStory {
 
   constructor(story) {
     super(story);
+    this.tempTitle = this.story.title.toLowerCase();
   }
 
   render() {
+    if (this.tempTitle.match('brick walls')) {
+      return ViewTopicBrickWalls.new();
+    }
+
     setPageTitle(this.story.title);
     h1(this.story.title);
     this.viewExcerpts();
@@ -56,15 +60,13 @@ class ViewStoryTopic extends ViewStory {
   }
 
   viewSpecialTopic() {
-    let tempTitle = this.story.title.toLowerCase();
-
-    if (tempTitle == 'gravestone symbols') {
+    if (this.tempTitle == 'gravestone symbols') {
       return ViewSpecialTopicGravestones.gravestoneSymbols();
     }
-    if (tempTitle == 'masonry') {
+    if (this.tempTitle == 'masonry') {
       return ViewSpecialTopicGravestones.masonGravestones();
     }
-    if (tempTitle == 'cause of death') {
+    if (this.tempTitle == 'cause of death') {
       return ViewSpecialTopicCauseOfDeath.new(this.story);
     }
   }
