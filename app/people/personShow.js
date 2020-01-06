@@ -215,6 +215,14 @@ class ViewPerson extends ViewPage {
 
     this.person.forEachRelationship((relationship, relatives) => {
       if (relatives.length == 0) {
+        if (relationship == 'children'
+            && this.person.tags['number of children']) {
+          const $box = $('<div class="person-family">');
+          $box.append(`<h3>${relationship}:</h3>`);
+          $box.append(this.person.tags['number of children'] +
+            ' (but none in database)');
+          rend($box);
+        }
         return;
       }
       const $box = $('<div class="person-family">');
