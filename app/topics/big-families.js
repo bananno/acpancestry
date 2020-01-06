@@ -24,8 +24,6 @@ class viewTopicBigFamilies extends ViewPage {
   }
 
   render() {
-    setPageTitle('Big Families');
-    h1('Big Families');
     rend('<div style="height: 30px"> </div>');
     this.showLetter();
     rend('<hr style="margin: 30px 0">');

@@ -1,4 +1,23 @@
 class ViewTopicDisease extends ViewPage {
+  static homePageSummary() {
+    const people = DATABASE.people.filter(person => {
+      return person.tags['cause of death'] == 'disease';
+    });
+
+    const diseases = [];
+
+    people.forEach(person => {
+      let note = person.tags['cause of death note'];
+      if (note && !diseases.includes(note)) {
+        diseases.push(note);
+      }
+    });
+
+    return ('At least ' + people.length + ' people in the Family Tree ' +
+      ' have died of ' + diseases.length + ' different diseases. See a ' +
+      'list of people, historical events, and newspaper articles.');
+  }
+
   constructor() {
     super();
     this.collectData();
@@ -23,9 +42,6 @@ class ViewTopicDisease extends ViewPage {
   }
 
   render() {
-    setPageTitle('Disease');
-    h1('Disease');
-
     h2('People that died of disease');
 
     rend($makePeopleList(this.people, 'photo', {

@@ -44,9 +44,6 @@ function viewTopicMilitary() {
 
   militaryTimeline.sortList();
 
-  setPageTitle('Military');
-  h1('Military');
-
   h2('American Revolution veterans');
   rend($makePeopleList(americanRevolution, 'photo'));
 

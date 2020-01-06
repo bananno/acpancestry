@@ -16,9 +16,6 @@ function viewTopicImmigration() {
 
   countries.trueSort((a, b) => a < b && a != 'Other');
 
-  setPageTitle('Immigration');
-  h1('Immigration');
-
   if (ENV == 'dev') {
     pg(localLink('audit/immigration', 'immigration audit page'))
       .css('margin', '20px 10px');

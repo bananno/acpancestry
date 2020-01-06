@@ -77,48 +77,12 @@ class ViewHome extends ViewPage {
       title: 'artifacts and family heirlooms'
     });
 
-    this.viewBrowseSection({
-      path: 'topic/military',
-      title: 'military'
-    });
-
-    this.viewBrowseSection({
-      path: 'topic/immigration',
-      title: 'immigration',
-      text: 'People in the Family Tree immigrated to the United States from ' +
-        DATABASE.countryList.length + ' different countries. ' +
-        'See a list of immigrants by county and a timeline of events.'
-    });
-
-    (() => {
-      const people = DATABASE.people.filter(person => {
-        return person.tags['died of disease'];
-      });
-      const diseases = [];
-      people.forEach(person => {
-        if (person.tags.disease && !diseases.includes(person.tags.disease)) {
-          diseases.push(person.tags.disease);
-        }
-      });
-      this.viewBrowseSection({
-        path: 'topic/disease',
-        title: 'disease',
-        text: 'At least ' + people.length + ' people in the Family Tree ' +
-          ' have died of ' + diseases.length + ' different diseases. See a ' +
-          'list of people, historical events, and newspaper articles.'
-      });
-    })();
-
-    this.viewBrowseSection({
-      path: 'topic/big-families',
-      title: 'big families'
-    });
-
     DATABASE.stories.filter(story => story.type == 'topic').forEach(story => {
       let storyId = story.tags.customId || story._id;
       this.viewBrowseSection({
         path: 'topic/' + storyId,
-        title: story.title.toLowerCase()
+        title: story.title.toLowerCase(),
+        text: ViewStoryTopic.homePageSummary(story)
       });
     });
 
