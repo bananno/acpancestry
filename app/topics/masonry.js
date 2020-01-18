@@ -9,19 +9,18 @@ class ViewTopicMasonry extends ViewStoryTopic {
   }
 
   render() {
-    this.renderPeople();
-    super.viewExcerpts();
-    super.viewSources();
+    this.renderSectionPeople();
     this.renderSectionGravestones();
+    super.viewSources();
+    super.viewExcerpts();
   }
 
-  renderPeople() {
-    h2('Known members');
-
-    pg('Members are often identified in their obituary or by a ' +
-      'symbol on their gravestone.').css('margin', '15px 0');
-
-    rend($makePeopleList(this.story.people, 'photo'));
+  renderSectionPeople() {
+    super.renderSectionPeople({
+      title: 'Known members',
+      subtext: 'Members are often identified in their obituary or by a ' +
+        'symbol on their gravestone.'
+    });
   }
 
   renderSectionGravestones() {

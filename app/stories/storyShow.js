@@ -27,6 +27,16 @@ class ViewStory extends ViewPage {
     return headerTrail('sources');
   }
 
+  renderSectionPeople(options = {}) {
+    h2(options.title || 'Known members');
+
+    if (options.subtext) {
+      pg(options.subtext).css('margin', '15px 0');
+    }
+
+    rend($makePeopleList(options.people || this.story.people, 'photo'));
+  }
+
   viewImages() {
     if (!this.story.images.length) {
       return;
