@@ -11,7 +11,16 @@ class ViewTopicGravestones extends ViewStoryTopic {
     });
   }
 
-  static gravestoneSymbols() {
+  static gravestoneSymbols(story) {
+    new ViewTopicGravestones(story).renderGravestoneSymbols();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  renderGravestoneSymbols() {
     super.viewExcerpts();
     super.viewSources();
 

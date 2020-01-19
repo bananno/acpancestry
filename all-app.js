@@ -4823,7 +4823,7 @@ class ViewStoryTopic extends ViewStory {
     }
 
     if (this.tempTitle == 'gravestone symbols') {
-      return ViewTopicGravestones.gravestoneSymbols();
+      return ViewTopicGravestones.gravestoneSymbols(this.story);
     }
 
     if (this.tempTitle == 'masonry') {
@@ -5178,7 +5178,16 @@ class ViewTopicGravestones extends ViewStoryTopic {
     });
   }
 
-  static gravestoneSymbols() {
+  static gravestoneSymbols(story) {
+    new ViewTopicGravestones(story).renderGravestoneSymbols();
+    return true;
+  }
+
+  constructor(story) {
+    super(story);
+  }
+
+  renderGravestoneSymbols() {
     super.viewExcerpts();
     super.viewSources();
 

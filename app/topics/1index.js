@@ -70,7 +70,7 @@ class ViewStoryTopic extends ViewStory {
     }
 
     if (this.tempTitle == 'gravestone symbols') {
-      return ViewTopicGravestones.gravestoneSymbols();
+      return ViewTopicGravestones.gravestoneSymbols(this.story);
     }
 
     if (this.tempTitle == 'masonry') {
