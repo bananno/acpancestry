@@ -45,7 +45,7 @@ class ViewSource extends ViewPage {
     if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
       return headerTrail(
         'sources',
-        pluralize(this.type),
+        this.type.pluralize(),
         [this.type + '/' + this.story._id, this.story.title]
       );
     }

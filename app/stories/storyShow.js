@@ -17,11 +17,11 @@ class ViewStory extends ViewPage {
 
   headerTrail() {
     if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
-      return headerTrail('sources', pluralize(this.type));
+      return headerTrail('sources', this.type.pluralize());
     }
 
     if (['artifact', 'landmark'].includes(this.type)) {
-      return headerTrail(pluralize(this.type));
+      return headerTrail(this.type.pluralize());
     }
 
     return headerTrail('sources');

@@ -220,18 +220,6 @@ function isDateBeforeDate(date1, date2) {
   return false;
 }
 
-function pluralize(word, number) {
-  if (number === 1) {
-    return word;
-  }
-  return {
-    cemetery: 'cemeteries',
-    Cemetery: 'Cemeteries',
-    child: 'children',
-    Child: 'Children',
-  }[word] || word + 's';
-}
-
 function removeDuplicatesById(list) {
   const foundId = {};
 
