@@ -46,7 +46,7 @@ class ViewStoryTopic extends ViewStory {
 
   viewSpecialTopic() {
     if (this.tempTitle.match('military')) {
-      viewTopicMilitary();
+      new ViewTopicMilitary(this.story).render();
       return true;
     }
 
