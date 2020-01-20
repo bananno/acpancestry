@@ -11,19 +11,11 @@ class ViewTopicGravestones extends ViewStoryTopic {
     });
   }
 
-  static gravestoneSymbols(story) {
-    new ViewTopicGravestones(story).renderGravestoneSymbols();
-    return true;
-  }
-
   constructor(story) {
     super(story);
   }
 
-  renderGravestoneSymbols() {
-    super.viewExcerpts();
-    super.viewSources();
-
+  render() {
     pg('Click any image for more information about the grave.')
       .css('margin-top', '15px');
 

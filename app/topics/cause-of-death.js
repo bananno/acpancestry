@@ -1,8 +1,4 @@
 class ViewTopicCauseOfDeath extends ViewStoryTopic {
-  static new(story) {
-    new ViewTopicCauseOfDeath(story).render();
-  }
-
   static getPersonList(causeOfDeath) {
     return DATABASE.people.filter(person => {
       return (person.tags['cause of death'] || '').split(',')
@@ -15,6 +11,8 @@ class ViewTopicCauseOfDeath extends ViewStoryTopic {
   }
 
   render() {
+    this.viewExcerpts();
+    this.viewSources();
     this.renderAccident();
     this.renderDisease();
     this.renderWar();

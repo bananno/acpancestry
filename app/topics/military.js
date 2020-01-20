@@ -1,8 +1,4 @@
 class ViewTopicMilitary extends ViewStoryTopic {
-  static homePageSummary() {
-    return null;
-  }
-
   constructor(story) {
     super(story);
     this.veterans = ViewTopicMilitary.collectDataVeterans();

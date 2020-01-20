@@ -1,9 +1,4 @@
 class ViewTopicMasonry extends ViewStoryTopic {
-  static new(story) {
-    new ViewTopicMasonry(story).render();
-    return true;
-  }
-
   constructor(story) {
     super(story);
   }

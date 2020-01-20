@@ -1,4 +1,4 @@
-class viewTopicBigFamilies extends ViewPage {
+class ViewTopicBigFamilies extends ViewPage {
   static new() {
     new viewTopicBigFamilies().render();
   }
