@@ -16,21 +16,32 @@ class ViewStoryTopic extends ViewStory {
     return true;
   }
 
-  static homePageSummary(story) {
+  static getStoryClass(story) {
     let matchTitle = story.title.toLowerCase();
 
     if (matchTitle.match('disease')) {
-      return ViewTopicDisease.homePageSummary();
+      return ViewTopicDisease;
     }
 
     if (matchTitle.match('immigration')) {
-      return ('People in the Family Tree immigrated to the United ' +
-        'States from ' + DATABASE.countryList.length + ' different ' +
-        'countries. See a list of immigrants by county and a ' +
-        'timeline of events.')
+      return ViewTopicImmigration;
     }
 
-    return null;
+    if (matchTitle.match('military')) {
+      return ViewTopicMilitary;
+    }
+  }
+
+  static homePageSummary(story) {
+    if (!story) {
+      return;
+    }
+
+    const storyClass = ViewStoryTopic.getStoryClass(story);
+
+    if (storyClass && storyClass.homePageSummary) {
+      return storyClass.homePageSummary();
+    }
   }
 
   constructor(story) {
@@ -56,7 +67,7 @@ class ViewStoryTopic extends ViewStory {
     }
 
     if (this.tempTitle.match('immigration')) {
-      viewTopicImmigration();
+      new ViewTopicImmigration(this.story).render();
       return true;
     }
 
