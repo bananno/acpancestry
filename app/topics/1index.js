@@ -51,7 +51,7 @@ class ViewStoryTopic extends ViewStory {
     }
 
     if (this.tempTitle.match('disease')) {
-      new ViewTopicDisease().render();
+      new ViewTopicDisease(this.story).render();
       return true;
     }
 
@@ -80,7 +80,7 @@ class ViewStoryTopic extends ViewStory {
     if (this.tempTitle == 'cause of death') {
       this.viewExcerpts();
       this.viewSources();
-      return ViewSpecialTopicCauseOfDeath.new(this.story);
+      return ViewTopicCauseOfDeath.new(this.story);
     }
   }
 

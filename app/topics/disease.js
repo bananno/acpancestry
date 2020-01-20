@@ -1,8 +1,6 @@
-class ViewTopicDisease extends ViewPage {
+class ViewTopicDisease extends ViewStoryTopic {
   static homePageSummary() {
-    const people = DATABASE.people.filter(person => {
-      return person.tags['cause of death'] == 'disease';
-    });
+    const people = ViewTopicDisease.getListOfPeople();
 
     const diseases = [];
 
@@ -18,16 +16,17 @@ class ViewTopicDisease extends ViewPage {
       'list of people, historical events, and newspaper articles.');
   }
 
-  constructor() {
-    super();
+  static getListOfPeople() {
+    return ViewTopicCauseOfDeath.getPersonList('disease');
+  }
+
+  constructor(story) {
+    super(story);
     this.collectData();
   }
 
   collectData() {
-    this.people = Person.filter(person => {
-      return person.tags['died of disease']
-        || person.tags['cause of death'] == 'disease';
-    });
+    this.people = ViewTopicDisease.getListOfPeople();
 
     this.timeline = new Timeline(false, false, {
       sourceFilter: this.sourceFilter.bind(this),
@@ -63,9 +62,6 @@ class ViewTopicDisease extends ViewPage {
   }
 
   eventFilter(event) {
-    if (event.title.match('illness')) {
-      return true;
-    }
     if (event.title == 'death'
         && Person.isInList(this.people, event.people[0])) {
       return true;

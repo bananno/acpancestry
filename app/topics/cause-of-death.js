@@ -1,11 +1,17 @@
-class ViewSpecialTopicCauseOfDeath extends ViewPage {
+class ViewTopicCauseOfDeath extends ViewStoryTopic {
   static new(story) {
-    new ViewSpecialTopicCauseOfDeath(story).render();
+    new ViewTopicCauseOfDeath(story).render();
+  }
+
+  static getPersonList(causeOfDeath) {
+    return DATABASE.people.filter(person => {
+      return (person.tags['cause of death'] || '').split(',')
+        .map(s => s.trim()).includes(causeOfDeath);
+    });
   }
 
   constructor(story) {
-    super();
-    this.story = story;
+    super(story);
   }
 
   render() {
@@ -33,9 +39,7 @@ class ViewSpecialTopicCauseOfDeath extends ViewPage {
 
   renderAccident() {
     h2('Accident');
-    const people = DATABASE.people.filter(person => {
-      return person.tags['cause of death'] == 'accident';
-    });
+    const people = ViewTopicCauseOfDeath.getPersonList('accident');
     this.printList(people);
   }
 
@@ -43,10 +47,7 @@ class ViewSpecialTopicCauseOfDeath extends ViewPage {
     h2('Disease');
     this.subtitle('See also: '
       + localLink('/topic/disease', 'disease timeline'));
-    const people = DATABASE.people.filter(person => {
-      return person.tags['cause of death'] == 'disease'
-        || person.tags['died of disease'];
-    });
+    const people = ViewTopicCauseOfDeath.getPersonList('disease');
     people.sortBy(person => person.tags['cause of death note'].toLowerCase());
     this.printList(people);
   }
@@ -55,26 +56,28 @@ class ViewSpecialTopicCauseOfDeath extends ViewPage {
     h2('War');
     this.subtitle('See also: '
       + localLink('/topic/military', 'more about military'));
-    const people = DATABASE.people.filter(person => {
-      return person.tags['died at war'];
-    });
+    const people = ViewTopicCauseOfDeath.getPersonList('war');
     this.printList(people);
   }
 
   renderOther() {
+    // Person has a cause of death and at least one of the values (separated
+    // by comma, if multiple) is not accounted for in the other sections.
     h2('Other');
     const people = DATABASE.people.filter(person => {
       return person.tags['cause of death']
-        && !['accident', 'disease', 'unknown']
-          .includes(person.tags['cause of death'])
-        && !person.tags['died at war']
-        && !person.tags['died of disease'];
+        && person.tags['cause of death'].split(',').some(causeOfDeath => {
+          return !['accident', 'disease', 'war', 'unknown']
+              .includes(causeOfDeath);
+          });
     });
     people.sortBy(person => person.tags['cause of death']);
     this.printList(people, person => (' - ' + person.tags['cause of death']));
   }
 
   renderUnknown() {
+    // Person cause of death is "unknown" or they died young and their
+    // cause of death is not specified.
     h2('Unknown');
     this.subtitle('Died young or under odd circumstances, but cause of ' +
       'death not yet found.');
