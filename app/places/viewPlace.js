@@ -1,6 +1,17 @@
 class ViewPlace extends ViewPage {
   static byUrl() {
-    let [base, country, region1, region2, city, extra] = PATH.split('/');
+    if (PATH == 'places') {
+      ViewPlace.renderIndex();
+      return true;
+    }
+
+    if (PATH == 'places/all') {
+      ViewPlace.renderListAll();
+      return true;
+    }
+
+    const placeParts = PATH.split('/');
+    let [base, country, region1, region2, city, extra] = placeParts;
 
     if (base != 'places' || extra) {
       return false;
@@ -32,6 +43,43 @@ class ViewPlace extends ViewPage {
 
   static new(place, story) {
     return new ViewPlace(place, story);
+  }
+
+  static renderIndex() {
+    const places = Place.getDatabaseList();
+
+    const keys = Object.keys(places).sort();
+
+    const countries = keys.filter(key => {
+      return places[key].level == 0 && places[key].title != '(none)';
+    }).map(key => places[key]);
+
+    h1('Places');
+
+    pg(localLink('/places/all', 'See all places'))
+      .css('margin', '12px 0 20px 0');
+
+    countries.forEach(country => {
+      pg(country.title).css('margin', '10px 0');
+    });
+  }
+
+  static renderListAll() {
+    const places = Place.getDatabaseList();
+
+    const keys = Object.keys(places).sort();
+
+    headerTrail(['/places', 'Places']);
+
+    h1('All places');
+
+    keys.forEach(placePath => {
+      const place = places[placePath];
+      if (place.title == '(none)') {
+        return;
+      }
+      pg(place.title).css('margin', '10px ' + (place.level * 30) + 'px');
+    });
   }
 
   constructor(place = {}, story) {
