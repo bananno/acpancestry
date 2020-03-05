@@ -1,7 +1,12 @@
 function PATHS() {
   return [
     ['', ViewHome],
-    ['image/:id', ViewImage],
+    ['audit', ViewAudit],
+    ['audit/age-at-death', ViewAuditAgeAtDeath],
+    ['audit/census/:year', ViewAuditCensus],
+    ['audit/children', ViewAuditChildren],
+    ['audit/immigration', ViewAuditImmigration],
+    ['image/:imageId', ViewImage],
     ['person/:personId', ViewPerson],
     ['person/:personId/source/:sourceId', ViewPerson],
     ['person/:personId/test', ViewPerson],
@@ -81,10 +86,6 @@ function loadContent() {
 
   if (PATH == 'test' && ENV == 'dev') {
     return viewTests();
-  }
-
-  if (PATH.match('audit') && ENV == 'dev') {
-    return ViewAudit.byUrl() || pageNotFound();
   }
 
   if (PATH.match('year/')) {

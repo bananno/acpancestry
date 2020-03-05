@@ -1003,10 +1003,16 @@ function getCurrentPath() {
 function PATHS() {
   return [
     ['', ViewHome],
-    ['image/:id', ViewImage],
+    ['audit', ViewAudit],
+    ['audit/age-at-death', ViewAuditAgeAtDeath],
+    ['audit/census/:year', ViewAuditCensus],
+    ['audit/children', ViewAuditChildren],
+    ['audit/immigration', ViewAuditImmigration],
+    ['image/:imageId', ViewImage],
     ['person/:personId', ViewPerson],
     ['person/:personId/source/:sourceId', ViewPerson],
     ['person/:personId/test', ViewPerson],
+    ['photos', ViewPhotos],
     ['topic/:id', ViewStoryTopic],
   ].map(([path, className]) => {
     return {
@@ -1026,6 +1032,7 @@ function loadContent() {
   const parts = PATH.split('/');
 
   if (exactPath) {
+    console.log('Found exact route.');
     return exactPath.className.byUrl();
   }
 
@@ -1083,10 +1090,6 @@ function loadContent() {
     return viewTests();
   }
 
-  if (PATH.match('audit') && ENV == 'dev') {
-    return ViewAudit.byUrl() || pageNotFound();
-  }
-
   if (PATH.match('year/')) {
     return viewYear();
   }
@@ -1112,10 +1115,6 @@ function loadContent() {
 
   if (PATH.match('event')) {
     return ViewStoryEvent.byUrl() || pageNotFound();
-  }
-
-  if (PATH.match('photo')) {
-    return ViewPhotos.byUrl() || pageNotFound();
   }
 
   return pageNotFound();

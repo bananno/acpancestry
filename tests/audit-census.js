@@ -1,5 +1,8 @@
 class ViewAuditCensus extends ViewAudit {
   static byUrl() {
+    if (ENV !== 'dev') {
+      return false;
+    }
     const year = PATH.replace('audit/census/', '');
     new ViewAuditCensus(year).render();
     return true;

@@ -1,4 +1,12 @@
 class ViewAuditChildren extends ViewAudit {
+  static byUrl() {
+    if (ENV !== 'dev') {
+      return false;
+    }
+    new ViewAuditChildren().render();
+    return true;
+  }
+
   constructor() {
     super();
     this.eval();

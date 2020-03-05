@@ -1,4 +1,12 @@
 class ViewAuditAgeAtDeath extends ViewAudit {
+  static byUrl() {
+    if (ENV !== 'dev') {
+      return false;
+    }
+    new ViewAuditImmigration().render();
+    return true;
+  }
+
   constructor() {
     super();
     this.eval();

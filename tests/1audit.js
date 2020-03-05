@@ -1,24 +1,10 @@
 class ViewAudit extends ViewPage {
   static byUrl() {
-    if (PATH == 'audit') {
-      new ViewAudit().render();
-      return true;
+    if (ENV !== 'dev') {
+      return false;
     }
-    if (PATH == 'audit/age-at-death') {
-      new ViewAuditAgeAtDeath().render();
-      return true;
-    }
-    if (PATH == 'audit/children') {
-      new ViewAuditChildren().render();
-      return true;
-    }
-    if (PATH == 'audit/immigration') {
-      new ViewAuditImmigration().render();
-      return true;
-    }
-    if (PATH.match('audit/census')) {
-      return ViewAuditCensus.byUrl() || false;
-    }
+    new ViewAudit().render();
+    return true;
   }
 
   constructor() {
