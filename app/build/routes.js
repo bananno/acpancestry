@@ -1,14 +1,66 @@
+function PATHS() {
+  return [
+    ['', ViewHome],
+    ['image/:id', ViewImage],
+    ['person/:personId', ViewPerson],
+    ['person/:personId/source/:sourceId', ViewPerson],
+    ['person/:personId/test', ViewPerson],
+    ['photos', ViewPhotos],
+    ['topic/:id', ViewStoryTopic],
+  ].map(([path, className]) => {
+    return {
+      className,
+      path,
+      pathParts: path.split('/'),
+      exact: !path.match(':')
+    };
+  });
+}
+
 function loadContent() {
-  if (PATH == '') {
-    return ViewHome.byUrl();
+  const exactPath = PATHS().find(route => {
+    return route.exact && route.path === PATH;
+  });
+
+  const parts = PATH.split('/');
+
+  if (exactPath) {
+    console.log('Found exact route.');
+    return exactPath.className.byUrl();
+  }
+
+  const dynamicPath = PATHS().filter(route => {
+    return !route.exact && parts.length == route.pathParts.length;
+  }).map(route => {
+    route.params = {};
+    for (let index = 0; index < route.pathParts.length; index++) {
+      const pathPart = route.pathParts[index];
+      if (pathPart[0] === ':') {
+        route.params[pathPart.slice(1)] = parts[index];
+        continue;
+      }
+      if (pathPart !== parts[index]) {
+        return false;
+      }
+    }
+    return route;
+  }).filter(Boolean);
+
+  if (dynamicPath.length > 1) {
+    console.error('Found multiple matching routes.');
+  }
+
+  if (dynamicPath.length === 1) {
+    console.log('Found dynamic route.');
+    return dynamicPath[0].className.byUrl(dynamicPath[0].params) || pageNotFound();
+  }
+
+  if (dynamicPath.length === 0) {
+    console.log('Route not found.');
   }
 
   if (PATH == 'people') {
     return viewPeople();
-  }
-
-  if (PATH.match('person/')) {
-    return ViewPerson.byUrl();
   }
 
   if (PATH == 'events') {
@@ -33,14 +85,6 @@ function loadContent() {
 
   if (PATH.match('audit') && ENV == 'dev') {
     return ViewAudit.byUrl() || pageNotFound();
-  }
-
-  if (PATH.match('image/')) {
-    return ViewImage.byUrl() || pageNotFound();
-  }
-
-  if (PATH.match('topic/')) {
-    return ViewStoryTopic.byUrl() || pageNotFound();
   }
 
   if (PATH.match('year/')) {
@@ -68,10 +112,6 @@ function loadContent() {
 
   if (PATH.match('event')) {
     return ViewStoryEvent.byUrl() || pageNotFound();
-  }
-
-  if (PATH.match('photo')) {
-    return ViewPhotos.byUrl() || pageNotFound();
   }
 
   return pageNotFound();
