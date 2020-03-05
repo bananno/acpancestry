@@ -1003,17 +1003,31 @@ function getCurrentPath() {
 function PATHS() {
   return [
     ['', ViewHome],
-    ['audit', ViewAudit],
-    ['audit/age-at-death', ViewAuditAgeAtDeath],
-    ['audit/census/:year', ViewAuditCensus],
-    ['audit/children', ViewAuditChildren],
-    ['audit/immigration', ViewAuditImmigration],
     ['image/:imageId', ViewImage],
     ['person/:personId', ViewPerson],
     ['person/:personId/source/:sourceId', ViewPerson],
     ['person/:personId/test', ViewPerson],
     ['photos', ViewPhotos],
+
+    // stories
+    ['artifacts', ViewStoryIndex],
+    ['artifact/:storyId', ViewStoryArtifactOrLandmark],
+    ['books', ViewStoryIndex],
+    ['book/:storyId', ViewStoryBook],
+    ['cemeteries', ViewStoryIndex],
+    ['cemetery/:storyId', ViewCemeteryOrNewspaper],
+    ['event/:storyId', ViewStoryEvent],
+    ['landmarks', ViewStoryIndex],
+    ['landmark/:storyId', ViewStoryArtifactOrLandmark],
+    ['newspapers', ViewStoryIndex],
+    ['newspaper/:storyId', ViewCemeteryOrNewspaper],
     ['topic/:id', ViewStoryTopic],
+
+    ['audit', ViewAudit],
+    ['audit/age-at-death', ViewAuditAgeAtDeath],
+    ['audit/census/:year', ViewAuditCensus],
+    ['audit/children', ViewAuditChildren],
+    ['audit/immigration', ViewAuditImmigration],
   ].map(([path, className]) => {
     return {
       className,
@@ -1032,7 +1046,7 @@ function loadContent() {
   const parts = PATH.split('/');
 
   if (exactPath) {
-    console.log('Found exact route.');
+    console.log('Found exact route: ' + exactPath.path);
     return exactPath.className.byUrl();
   }
 
@@ -1096,25 +1110,6 @@ function loadContent() {
 
   if (PATH.match('about/')) {
     return viewAbout();
-  }
-
-  if (PATH.match('artifact') || PATH.match('landmark')) {
-    return ViewStoryIndex.byUrl() || ViewStoryArtifactOrLandmark.byUrl()
-      || pageNotFound();
-  }
-
-  if (PATH.match('cemeter') || PATH.match('newspaper')) {
-    return ViewStoryIndex.byUrl() || ViewCemeteryOrNewspaper.byUrl()
-      || pageNotFound();
-  }
-
-  if (PATH.match('book')) {
-    return ViewStoryIndex.byUrl() || ViewStoryBook.byUrl()
-      || pageNotFound();
-  }
-
-  if (PATH.match('event')) {
-    return ViewStoryEvent.byUrl() || pageNotFound();
   }
 
   return pageNotFound();
