@@ -20,11 +20,11 @@ function PATHS() {
     ['sources/other', ViewSourcesOther],
 
     // source/story/etc. categories
-    ['artifacts', ViewStoryIndex],
-    ['books', ViewStoryIndex],
-    ['cemeteries', ViewStoryIndex],
-    ['landmarks', ViewStoryIndex],
-    ['newspapers', ViewStoryIndex],
+    ['artifacts', ViewStoryIndexArtifacts],
+    ['books', ViewStoryIndexBooks],
+    ['cemeteries', ViewStoryIndexCemeteries],
+    ['landmarks', ViewStoryIndexLandmarks],
+    ['newspapers', ViewStoryIndexNewspapers],
     ['events', ViewEvents],
     ['photos', ViewPhotos],
 

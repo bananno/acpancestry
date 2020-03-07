@@ -1,73 +1,29 @@
 class ViewStoryIndex extends ViewPage {
-  static byUrl() {
-    if (['artifacts', 'books', 'cemeteries', 'landmarks', 'newspapers']
-        .includes(PATH)) {
-      new ViewStoryIndex(PATH).render();
-      return true;
-    }
-    return false;
-  }
-
-  constructor(storyType) {
+  constructor(options = {}) {
     super();
-    this.type = storyType.singularize();
-    this.mainTitle = storyType.capitalize();
+    this.type = options.storyType.singularize();
+    this.mainTitle = options.storyType.capitalize();
+    this.h1Title = options.h1Title || this.mainTitle;
+    this.entryName = options.entryName;
     this.stories = this.getStories();
-    this.entryName = this.getEntryName();
   }
 
   getStories() {
-    if (this.type == 'artifact') {
-      return DATABASE.stories.filter(story => {
-        return story.type == 'artifact' || story.tags.artifact;
-      });
-    }
-    return DATABASE.stories.filter(story => {
-      return story.type == this.type;
-    });
-  }
-
-  getEntryName() {
-    if (this.type == 'cemetery') {
-      return 'grave';
-    }
-    if (this.type == 'newspaper') {
-      return 'article';
-    }
+    return Story.filterByType(this.type);
   }
 
   render() {
     this.headerTrail();
-    this.setPageTitle();
-    this.viewTitle();
-    this.viewStories();
+    setPageTitle(this.mainTitle);
+    h1(this.h1Title);
+    this.renderStories();
   }
 
   headerTrail() {
-    if (['book', 'cemetery', 'newspaper'].includes(this.type)) {
-      headerTrail('sources');
-    }
+    // skip for most story types
   }
 
-  setPageTitle() {
-    setPageTitle(this.mainTitle);
-  }
-
-  viewTitle() {
-    if (this.type == 'artifact') {
-      return h1('Artifacts and family heirlooms');
-    }
-    if (this.type == 'landmark') {
-      return h1('Landmarks and buildings');
-    }
-    h1(this.mainTitle);
-  }
-
-  viewStories() {
-    if (['cemetery', 'newspaper'].includes(this.type)) {
-      return this.viewCemeteriesNewspapers();
-    }
-
+  renderStories() {
     this.viewSectionList(this.stories, {
       type: 'stories',
       bullet: false,
@@ -77,20 +33,103 @@ class ViewStoryIndex extends ViewPage {
       date: true,
     });
   }
+}
 
-  viewCemeteriesNewspapers() {
-    const [placeList, storiesByPlace] = this.getStoriesByPlace();
+class ViewStoryIndexArtifacts extends ViewStoryIndex {
+  static load(params) {
+    new ViewStoryIndexArtifacts().render();
+  }
 
-    placeList.forEach(place => {
+  constructor() {
+    super({
+      storyType: 'artifacts',
+      h1Title: 'Artifacts and family heirlooms',
+    });
+  }
+
+  getStories() {
+    return Story.filter(story => {
+      return story.type == 'artifact' || story.tags.artifact;
+    });
+  }
+}
+
+class ViewStoryIndexBooks extends ViewStoryIndex {
+  static load(params) {
+    new ViewStoryIndexBooks().render();
+  }
+
+  constructor() {
+    super({
+      storyType: 'books',
+    });
+  }
+
+  headerTrail() {
+    headerTrail('sources');
+  }
+}
+
+class ViewStoryIndexLandmarks extends ViewStoryIndex {
+  static load(params) {
+    new ViewStoryIndexLandmarks().render();
+  }
+
+  constructor() {
+    super({
+      storyType: 'landmarks',
+      h1Title: 'Landmarks and buildings'
+    });
+  }
+}
+
+class ViewStoryIndexCemeteryOrNewspaper extends ViewStoryIndex {
+  // Cemeteries and newspapers have more functionality in common with
+  // each other than with any of the other story types.
+
+  constructor(options) {
+    super(options);
+    this.getStoriesByPlace();
+  }
+
+  headerTrail() {
+    headerTrail('sources');
+  }
+
+  getStoriesByPlace() {
+    this.placeList = [];
+    this.storiesByPlace = {Other: []};
+
+    this.stories.forEach(story => {
+      let placeName = 'Other';
+      if (story.location.country == 'United States' && story.location.region1) {
+        placeName = USA_STATES[story.location.region1];
+      }
+      if (this.storiesByPlace[placeName] == undefined) {
+        this.placeList.push(placeName);
+        this.storiesByPlace[placeName] = [];
+      }
+      this.storiesByPlace[placeName].push(story);
+    });
+
+    this.placeList.sort();
+
+    if (this.storiesByPlace.Other.length) {
+      this.placeList.push('Other');
+    }
+  }
+
+  renderStories() {
+    this.placeList.forEach(place => {
       h2(place);
-      storiesByPlace[place].forEach(story => {
+      this.storiesByPlace[place].forEach(story => {
         pg(linkToStory(story)).css('margin', '15px 0 0 5px');
         pg(story.location.format).css('margin-left', '5px');
 
         let numEntries;
 
         if (this.type == 'cemetery') {
-          numEntries = ViewStoryIndex.getNumberOfGravesInCemetery(story);
+          numEntries = Story.getNumberOfGravesInCemetery(story);
         } else {
           numEntries = story.entries.length;
         }
@@ -100,40 +139,31 @@ class ViewStoryIndex extends ViewPage {
       });
     });
   }
+}
 
-  getStoriesByPlace() {
-    const placeList = [];
-    const storiesByPlace = { Other: [] };
-    const stories = DATABASE.stories.filter(s => s.type == this.type);
-
-    stories.forEach(story => {
-      let placeName = 'Other';
-      if (story.location.country == 'United States' && story.location.region1) {
-        placeName = USA_STATES[story.location.region1];
-      }
-      if (storiesByPlace[placeName] == undefined) {
-        placeList.push(placeName);
-        storiesByPlace[placeName] = [];
-      }
-      storiesByPlace[placeName].push(story);
-    });
-
-    placeList.sort();
-
-    if (storiesByPlace.Other.length) {
-      placeList.push('Other');
-    }
-
-    return [placeList, storiesByPlace];
+class ViewStoryIndexCemeteries extends ViewStoryIndexCemeteryOrNewspaper {
+  static load(params) {
+    new ViewStoryIndexCemeteries().render();
   }
 
-  static getNumberOfGravesInCemetery(story) {
-    let count = 0;
-
-    story.entries.forEach(source => {
-      count += source.people.length || 1;
+  constructor() {
+    super({
+      storyType: 'cemeteries',
+      entryName: 'grave',
     });
-
-    return count;
   }
 }
+
+class ViewStoryIndexNewspapers extends ViewStoryIndexCemeteryOrNewspaper {
+  static load(params) {
+    new ViewStoryIndexNewspapers().render();
+  }
+
+  constructor() {
+    super({
+      storyType: 'newspapers',
+      entryName: 'article',
+    });
+  }
+}
+

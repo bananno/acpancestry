@@ -88,9 +88,7 @@ class ViewSourcesCensusUSA extends ViewPage {
     h1('United States Federal Census');
 
     for (let year = 1790; year <= 1950; year += 10) {
-      const story = DATABASE.stories.filter(story => {
-        return story.title == 'Census USA ' + year;
-      })[0];
+      const story = Story.findByTitle('Census USA ' + year);
 
       if (!story) {
         continue;
