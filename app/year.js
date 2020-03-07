@@ -1,64 +1,78 @@
 
-function viewYear() {
-  const year = parseInt(PATH.replace('year/', '') || 0);
+class ViewYear extends ViewPage {
+  static load(params) {
+    const year = parseInt(params.year);
 
-  if (isNaN(year)) {
-    return pageNotFound();
+    if (isNaN(year)) {
+      return false;
+    }
+
+    new ViewYear(year).render();
+
+    return true;
   }
 
-  const bornThisYear = DATABASE.people.filter(person => {
-    return person.birth && person.birth.date && person.birth.date.year === year;
-  });
+  constructor(year) {
+    super();
 
-  const diedThisYear = DATABASE.people.filter(person => {
-    return person.death && person.death.date && person.death.date.year === year;
-  });
+    this.year = year;
 
-  const aliveThisYear = DATABASE.people.filter(person => {
-    return person.birth && person.birth.date && person.birth.date.year < year
-      && person.death && person.death.date && person.death.date.year > year;
-  });
+    this.bornThisYear = DATABASE.people.filter(person => {
+      return person.birth && person.birth.date && person.birth.date.year === year;
+    });
 
-  const events = DATABASE.events.filter(event => {
-    return event.date && event.date.year == year
-      && event.title != 'birth' && event.title != 'death';
-  });
+    this.diedThisYear = DATABASE.people.filter(person => {
+      return person.death && person.death.date && person.death.date.year === year;
+    });
 
-  bornThisYear.trueSort((a, b) => a.birthSort < b.birthSort);
-  aliveThisYear.trueSort((a, b) => a.birthSort < b.birthSort);
-  events.trueSort((a, b) => a.date.sort < b.date.sort);
+    this.aliveThisYear = DATABASE.people.filter(person => {
+      return person.birth && person.birth.date && person.birth.date.year < year
+        && person.death && person.death.date && person.death.date.year > year;
+    });
 
-  setPageTitle(year);
-  h1(year);
+    this.events = DATABASE.events.filter(event => {
+      return event.date && event.date.year == year
+        && event.title != 'birth' && event.title != 'death';
+    });
 
-  rend(
-    '<p>' +
-      localLink('year/' + (year - 1), '&#10229;' + (year - 1)) +
-      ' &#160; &#160; &#160; ' +
-      localLink('year/' + (year + 1), (year + 1) + '&#10230;') +
-    '</p>'
-  );
+    this.bornThisYear.sortBy(person => person.birthSort);
+    this.aliveThisYear.sortBy(person => person.birthSort);
+    this.events.sortBy(event => event.date.sort);
+  }
 
-  let $list;
+  render() {
+    setPageTitle(this.year);
+    h1(this.year);
 
-  h2('Events');
-  events.forEach(event => {
-    rend(eventBlock(event).css('margin-left', '10px'));
-  });
+    rend(
+      '<p>' +
+        localLink('year/' + (this.year - 1), '&#10229;' + (this.year - 1)) +
+        ' &#160; &#160; &#160; ' +
+        localLink('year/' + (this.year + 1), (this.year + 1) + '&#10230;') +
+      '</p>'
+    );
 
-  h2('Born this year');
-  $list = $makePeopleList(bornThisYear, 'photo');
-  rend($list);
+    let $list;
 
-  h2('Died this year');
-  $list = $makePeopleList(diedThisYear, 'photo');
-  rend($list);
+    h2('Events');
+    this.events.forEach(event => {
+      rend(ViewEvents.eventBlock(event).css('margin-left', '10px'));
+    });
 
-  h2('Lived during this year');
-  $list = $makePeopleList(aliveThisYear, 'photo');
-  rend($list);
-  aliveThisYear.forEach(person => {
-    const age = year - person.birth.date.year;
-    $list.find('[data-person="' + person._id + '"]').append(' (age: ' + age + ')');
-  });
+    h2('Born this year');
+    $list = $makePeopleList(this.bornThisYear, 'photo');
+    rend($list);
+
+    h2('Died this year');
+    $list = $makePeopleList(this.diedThisYear, 'photo');
+    rend($list);
+
+    h2('Lived during this year');
+    $list = $makePeopleList(this.aliveThisYear, 'photo');
+    rend($list);
+    this.aliveThisYear.forEach(person => {
+      const age = this.year - person.birth.date.year;
+      $list.find('[data-person="' + person._id + '"]').append(' (age: ' + age + ')');
+    });
+  }
 }
