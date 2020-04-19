@@ -126,13 +126,7 @@ class ViewStoryIndexCemeteryOrNewspaper extends ViewStoryIndex {
         pg(linkToStory(story)).css('margin', '15px 0 0 5px');
         pg(story.location.format).css('margin-left', '5px');
 
-        let numEntries;
-
-        if (this.type == 'cemetery') {
-          numEntries = Story.getNumberOfGravesInCemetery(story);
-        } else {
-          numEntries = story.entries.length;
-        }
+        const numEntries = this.getNumEntries(story);
 
         pg(numEntries + ' ' + this.entryName.pluralize(numEntries))
           .css('margin-left', '5px');
@@ -152,6 +146,10 @@ class ViewStoryIndexCemeteries extends ViewStoryIndexCemeteryOrNewspaper {
       entryName: 'grave',
     });
   }
+
+  getNumEntries(story) {
+    return Story.getNumberOfGravesInCemetery(story);
+  }
 }
 
 class ViewStoryIndexNewspapers extends ViewStoryIndexCemeteryOrNewspaper {
@@ -164,6 +162,10 @@ class ViewStoryIndexNewspapers extends ViewStoryIndexCemeteryOrNewspaper {
       storyType: 'newspapers',
       entryName: 'article',
     });
+  }
+
+  getNumEntries(story) {
+    return story.entries.length;
   }
 }
 
