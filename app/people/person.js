@@ -179,10 +179,22 @@ class Person {
   }
 
   get mother() {
-    return Person.new(this.parents.filter(person => person.gender == GENDER.FEMALE)[0]);
+    const femaleParent = this.parents.find(person => person.gender === GENDER.FEMALE);
+    if (femaleParent) {
+      return Person.new(femaleParent);
+    }
+    if (this.parents.length === 2 && this.parents[0].private && this.parents[1].private) {
+      return Person.new(this.parents[1]);
+    }
   }
 
   get father() {
-    return Person.new(this.parents.filter(person => person.gender == GENDER.MALE)[0]);
+    const maleParent = this.parents.find(person => person.gender === GENDER.MALE);
+    if (maleParent) {
+      return Person.new(maleParent);
+    }
+    if (this.parents.length === 2 && this.parents[0].private && this.parents[1].private) {
+      return Person.new(this.parents[0]);
+    }
   }
 }
