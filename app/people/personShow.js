@@ -8,17 +8,18 @@ class ViewPerson extends ViewPage {
 
     const person = Person.new(personId);
 
-    if (!person) {
-      return ViewPerson.notFound(personId);
+    if (person) {
+      new ViewPerson(person, subPath).render();
+    } else {
+      ViewPerson.notFound(personId);
     }
 
-    new ViewPerson(person, subPath).render();
+    return true;
   }
 
   static notFound(personId) {
     setPageTitle('Person Not Found');
     h1('Person not found: ' + personId);
-    return;
   }
 
   constructor(person, subPath) {

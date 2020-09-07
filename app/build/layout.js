@@ -5,7 +5,7 @@ function setupLayout() {
   $(document).on('click', '#main-navigation .local-link', closeSideMenu);
   $(document).on('click', '#menu-backdrop', closeSideMenu);
   createHeaderLinks();
-  addFooterQuote();
+  updateFooterQuote();
 }
 
 function openSideMenu() {
@@ -36,7 +36,7 @@ function createHeaderLinks() {
   }
 }
 
-function addFooterQuote() {
+function updateFooterQuote() {
   const quotes = DATABASE.notations.filter(n => n.tags['featured quote']);
-  $('#page-footer').append(quotes.random().text);
+  $('#page-footer').text(quotes.random().text);
 }

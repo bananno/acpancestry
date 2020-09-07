@@ -19,6 +19,8 @@ function clickLocalLink(event) {
   getRoute();
 
   window.scrollTo(0, 0);
+
+  updateFooterQuote();
 }
 
 function getRoute() {

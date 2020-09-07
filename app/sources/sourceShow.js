@@ -4,12 +4,13 @@ class ViewSource extends ViewPage {
 
     const source = DATABASE.sourceRef[sourceId];
 
-    if (!source) {
+    if (source) {
+      new ViewSource(source).render();
+    } else {
       h1('Source not found');
-      return;
     }
 
-    new ViewSource(source).render();
+    return true;
   }
 
   constructor(source) {

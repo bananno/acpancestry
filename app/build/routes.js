@@ -38,6 +38,9 @@ function PATHS() {
     ['newspaper/:storyId', ViewCemeteryOrNewspaper],
     ['topic/:storyId', ViewStoryTopic],
 
+    // one source
+    ['source/:sourceId', ViewSource],
+
     // places
     ['places', ViewPlace],
     ['places/all', ViewPlace],
