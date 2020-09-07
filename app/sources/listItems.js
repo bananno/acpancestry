@@ -13,11 +13,17 @@ function showSourceCategoryList(options) {
     if (options.showStoryTitles) {
       h2(story.title);
     }
-    showSourceList(story.entries, true, true, showStory);
+
+    showSourceList({
+      sourceList: story.entries,
+      showLocation: true,
+      showDate: true,
+      showStory: showStory,
+    });
   });
 }
 
-function showSourceList(sourceList, showLocation, showDate, showStory) {
+function showSourceList({sourceList, showLocation, showDate, showStory}) {
   let previousHeader;
   let firstItem = true;
 

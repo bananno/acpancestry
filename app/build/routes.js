@@ -17,6 +17,7 @@ function PATHS() {
     ['sources/censusOther', ViewSourcesCensusOther],
     ['sources/draft', ViewSourcesDraft],
     ['sources/indexOnly', ViewSourcesIndexOnly],
+    ['sources/obituaries', ViewSourcesObituaries],
     ['sources/other', ViewSourcesOther],
 
     // source/story/etc. categories

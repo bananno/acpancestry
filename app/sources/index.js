@@ -27,6 +27,7 @@ class ViewSourcesIndex extends ViewPage {
       ['Other Census', 'sources/censusOther'],
       ['Military Draft Registration', 'sources/draft'],
       ['Index-only Records', 'sources/indexOnly'],
+      ['Obituaries', 'sources/obituaries'],
       ['Other Sources', 'sources/other'],
     ].forEach(([text, path]) => {
       rend(
@@ -104,7 +105,12 @@ class ViewSourcesCensusUSA extends ViewPage {
         );
       }
 
-      showSourceList(story.entries, true, false, false);
+      showSourceList({
+        sourceList: story.entries,
+        showLocation: true,
+        showDate: false,
+        showStory: false,
+      });
     }
   }
 }
@@ -136,7 +142,12 @@ class ViewSourcesCensusState extends ViewPage {
         previousHeader = headerName;
       }
 
-      showSourceList(story.entries, true, true, true);
+      showSourceList({
+        sourceList: story.entries,
+        showLocation: true,
+        showDate: true,
+        showStory: true,
+      });
     });
   }
 }
@@ -240,6 +251,31 @@ class ViewSourcesIndexOnly extends ViewPage {
         return !story.title.match('Birth Index')
           && !story.title.match('Death Index');
       })
+    });
+  }
+}
+
+class ViewSourcesObituaries extends ViewPage {
+  static load(params) {
+    new ViewSourcesObituaries().render();
+    return true;
+  }
+
+  constructor() {
+    super();
+    this.story = DATABASE.stories.find(story => story.tags.customId === 'obituaries');
+    this.sources = this.story.sources;
+    this.sources.sortBy(source => source.title);
+  }
+
+  render() {
+    headerTrail('sources');
+    setPageTitle('Obituaries');
+    h1('Obituaries');
+
+    showSourceList({
+      sourceList: this.sources,
+      showDate: true,
     });
   }
 }
