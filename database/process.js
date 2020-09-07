@@ -137,14 +137,19 @@ function getProcessedSource(source) {
 
   source.people = removeNullValues(source.people);
 
+  // source.story = the story that owns this source/entry (required)
   source.story = DATABASE.storyRef[source.story];
   source.story.entries.push(source);
 
+  // source.stories = other stories to which this source is relevant (optional)
   source.stories = source.stories.map(storyId => {
     const story = DATABASE.storyRef[storyId];
-    story.sources.push(source);
-    return story;
-  });
+    if (story) {
+      story.sources.push(source);
+      return story;
+      // else, story is not shared
+    }
+  }).filter(Boolean);
 
   source.date = source.date || {};
   source.date.format = formatDate(source.date);

@@ -13,7 +13,7 @@ class ViewPhotos extends ViewPage {
   }
 
   makeList() {
-    this.list = DATABASE.images.filter(image => image.tags.gallery);
+    this.list = DATABASE.images.filter(image => image.tags['main gallery']);
   }
 
   render() {
